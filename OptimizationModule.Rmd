@@ -304,6 +304,118 @@ fig
 ### 3.1.1 Simulated Annealing
 
 <p> __Simulated annealing__ is motivated by the process of annealing: a heat treatment by which the physical properties of metals can be altered. This is an iterative algorithm; as in gradient descent, the algorithm starts at an initial guess, and then steps from point to point in the search space. However, there is a random element to the process followed by simulated annealing: that means that the path followed from a particular initial condition won't be repeated if the algorithm is run again from the same point. (Algorithms that incorporate randomness are often referred to as _Monte Carlo_ methods, after the European gambling centre.)  At each step, the algorithm begins by identify a candidate next position. (This point could be selected by a variant of the gradient descent step, or some other method).  The value of the objective at this candidate point is then compared with the objective value at the current point. If the objective is lower at the new point (i.e.~this step takes the algorithm downhill), then the step is taken and a new iteration begins. If the value of the objective is larger at the candidate (i.e.~the step makes things _worse_), the step can still be taken, but only with a small probability. Both the size of the candidate steps and the probability of accepting 'wrong' (uphill) steps are tied to a __cooling schedule__: a decreasing `temperature' profile: at high temperatures, large steps are considered and 'wrong' steps are taken frequently; as the temperature drops, only smaller steps are considered, and fewer 'wrong' steps are allowed. (By analogy, imagine a ping-pong ball resting on a table into which has been carved a rolling landscape. One strategy to move the ball to the lowest valley bottom is to shake the table to jostle it about. Mirroring simulated annealing, we would begin by applying violent shakes (high temperature) which would result in the ball bouncing across much of the table. By slowly reducing the severity of the shaking, the ball would settle into a local minimum at a valley bottom. The hope is that if the cooling schedule is well-chosen, the ball would have sampled many valleys, and would end up at the bottom of the lowest. Simulated annealing is often combined with a multi-start strategy to further ensure wise sampling of the search space. </p>
+
+Let's first solve the complicated function above using simulated annealing using the same initial points as above.
+
+```{r,message=FALSE}
+library(GenSA)
+
+set.seed(1234) # The user can use any seed.
+dimension <- 2
+global.min <- 0
+tol <- 1e-13
+lower <- rep(-2, dimension)
+upper <- rep(2, dimension)
+
+out0 <- GenSA(par = x0, lower = lower, upper = upper,fn = complicatedFun)
+out0[c("value","par","counts")]
+
+out1 <- GenSA(par = x1, lower = lower, upper = upper,fn = complicatedFun,control = list(temperature=2000))
+out1[c("value","par","counts")]
+
+out2 <- GenSA(par = x2, lower = lower, upper = upper,fn = complicatedFun)
+out2[c("value","par","counts")]
+
+out3 <- GenSA(par = x3, lower = lower, upper = upper,fn = complicatedFun)
+out3[c("value","par","counts")]
+
+out4 <- GenSA(par = x4, lower = lower, upper = upper,fn = complicatedFun)
+out4[c("value","par","counts")]
+```
+
+From the results, we can see that although the initial points are different, they ended up with the same optimized value. 
+
+The plot below shows how simulated annealing works. The red line records the current minimum. The blue points represents function value. It can be seen that although the actual minimum is found, there is still a probability to jump around to make sure that is the global minimum.
+
+```{r}
+plot(out1$trace.mat[,4][1:8000],type="l",lwd=4,col="red")
+points(out1$trace.mat[,3][1:8000],pch=20,col="blue")
+```
+
+The example below looks like an egg carton, which has many local minima.
+
+```{r,echo=FALSE}
+f.name <- "Eggholder function"
+
+# make the function
+f.egg<- function(x){
+  -(x[,2]+47)*sin(sqrt(abs(x[,2]+(x[,1]/2)+47)))-x[,1]*sin(sqrt(abs(x[,1]-(x[,2]+47))))
+}
+
+# define the function
+f.egghold <- function(x) {
+  # make x a matrix so this function works for plotting and for optimizing
+  x <- matrix(x, ncol=2)
+  # calculate the function value for each row of x
+  f.x <- f.egg(x)
+  # return function value
+  return(f.x)
+}
+
+# plot the function
+# define ranges of x to plot over and put into matrix
+x1 <- seq(-512, 512, length = 101)
+x2 <- seq(-512, 512, length = 101)
+X <- as.matrix(expand.grid(x1, x2))
+colnames(X) <- c("x1", "x2")
+
+# evaluate function
+y <- f.egghold(X)
+
+# put X and y values in a data.frame for plotting
+df <- data.frame(X, y)
+# plot the function
+library(lattice) # use the lattice package
+wireframe(y ~ x1 * x2 # y, x1, and x2 axes to plot
+  , data = df # data.frame with values to plot
+  , main = f.name # name the plot
+  , shade = TRUE
+  , scales = list(arrows = FALSE) # include axis ticks
+  , screen = list(z = -100, x = -30) # view position
+)
+```
+
+```{r,echo=FALSE}
+f.egg<- function(x){
+  -(x[2]+47)*sin(sqrt(abs(x[2]+(x[1]/2)+47)))-x[1]*sin(sqrt(abs(x[1]-(x[2]+47))))
+}
+
+lower <- rep(-200, dimension)
+upper <- rep(200, dimension)
+
+x0 <- c(100,100)
+```
+
+Here we started from two different starting points and they resulted in the same final position.
+
+```{r}
+egg.out <- GenSA(par = x0, lower = lower, upper = upper,fn = f.egg)
+egg.out[c("value","par","counts")]
+
+egg.out3 <- GenSA(par = x3, lower = lower, upper = upper,fn = f.egg)
+egg.out3[c("value","par","counts")]
+```
+
+The plot below shows how simulated annealing works for the two initial points respectively. The red line records the current minimum. The blue points represents function value. Although they have different starting position, it can be seen from the plots the optimized values are the same.
+
+```{r,echo=FALSE}
+plot(egg.out$trace.mat[,4],type="l",lwd=4,col="red")
+points(egg.out$trace.mat[,3],pch=20,col="blue")
+
+plot(egg.out3$trace.mat[,4],type="l",lwd=4,col="red")
+points(egg.out3$trace.mat[,3],pch=20,col="blue")
+```
+
 We next consider a heuristic algorithm in which multiple paths through the search space are followed simultaneously.  
 
 ### 3.1.2 Genetic Algorithms
