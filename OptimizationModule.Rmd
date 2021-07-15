@@ -125,6 +125,107 @@ curve((params[2]*x)/(params[1]+x), from = 0, to = 4, add=TRUE, col='firebrick')
 
 <p> Perhaps the simplest iterative optimization algorithm is __gradient descent__, which can be understood intuitively in terms of finding your way to a valley bottom in a think fog. The fog obscures your vision so that you can only detect changes in elevation in your immediate vicinity. To make your way to the valley bottom, it would be reasonable to take each step of your journey in the direction of steepest decline. This strategy, illustrated in figure XYZ, is guaranteed to lead to a local minimum, but cannot guarantee arrival at the lowest point: the global minimum. </p>
 <p> Mathematically, the local change in elevation is determined by evaluating the objective at points nearby the 'current position', and then using those to determine the direction of steepest descent. (technically, this involves a linearization of the function at the current position, or equivalently a calculation of the 'gradient vector'.) A 'step' is then taken in the direction, and the process is repeated form this new 'current position'. Beyond that basic idea, a number of details have to be specified: how long should each step be? How many steps should be taken? Or should there be some other 'termination condition' that will trigger the end of the journey? (Each of these involve a tradeoff: often of precision vs. execution time. For instance, small steps guarantee a smooth path down the steepest route (as water would follow), but can take a very long time to complete the journey. Termination conditions are often specified in terms of the local topography: the algorithm stops when the 'current position' is at a sufficiently flat point (no downhill direction detected). </p>
+
+```{r,echo=FALSE}
+library(numDeriv)
+grad.descent = function(f, x0, max.iter=200, step.size=0.05,
+                        stopping.deriv=0.01, ...) {
+  n = length(x0)
+  xmat = matrix(0,nrow=n,ncol=max.iter)
+  xmat[,1] = x0
+  for (k in 2:max.iter) {
+    # Calculate the gradient
+    grad.cur = grad(f,xmat[,k-1],...)
+    # Should we stop?
+    if (all(abs(grad.cur) < stopping.deriv)) {
+      k = k-1; break
+      3
+    }
+    # Move in the opposite direction of the grad
+    xmat[,k] = xmat[,k-1] - step.size * grad.cur
+  }
+  xmat = xmat[,1:k] # Trim
+  return(list(x=xmat[,k], xmat=xmat, k=k))
+}
+```
+
+First, let's work with a simple function with global minimum only.
+
+```{r}
+simpleFun = function(x) {
+  return(x[1]^2 + 1/3*x[2]^2)
+}
+```
+
+```{r,echo=FALSE}
+x0 = c(-1.9,-1.9)
+gd = grad.descent(simpleFun,x0,step.size=1/3)
+
+x1 = c(-1.9,1.1)
+gd1 = grad.descent(simpleFun,x1,step.size=1/3)
+
+x2 = c(1.9,-1.9)
+gd2 = grad.descent(simpleFun,x2,step.size=1/3)
+
+x3 = c(1.9,1.1)
+gd3 = grad.descent(simpleFun,x3,step.size=1/3)
+
+surface = function(f, from.x=0, to.x=1, from.y=0, to.y=1,
+                   n.x=30, n.y=30, theta=5, phi=80, ...) {
+  # Build the 2d grid
+  x.seq = seq(from=from.x,to=to.x,length.out=n.x)
+  y.seq = seq(from=from.y,to=to.y,length.out=n.y)
+  plot.grid = expand.grid(x.seq,y.seq)
+  z.vals = apply(plot.grid,1,f)
+  z.mat = matrix(z.vals,nrow=n.x)
+  # Plot with the persp function
+  orig.mar = par()$mar # Save the original margins
+  par(mar=c(1,1,1,1)) # Make the margins small
+  r = persp(x.seq,y.seq,z.mat,theta=theta,phi=phi,...)
+  par(mar=orig.mar) # Restore the original margins
+  invisible(r)
+}
+```
+
+We start from different initial points and plot the iteration steps to see if they result in the same spot.
+
+```{r,echo=FALSE}
+r = surface(simpleFun,from.x=-2,to.x=2,from.y=-2,to.y=2,xlab="",ylab="",zlab="")
+points(trans3d(x0[1],x0[2],simpleFun(x0),r),col="red",cex=2)
+points(trans3d(gd$xmat[1,],gd$xmat[2,],apply(gd$xmat,2,simpleFun),r),
+      col="blue")
+lines(trans3d(gd$xmat[1,],gd$xmat[2,],apply(gd$xmat,2,simpleFun),r),
+      lwd=2,col="green")
+points(points(trans3d(gd$x[1],gd$x[2],simpleFun(gd$x),r),
+              col="black",cex=2))
+
+points(trans3d(x1[1],x1[2],simpleFun(x1),r),col="red",cex=2)
+points(trans3d(gd1$xmat[1,],gd1$xmat[2,],apply(gd1$xmat,2,simpleFun),r),
+      col="blue")
+lines(trans3d(gd1$xmat[1,],gd1$xmat[2,],apply(gd1$xmat,2,simpleFun),r),
+      lwd=2,col="orange")
+points(points(trans3d(gd1$x[1],gd1$x[2],simpleFun(gd1$x),r),
+              col="black",cex=2))
+
+points(trans3d(x2[1],x2[2],simpleFun(x2),r),col="red",cex=2)
+points(trans3d(gd2$xmat[1,],gd2$xmat[2,],apply(gd2$xmat,2,simpleFun),r),
+      col="blue")
+lines(trans3d(gd2$xmat[1,],gd2$xmat[2,],apply(gd2$xmat,2,simpleFun),r),
+      lwd=2,col="firebrick")
+points(points(trans3d(gd2$x[1],gd2$x[2],simpleFun(gd2$x),r),
+              col="black",cex=2))
+
+points(trans3d(x3[1],x3[2],simpleFun(x3),r),col="red",cex=2)
+points(trans3d(gd3$xmat[1,],gd3$xmat[2,],apply(gd3$xmat,2,simpleFun),r),
+      col="blue")
+lines(trans3d(gd3$xmat[1,],gd3$xmat[2,],apply(gd3$xmat,2,simpleFun),r),
+      lwd=2,col="magenta")
+points(points(trans3d(gd3$x[1],gd3$x[2],simpleFun(gd3$x),r),
+              col="black",cex=2))
+```
+
+It can be seen from the plot that the global minimum found are the same no matter where you start.   
+
 <p> The default optimization algorithm used by ```nls``` is the Gauss-Newton method, which is a generalization of Newton's method for solving nonlinear equations (which may be familiar from an introductory calculus). This is a refinement of gradient descent in which the local curvature of the function is used to project the position of the bottom of the local valley _assuming that the surface is shaped like a parabola._ On parabolic surfaces, this achieves descent to the bottom in one iteration. On non-parabolic surfaces (i.e.~most surfaces), the results is a sequence of iterations, but often many fewer than would be required using gradient descent. </p>
 <p> Both gradient descent and Gauss-Newton method are design to reach the bottom of the valley in which the initial guess lies. If that's a local minimum but not the global minimum, then the algorithm will not be successful.  So, how does one select a 'good' initial guess? Unfortunately, there's no general answer to this question. In many cases, one can use previous knowledge of the system under investigation to begin with a solid initial guess. (This is closely related to the choice of a prior distribution in Bayesian approaches.) If no such previous knowledge is available, sometimes a `guess' is all we have. In those cases, we may have little confidence that the algorithm will arrive at a global minimum. The simplest way to gain some confidence of achieving a global minimum is the multi-start strategy: choose many initial guesses, and run the algorithm from each. This can be computationally expensive, but if the same minimum is reached from initial spread widely over the parameters space, one begins to gain confidence that this is the true global minimum. </p>
 <p> A number of methods have been developed to complement the multi-start approach. These are known as __global optimization routines__. They are also known as _heuristic methods_, because their performance cannot be guaranteed in general: there are no guarantees that they'll find the global minimum, nor are there solid estimates of how many iterations will be required for them to carry out a satisfactory search of the parameter space. We will consider two commonly used methods: simulated annealing and genetic algorithms. </p>
