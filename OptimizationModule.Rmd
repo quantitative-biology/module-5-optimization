@@ -88,7 +88,33 @@ Figure 5: Example 1: finding a line of best fit through the origin
 In several important cases, the nonlinear regression task can be transformed into a linear regression task. In the case of Michaelis-Menten kinetics, several linearizing transformations have been proposed, including those by Eadie–Hofstee and Lineweaver–Burk. Another example commonly encountered in Biology is fitting exponential curves (e.g.~population growth or drug clearance).  In those cases, a logarithmic modifies the data so that a linear trend is captured. </p>
 <p> data: $y \sim e^{rt}$ transform $y^{trans} \sim \ln (e^{rt})  = \times \ln(e^{rt}) = rt$. Linear regression on the transformed data $(t_i, y^{trans}_i)$ then provides an estimate of the value of $r$.  
 Unfortunately, linearizing transformations are only available in a handful of special cases. In general, the nonlinear regression task must be addressed directly. An example of the procedure in R follows:  
-****Insert first nonlinear regression example, with minimal coding****  </p>
+
+```{r}
+mm <- structure(list(S = c(3.6, 1.8, 0.9, 0.45, 0.225, 0.1125, 3.6, 
+                           1.8, 0.9, 0.45, 0.225, 0.1125, 3.6, 1.8, 0.9, 0.45, 0.225, 0.1125, 
+                           0), v = c(0.004407692, 0.004192308, 0.003553846, 0.002576923, 
+                                     0.001661538, 0.001064286, 0.004835714, 0.004671429, 0.0039, 0.002857143, 
+                                     0.00175, 0.001057143, 0.004907143, 0.004521429, 0.00375, 0.002764286, 
+                                     0.001857143, 0.001121429, 0)), .Names = c("S", "v"), class = "data.frame",
+                row.names = c(NA,-19L))
+```
+
+We need to provide the starting values $V_m$ and $K$. $V_m$ is the maximum value, the asymoptote of the curve. The value of $K_m$ is equal to $S$ when $V_m$ is half-way ($\frac12 V_m$).
+
+```{r}
+model.nls <- nls(v ~ Vm * S/(K+S), data = mm, 
+                 start = list(K = max(mm$v)/2, Vm = max(mm$v)))
+summary(model.nls)
+```
+
+Below is the plot of the original points and the fitted curve using nls().   
+
+```{r}
+params <- summary(model.nls)$coeff[,1]
+plot(mm)
+curve((params[2]*x)/(params[1]+x), from = 0, to = 4, add=TRUE, col='firebrick')
+```
+</p>
 <p> From that exercise, the reader might have the impression that nonlinear regression and linear regression are very similar exercises. That would be a false impression. Although the problem set-up is similar (chose family of curves, minimize SSE), the optimization task is different, and it's 'solution' follow a very different protocol. As we saw above, the solution to the linear regression task can be stated as a general formula. For nonlinear regression, no such formula exists. Worse, there is no procedure (algorithm) that is guaranteed to find the solution! </p>
 
 # 3 Iterative Optimization Algorithms
