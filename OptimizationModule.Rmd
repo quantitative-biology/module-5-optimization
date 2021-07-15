@@ -545,7 +545,18 @@ c("lower" = lm_summ$coef[1,1] - qt(0.975, df = lm_summ$df[2]) * lm_summ$coef[1, 
 ```
 
 <p> For nonlinear regression (including calibration of dynamic models), the theory is less helpful, but estimates of uncertainty intervals can be achieved (as discussed below in the section on optimal experimental design). </p>
-[implementation for linear regression; previous example]
+
+```{r}
+confint(model.nls)
+```
+
+```{r}
+lm_summ <- summary(model.nls)
+c("lower" = lm_summ$coef[2,1] - qt(0.975, df = lm_summ$df[2]) * lm_summ$coef[2, 2],
+  "upper" = lm_summ$coef[2,1] + qt(0.975, df = lm_summ$df[2]) * lm_summ$coef[2, 2])
+c("lower" = lm_summ$coef[1,1] - qt(0.975, df = lm_summ$df[2]) * lm_summ$coef[1, 2],
+  "upper" = lm_summ$coef[1,1] + qt(0.975, df = lm_summ$df[2]) * lm_summ$coef[1, 2])
+```
 
 <p> An alternative approach to the regression task combines calibration and uncertainty in a single process: Bayesian methods. The basic idea behind Bayesian analysis (founded on Bayes Theorem, which may be familiar from elementary probability), is to start with an initial parameter estimate (analogous to the initial guess needed in nonlinear regression) and then use the available data to refine that estimate. The difference is that instead of the initial guess and refined estimate being single numerical values, they are _distributions_. In Bayesian terminology, we being with a _prior_ distribution, which may be informed by expert knowledge (e.g.~a normal distribution centered at a good initial guess), or may be a wilde guess (e.g.~a uniform distribution over a wide range of possible values). Application of a Bayesian calibration scheme uses the available data to generate an improved description of the parameter value distributions, called the _posterior_ distribution. A successful Bayesian calibration could take a `wild guess' uniform prior and return a tightly-centered posterior, as in figure XYZ. Uncertainty can then be gleaned directly from the posterior, by reporting, e.g.~ a 95% confidence interval. One commonly cited concern with Bayesian techniques is the dependence of the result on the rather subjective selection of a prior. This is analogous to concerns about any bias introduced by choice of initial guess in the non-Bayesian (maximum likelihood-based) regression analysis described above. In both cases, multi-start techniques can be used to address this issue. </p>
 
