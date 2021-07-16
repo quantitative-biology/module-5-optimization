@@ -79,7 +79,27 @@ Figure 5: Example 1: finding a line of best fit through the origin
 
 <p> This formula is somewhat unwieldy, but is straightforward to implement. In R, the command ```lm``` implements this formula, as the following example illustrates. </p>
 
-*****linear regression R exercise here****  
+To plot your dataset, use the __plot()__ command. In this example, we will use the cars dataset and plot a distance vs. speed graph. The code used will be __plot(cars)__. 
+
+```{r, echo = TRUE}
+plot(cars)
+```
+
+By using the __lm()__ command with the two variables we get the intercept and the slope of the line. The code used will be __lm(dist~speed)__. 
+
+```{r, echo = TRUE}
+lm(dist~speed)
+```
+
+As shown above, the intercept is -17.579 and the slope of the line is 3.932. 
+
+There are two ways to add the line of best fit to the plot. The first is using the command __abline(-17.579, 3.932)__, and the second method is to use __abline(lm(dist~speed))__. 
+
+```{r, echo = TRUE}
+attach(cars)
+plot(cars)
+abline(lm(dist~speed))
+```
 
 ## 2.2 Nonlinear Regression
 
