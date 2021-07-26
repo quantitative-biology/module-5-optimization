@@ -640,7 +640,69 @@ legend("bottomright",legend=c("Prior Distribution for Vm", "Posterior Distributi
 ```
 
 <p> Typically, approximate Bayesian computation is implemented as an iterative method, in which a sequence of rejection steps is applied, withe the prior being refined at each step (generating, in essence, a sequence of posterior distributions, the last of which is considered to be the best description of the desired parameter estimates). </p>
-[Implementation of ABC method from package; Michaelis-Menten and Lotka Volterra]
+
+```{r,message=FALSE,warning=FALSE}
+library(EasyABC)
+mm <- structure(list(S = c(3.6, 1.8, 0.9, 0.45, 0.225, 0.1125, 3.6, 
+                           1.8, 0.9, 0.45, 0.225, 0.1125, 3.6, 1.8, 0.9, 0.45, 0.225, 0.1125, 
+                           0), v = c(0.004407692, 0.004192308, 0.003553846, 0.002576923, 
+                                     0.001661538, 0.001064286, 0.004835714, 0.004671429, 0.0039,
+                                     0.002857143, 0.00175, 0.001057143, 0.004907143, 0.004521429,
+                                     0.00375, 0.002764286, 0.001857143, 0.001121429, 0)), 
+                .Names = c("S", "v"), class = "data.frame", row.names = c(NA,-19L))
+
+# target dataset
+summary_data=c(0.004407692, 0.004192308, 0.003553846, 0.002576923, 
+              0.001661538, 0.001064286, 0.004835714, 0.004671429, 0.0039,
+              0.002857143,0.00175, 0.001057143, 0.004907143, 0.004521429,
+              0.00375, 0.002764286,0.001857143, 0.001121429, 0)
+```
+
+```{r}
+# set seed
+set.seed(123)
+
+# simulate data
+mm_model <- function(par) {
+  Vm <- par[1]
+  K <- par[2]
+  S <- mm$S
+  samples <- S*Vm/(S+K)
+  return(samples)
+}
+
+# set tolerance levels
+tolerance=c(8,3)
+
+# identify prior distribution for parameters
+mm_prior = list(c("unif",0,0.01),c("unif",0,1))
+```
+
+```{r}
+# use ABC_sequential() to obtain a rough posterior distribution of parameter values
+ABC_sequential <- ABC_sequential(method="Beaumont", model=mm_model,prior=mm_prior, 
+                                 nb_simul=10000, summary_stat_target=summary_data,
+                                 tolerance_tab=tolerance)
+```
+
+After 100000 simulations, it can be seen from the histograms that the most frequent values are close to the estimated values derived from the non linear regression model.
+
+```{r}
+c1 <- rgb(173,216,230,max = 255, alpha = 80, names = "lt.blue")
+c2 <- rgb(255,192,203, max = 255, alpha = 80, names = "lt.pink")
+
+hist(runif(15000,0,0.01),main="Prior Versus Posterior Distribution for K",
+     col = c1,xlab = "K")
+hist(ABC_sequential$param[5000:10000,1],col = c2, add=TRUE)
+legend("topleft",legend=c("Prior Distribution for K", "Posterior Distribution for K"),
+       inset=.02, fill=c(c1,c2), cex=0.8)
+
+hist(runif(10000,0,1),main="Prior Versus Posterior Distribution for Vm",
+     col = c1,xlab = "K")
+hist(ABC_sequential$param[5000:10000,2],col = c2, add=TRUE)
+legend("topleft",legend=c("Prior Distribution for Vm", "Posterior Distribution for Vm"),
+       inset=.02, fill=c(c1,c2), cex=0.8)
+```
 
 ### Optimal Experimental Design 
 
