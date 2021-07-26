@@ -627,14 +627,17 @@ sum(sampled_parameter_values_squared_distances$accepted_or_rejected)
 ```{r}
 c1 <- rgb(173,216,230,max = 255, alpha = 80, names = "lt.blue")
 c2 <- rgb(255,192,203, max = 255, alpha = 80, names = "lt.pink")
-prior1 <- hist(sampled_parameter_values_squared_distances[1:1200,2],col = c1,
+prior1 <- hist(sampled_parameter_values_squared_distances[1:1200,3],col = c1,
                xlab = "K", main="Prior Versus Posterior Distribution for K") 
-post1 <- hist(sampled_parameter_values_squared_distances[which(sampled_parameter_values_squared_distances$accepted_or_rejected==1),2], col=c2, xlab = "K", add=TRUE)
+post1 <- hist(sampled_parameter_values_squared_distances[which(sampled_parameter_values_squared_distances$accepted_or_rejected==1),3], col=c2, xlab = "K", add=TRUE)
+abline(v=0.005425,col="firebrick",lwd=2)
 legend("bottomright",legend=c("Prior Distribution for K", "Posterior Distribution for K"),
        inset=.02, fill=c(c1,c2), cex=0.8)
-prior2 = hist(sampled_parameter_values_squared_distances[1:1200,3],col = c1,
+
+prior2 = hist(sampled_parameter_values_squared_distances[1:1200,2],col = c1,
               xlab = "Vm", main="Prior Distribution for Vm") 
-post2 = hist(sampled_parameter_values_squared_distances[which(sampled_parameter_values_squared_distances$accepted_or_rejected==1),3],col = c2, xlab = "Vm", add=TRUE)
+post2 = hist(sampled_parameter_values_squared_distances[which(sampled_parameter_values_squared_distances$accepted_or_rejected==1),2],col = c2, xlab = "Vm", add=TRUE)
+abline(v=0.439802,col="firebrick",lwd=2)
 legend("bottomright",legend=c("Prior Distribution for Vm", "Posterior Distribution for Vm"),
        inset=.02, fill=c(c1,c2), cex=0.8)
 ```
