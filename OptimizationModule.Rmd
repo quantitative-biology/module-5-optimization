@@ -613,7 +613,7 @@ sample_by_rejection <- function (true_data, n_iterations, acceptance_threshold, 
 }
 ```
 
-Here we randomly sample $K$ and $V_m$ 200000 times, it can be seen from the histogram that the values that occur most frequently are close to the estimated values derived from the non linear regression model.
+Here we randomly sample $K$ and $V_m$ 200000 times, it can be seen from the histograms that the values that occur most frequently are close to the estimated values derived from the non linear regression model.
 
 ```{r}
 # set seed
@@ -627,17 +627,16 @@ sum(sampled_parameter_values_squared_distances$accepted_or_rejected)
 ```{r}
 c1 <- rgb(173,216,230,max = 255, alpha = 80, names = "lt.blue")
 c2 <- rgb(255,192,203, max = 255, alpha = 80, names = "lt.pink")
-
-par(mfrow=c(1,2))
-prior1 <- hist(sampled_parameter_values_squared_distances[,2],col = c1,
-               xlab = "K", main="Prior Distribution for K") 
-post1 <- hist(sampled_parameter_values_squared_distances[which(sampled_parameter_values_squared_distances$accepted_or_rejected==1),2], 
-              col=c2, xlab = "K", main="Posterior Distribution for K")
-
-prior2 = hist(sampled_parameter_values_squared_distances[,3],col = c1,
+prior1 <- hist(sampled_parameter_values_squared_distances[1:1200,2],col = c1,
+               xlab = "K", main="Prior Versus Posterior Distribution for K") 
+post1 <- hist(sampled_parameter_values_squared_distances[which(sampled_parameter_values_squared_distances$accepted_or_rejected==1),2], col=c2, xlab = "K", add=TRUE)
+legend("bottomright",legend=c("Prior Distribution for K", "Posterior Distribution for K"),
+       inset=.02, fill=c(c1,c2), cex=0.8)
+prior2 = hist(sampled_parameter_values_squared_distances[1:1200,3],col = c1,
               xlab = "Vm", main="Prior Distribution for Vm") 
-post2 = hist(sampled_parameter_values_squared_distances[which(sampled_parameter_values_squared_distances$accepted_or_rejected==1),3],
-             col = c2, xlab = "Vm", main="Posterior Distribution for Vm")
+post2 = hist(sampled_parameter_values_squared_distances[which(sampled_parameter_values_squared_distances$accepted_or_rejected==1),3],col = c2, xlab = "Vm", add=TRUE)
+legend("bottomright",legend=c("Prior Distribution for Vm", "Posterior Distribution for Vm"),
+       inset=.02, fill=c(c1,c2), cex=0.8)
 ```
 
 <p> Typically, approximate Bayesian computation is implemented as an iterative method, in which a sequence of rejection steps is applied, withe the prior being refined at each step (generating, in essence, a sequence of posterior distributions, the last of which is considered to be the best description of the desired parameter estimates). </p>
