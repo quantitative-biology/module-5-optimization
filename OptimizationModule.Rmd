@@ -2,57 +2,79 @@
 
 ## Introduction
 
-<p> To improve is to make better; to optimize is to make best. More generally, TEST CHANGE
-optimization is the act of identifying the extreme (cheapest, tallest, fastest...) case over a collection of possible cases. You may recall studying optimization in introductory calculus. In that case you likely solved design problems, for which the collection of possibilities was specified as possible dimensions of a farmer's fence, or of a box, or something similar. Optimization over __design space__ (also called __decision space__) is a critical feature of many engineering tasks, and has a role in most areas of applied science, including applied biology. Examples include optimal manipulation of biological systems (e.g.~optimal harvesting, or optimal drug dosing), optimal design of biological systems (e.g.~robust synthetic genetic circuits). A complementary task is optimal experimental design, which aims to identify the 'best' experiment from a collection of possible designs. Model calibration, to be discussed further below, provides another example; here we seek the 'best fit' version of a model from a collection of possible options.</p>
-<p> Optimization can also be used to investigations of natural systems (i.e.~in `pure' science), in cases where we have reason to believe that 'nature' presents us with an optimal version of a given phenomenon. The principle of entropy maximization (or energy minimization) can be used to justify nature of a wide variety of phenomena, from the shapes of soap bubbles (why are they round?) to the configuration of proteins [maybe add distributions: check Nelson book for examples].  Darwinian evolution provides another avenue for optimization. Assuming evolution has arrived at (or near) an optimum, we can apply optimization to understand a wide array of biological phenomena, from metabolic flux distribution (FBA), to brain wiring (ref needed: check Banga), to optimal foraging strategies (ref needed).</p>
-<p> This module will introduce optimization methods in R. Applications and illustrations will be drawn from a range of biological domains. The simple optimization tasks addressed in introductory calculus could be accomplished with paper-and-pencil calculations. As shown below, while the fundamental principles introduced by those exercises carry forward, most optimization tasks of interest in biology demand more extensive computational resources.</p>
+<p> To improve is to make better; to optimize is to make best. Optimization is the act of identifying the extreme (cheapest, tallest, fastest...) over a collection of possibilities. You may recall studying optimization in introductory calculus where you may have solved simple design problems over the possible sizes of fences, or boxes, or something similar. Optimization over __design space__ (also called __decision space__) is a critical feature of many engineering tasks, and has a role in most areas of applied science, including biology. Examples include optimal manipulation of biological systems (e.g. optimal harvesting or optimal drug dosing) or optimal design of biological systems (e.g. robust synthetic genetic circuits). A complementary task is optimal experimental design, which aims to identify the 'best' experiment from a collection of possibilities. Model calibration, to be discussed further below, provides another example; here we seek the 'best fit' version of a model from a collection of possible options.</p>
+<p> Beyond its use in design, optimization is also used to investigate natural systems (i.e. in `pure' science), in cases where 'nature' presents us with an optimal version of a given phenomenon. For example, the principle of entropy maximization (equivalently energy minimization) justifies a wide variety of phenomena, from the shapes of soap bubbles to the configuration of proteins.  Darwinian evolution provides another mechanism for optimization. Assuming evolution has arrived at optimal designs, we can apply optimization to understand a variety of biological phenomena, from metabolic flux distribution, to brain wiring, to optimal foraging strategies.</p>
+<p> This module introduces optimization methods in R. Applications and illustrations are be drawn from a range of biological domains. The simple optimization tasks addressed by introductory calculus can be accomplished with paper-and-pencil calculations. As shown below, while the fundamental principles introduced by those exercises carry forward, most optimization tasks of interest in biology demand more extensive computational resources.</p>
 
 ## Fundamentals of Optimization
 
-Figure 1 illustrates some basics terminology associated with optimization. The graph of a function $f$ of a single variable $x$ is shown, over a domain $[a,b]$. In the context of optimization, we can think of each $x$-value in the interval $[a,b]$ as one possible scenario (fence measurement, harvesting rate, etc.). The function $f$ maps those choices to some _objective_ (e.g.~total area, long-term annual yield) that we wish to optimize (either maximize or minimize). The points labelled in the figure capture a central dichotomy in the theory of optimization. The _global_ extrema (i.e. maximum, minimum) represent the results we wish to achieve.  
+Figure 1 illustrates some basics terminology associated with optimization. The graph of a function $f$ of a single variable $x$ is shown, defined over a domain $[a,b]$. In the context of optimization, we can think of each $x$-value in the interval $[a,b]$ as one possible scenario (e.g. fence length, harvesting rate, etc.). The function $f$ maps those choices to some __objective__ (e.g. total area, long-term annual yield) that we wish to optimize (either maximize or minimize). The _global_ extrema (i.e. maximum and minimum) represent the results we wish to achieve.  
 
 <p><center>
 `r htmltools::img(src=knitr::image_uri("Figure1.png"))`  
 Figure 1: Extreme Values  
 </center></p>
 
-<p> More generally, we define _local_ extrema (max, min) as results that appear to be optimal if we restrict our attention only to 'nearby' possibilities (i.e.~$x$-values). There is an extensive theory of optimization methods; unfortunately most of these are dedicated to __identifying local optima__. These approaches cannot directly identify global optimum; at best they can identify candidate global optima, which then can be compared to identify the 'best' result. (A convenient special case occurs for functions in which every local optimum is a global optimum; these are called convex optimization problems. Unfortunately, they occur only rarely in addressing biological phenomena.) </p>
-<p> To illustrate these fundamentals, consider the following two academic examples that may be familiar form an introductory calculus course. These both rely on __Fermat's Theorem__, which states that local extrema occur at points where the tangent line to a function's graph is horizontal (so the derivative (i.e.~the slope of the tangent) is zero (Figure 2). </p>
-<p> Example 1.  Identify the value of $x$ for which the function $f(x) = x^2+3x-2$ is minimized. </p>
-<p> Solution: Taking the derivative, we find $f'(x) = 2x+3$. To find the single point where the derivative is zero, we solve: $f'(x) = 0 \Leftrightarrow 2x+3 = 0\Leftrightarrow x = -\frac{3}{2} = -1.5$. As shown in Figure 4, the single local minimum is the global miminum in this case, so $x=-1.5$ is the desired solution.</p>  
-<p> Example 2.  Identify the value of $x$ for which the function $f(x) = 3x^4-4x^3-54x^2+108x$ is minimized. </p>
-<p> Solution: Taking the derivative, we find $f'(x) = 12x^3-12x^2-108x+108 = 12(x-3)(x-1)(x+3)$. To find the single point where the derivative is zero, we solve: $f'(x) = 0 \Leftrightarrow x = 3, 1, -3$. As shown in Figure 4, two of these points are local minima. One ($x=-3$) is where the global minimum occurs.</p> 
+<p> More generally, we define _local_ extrema (maxima and minima) as cases that appear to be optimal if we restrict our attention only to 'nearby' possibilities (i.e. $x$-values). There is an extensive theory of optimization methods; unfortunately most of these are dedicated to __identifying local optima__. These approaches cannot directly identify global optimum -- instead they identify _candidate_ global optima, which then can be compared to identify the 'best' result. (A convenient special case occurs for problems where every local optimum is a global optimum; these are called convex optimization problems. Unfortunately, they occur only rarely in addressing biological phenomena.) </p>
+
+### Fermat's Theorem
+
+<p> To illustrate these fundamentals, consider the following two academic examples that rely on basic calculus, specifically on __Fermat's Theorem__, which states that local extrema occur at points where the tangent line to a function's graph is horizontal, i.e. at points where the derivative (i.e. the slope of the tangent) is zero (Figure 2). </p>
 
 <p><center>
 `r htmltools::img(src=knitr::image_uri("Figure2.png"))`  
-Figure 2: Fermat's Theorem: local extrema occur at points where the tangent line is horizontal
+Figure 2: Fermat's Theorem: local extrema occur at points where the tangent line is horizontal. Some local extrema are also global extrema.
 </center></p>
+
+
+<p> Example 1.  Identify the value of $x$ for which the function $f(x) = x^2+3x-2$ is minimized. </p>
+<p> Solution: Taking the derivative, we find $f'(x) = 2x+3$. To find the point(s) where the derivative is zero, we solve: $f'(x) = 0 \Leftrightarrow 2x+3 = 0\Leftrightarrow x = -\frac{3}{2} = -1.5$. As shown in Figure 4, the single local minimum is the global miminum in this case, so $x=-1.5$ is the desired solution.</p> 
+
+
+<p><center>
+`r htmltools::img(src=knitr::image_uri("Figure3.png"))`  
+Figure 3: Graph of $f(x) = x^2+3x-2$  (Example 1)   
+</center></p>
+
+<p> Example 2.  Identify the value of $x$ at which the function $f(x) = 3x^4-4x^3-54x^2+108x$ is minimized. </p>
+<p> Solution: Taking the derivative, we find $f'(x) = 12x^3-12x^2-108x+108 = 12(x-3)(x-1)(x+3)$. To find the point(s) where the derivative is zero, we solve: $f'(x) = 0 \Leftrightarrow x = 3, 1, -3$. As shown in Figure 4, two of these points are local minima. One ($x=-3$) is where the global minimum occurs.</p> 
+
+
+<p><center>
+`r htmltools::img(src=knitr::image_uri("Figure4.png"))`  
+Figure 4: Graph of $f(x) = 3x^4-4x^3-54x^2+108x$  (Example 2)
+</center></p>
+
 
 ## Regression
 
 ### Linear Regression
 
-<p> As mentioned above, finding the 'best fit' from a family of models is a common optimization task in science. The simplest (and most frequently used) example is _linear regression_: determining a line of best fit through a given set of points. </p> 
-<p> To illustrate, consider the dataset of $(x,y)$ pairs shown in Figure XYZ. Several lines are displayed in the figure. The optimization task here is to identify the 'best' line: the one that best captures the trend in the data. To specify this task  mathematically, we need to agree on a measure of 'quality of fit'. We start by recognizing that the line will (typically) fail to pass through many of the points in the dataset. (In fact, the 'best' line, by the definition we'll adopt, will typically fail to pass through _any_ of the points in the dataset.) Thus, at each point $x_i$ we can define an __error__, which is the difference between the observed $y$-value and the $y$-value predicted by the line. If we call the line $y=mx+b$, then the error at $x_i$ will be $y_i-(mx_i+b)$. This definition of the error is not satisfactory: the errors associated with points above and below the line will have opposite signs, and so will cancel when we attempt to tally the total error. The problem could be addressed by taking the absolute value $|y_i-(mx_i+b)|$, but it turns out that __squaring__ the error is a more satisfactory solution for a number of theoretical reasons; we will follow this standard approach. This, we consider the squared error at $x_i$ as $(y_i-(mx_i+b))^2$, and tally these together into the __sum of squared errors__ (SSE): $(y_1-(mx_1+b))^2 + (y_2-(mx_2+b))^2 + \ldots (y_N-(mx_N+b))^2$. </p>
-<p> We can now pose the model-fitting task as an optimization problem. For each line (that is, each assignment of numerical values to $m$ and $b$), we associate a corresponding SSE. We seek the values of $m$ and $b$ for which the SEE is a global minimum. </p>
+<p> As mentioned above, finding the 'best fit' from a family of models is a common optimization task in science. The simplest example of this task is __linear regression__: determining a line of best fit through a given set of points. </p> 
+<p> To illustrate, consider the dataset of $(x,y)$ pairs shown in Figure __XYZ__, which we can label as $(x_1, y_1)$, $(x_2, y_2)$, ldots, $(x_N, y_N)$. Several lines are displayed. The optimization task here is to identify the 'best' line: the one that best captures the trend in the data. To specify this task  mathematically, we need to decide on a measure of 'quality of fit'. We start by recognizing that the line will (typically) fail to pass through most of the points in the dataset. Thus, at each point $x_i$ we can define an __error__, which is the difference between the observed $y$-value and the $y$-value on the line. If we call the line $y=mx+b$, then the error at $x_i$ can be defined as $e_i = y_i-(mx_i+b)$. We then need to combine these errors into a single measure of teh quality of fit. This is typically done by _squaring_ the errors and adding them together. (Squaring ensures that both under- and over-estimations contribute equally.) We define the __sum of squared errors__ (SSE) as : $(y_1-(mx_1+b))^2 + (y_2-(mx_2+b))^2 + \cdots +(y_N-(mx_N+b))^2 = e_1^2+e_2^2+ \cdots e_N^2$. </p>
+
+<p> We can now pose the model-fitting task as an optimization problem. For each line (that is, each assignment of numerical values to $m$ and $b$), we associate a corresponding SSE. We seek the values of $m$ and $b$ for which the SSE is a global minimum. </p>
+
+
+<p> Example 3. Consider a simplified version of linear regression, in which we know that our model (line) should pass through the origin (0,0). That is, instead of lines $y=mx+b$, we will consider only lines of the form $y=mx$. (We thus have a single parameter to identify: the slope $m$.) To keep the algebra as simple as possible we'll take a tiny dataset consisting of just two points: $(x_1, y_1) = (2,3)$ and $(x_2, y_2)= (5.4)$, as indicated in Figure 5. The line passes through points $(2,2m)$ and $(5, 5m)$. </p>
 
 <p><center>
-`r htmltools::img(src=knitr::image_uri("Figure3.png"))`  
-Figure 3: Example graph of $f(x) = x^2+3x-2$    
+`r htmltools::img(src=knitr::image_uri("Figure5.png"))`  
+Figure 5: Example 1: finding a line of best fit through the origin  
 </center></p>
 
-<p> Example 3. Consider a simplified version of linear regression, in which we know that our model (line) should pass through the origin (0,0). That is, instead of lines $y=mx+b$, we will consider only lines of the form $y=mx$. (We thus have a single parameter to identify: the slope $m$.) To keep the algebra as simple as possible we'll take a tiny dataset consisting of just two points: (2,3) and (5.4), as indicated in Figure 5. The line passes through points $(2,2m)$ and $(5, 5m)$. </p>
+
 In this simple case, the sum of squared errors is:
 \begin{equation*}
-    \mbox{SSE} = e_1+e_2 = (3-2m)^2+(5m-4)^2
+    \mbox{SSE} = e_1^2+e_2^2 = (3-2m)^2+(4-5m)^2
 \end{equation*}  
 To apply Fermat's theorem we take the derivative and identify any values of $m$ for which it is zero:
 \begin{eqnarray*}
-    \frac{d}{dm} \mbox{SSE} &=& 2(3-2m)(-2)+2(5m-4)(5) \\
-    &=& -4(3-2m) + 10(5m-4) = -12 +8m+50m-40 = -52+58m.
+    \frac{d}{dm} \mbox{SSE} &=& 2(3-2m)(-2)+2(4-5m)(-5) \\
+    &=& -4(3-2m) - 10(4-5m) = -12 +8m+-40+50m = -52+58m.
 \end{eqnarray*}
-<p> The only local extremum (and hence only candidate for global minimum) is then $m=52/58 = 26/29$. (Additional analysis can confirm this is indeed the global minimum.) </p>
-<p> The analysis in Example 3 can be extended to determine the general solution of the linear regression task. The solution formula is as follows:
+<p> The only local extremum (and hence the only candidate for global minimum) is then $m=52/58 = 26/29$.</p>
+<p> The analysis in Example 3 can be extended to determine the general solution of the linear regression task [Fairway, 2002]. The solution formula is as follows:
 __Linear regression formula__ The best fit line $y=mx+b$ to the dataset $(x_1, y_1)$, $(x_2, y_2)$, \ldots, $(x_n, y_n)$ is given by
 \begin{eqnarray*}
     m&=& \frac{\sum_{i=1}^n (x_i-\bar{x})(y_i-\bar{y})}{\sum_{i=1}^n (x_i-\bar{x})^2} \\
@@ -64,27 +86,21 @@ where $\bar{x}$ and $\bar{y}$ are the averages
 \bar{y}=\frac{1}{n} \sum_{i=1}^n y_i
 \end{eqnarray*}  </p>
 
-<p><center>
-`r htmltools::img(src=knitr::image_uri("Figure4.png"))`  
-Figure 4: Example graph of $f(x) = 3x^4-4x^3-54x^2+108x$  
-</center></p>
-
-<p><center>
-`r htmltools::img(src=knitr::image_uri("Figure5.png"))`  
-Figure 5: Example 1: finding a line of best fit through the origin  
-</center></p>
-
 <p> This formula is somewhat unwieldy, but is straightforward to implement. In R, the command ```lm``` implements this formula, as the following example illustrates. </p>
 
 *****linear regression R exercise here****  
 
 ### Nonlinear Regression
 
-<p> Nonlinear regression is the task of fitting a nonlinear model through a dataset. The setup for this task is identical to linear regression. We begin by selecting a parameterized family of models (curves), and aim to identify the curves that minimizes the sum of squared errors when compared to the data. The family of models can be chosen based on an understanding of the mechanism that relates the input and output data. For example, if we are investigating  the rate law for a single-substrate enzyme-catalysed reaction, we might choose the family of curves specified by Michaelis-Menten kinetics: $y = \frac{V_{\mbox{max}} S}{K_M+S}$. Our goal would then be to idntify values for the parameters  $V_{\mbox{max}}$ and $K_M$ that minimize the sum of squared errors when comparing with the observed data. </p>
+<p> Nonlinear regression is the task of fitting a nonlinear model (e.g. a curve) to a dataset. The setup for this task is identical to linear regression. We begin by selecting a parameterized family of models (i.e. curves), and aim to identify the model (i.e. curve) that minimizes the sum of squared errors when compared to the data. The family of models can be chosen based on an understanding of the mechanism that relates the input and output data. For example, if we are investigating  the rate law for a single-substrate enzyme-catalysed reaction, we might choose the family of curves specified by Michaelis-Menten kinetics: 
+\begin{eqnarray*}
+y = \frac{V_{\mbox{\tiny max}} S}{K_M+S}
+\end{eqnarray*} 
+Our goal would then be to identify values for the parameters $V_{\mbox{\tiny max}}$ and $K_M$ that minimize the sum of squared errors when comparing with observed data. </p>
 <p> __Regression via linearizing transformation__
-In several important cases, the nonlinear regression task can be transformed into a linear regression task. In the case of Michaelis-Menten kinetics, several linearizing transformations have been proposed, including those by Eadie–Hofstee and Lineweaver–Burk. Another example commonly encountered in Biology is fitting exponential curves (e.g.~population growth or drug clearance).  In those cases, a logarithmic modifies the data so that a linear trend is captured. </p>
-<p> data: $y \sim e^{rt}$ transform $y^{trans} \sim \ln (e^{rt})  = \times \ln(e^{rt}) = rt$. Linear regression on the transformed data $(t_i, y^{trans}_i)$ then provides an estimate of the value of $r$.  
-Unfortunately, linearizing transformations are only available in a handful of special cases. In general, the nonlinear regression task must be addressed directly. An example of the procedure in R follows:  
+In several important cases, the nonlinear regression task can be transformed into a linear regression task. In the case of Michaelis-Menten kinetics, several linearizing transformations have been proposed (e.g. Eadie–Hofstee and Lineweaver–Burk [Cho and Lim, 2018]). Another example commonly encountered in Biology is fitting exponential curves (e.g. population growth or drug clearance).  In those cases, a logarithm modifies the data so that a linear trend is captured: e.g. $y = e^{rt}$, after applying a logarithm becomes $y^{trans} = \ln(y) = \ln (e^{rt})= rt$. Linear regression on transformed data $(t_i, y^{trans}_i)$ then provides an estimate of the value of $r$.  </p>
+
+<p> Unfortunately, linearizing transformations are only available in a handful of special cases. In general, the nonlinear regression task must be addressed directly. An example of the procedure in R follows:  
 
 ```{r}
 mm <- structure(list(S = c(3.6, 1.8, 0.9, 0.45, 0.225, 0.1125, 3.6, 
@@ -463,39 +479,39 @@ Here $x_1$ is the size of the prey population; $x_2$ is the size of the predator
 
 <p> Matt: insert example </p>
 
-## Other Topics
+<!-- ## Other Topics -->
 
-### Optimal Control
+<!-- ### Optimal Control -->
 
-<p> The behaviour of the Lotka-Volterra model described above depends on the values of the model parameters. Such models are often used to explore the effect of perturbations on a system. For instance, after successfully calibrating a model to given population's dynamics, one could propose interventions that could alter the value of one of the model parameters, e.g.~by restricting access to resources required for growth of the prey population. We could then simulate the model under this altered value of $p_1$ and thus generate predictions of the effect of this manipulation. </p>
+<!-- <p> The behaviour of the Lotka-Volterra model described above depends on the values of the model parameters. Such models are often used to explore the effect of perturbations on a system. For instance, after successfully calibrating a model to given population's dynamics, one could propose interventions that could alter the value of one of the model parameters, e.g.~by restricting access to resources required for growth of the prey population. We could then simulate the model under this altered value of $p_1$ and thus generate predictions of the effect of this manipulation. </p> -->
 
-<p> Alternatively, we could use a model formulation that incorporates a time-varying perturbation.  As an example, consider a version of the Lotka-Volterra equations that includes a term to describe removal (harvesting/culling) of the predator population:
-\begin{eqnarray*}
-    \frac{d}{dt} x_1(t) &=& p_1 x_1(t) - p_2 x_1(t) x_2(t)\\
-    \frac{d}{dt} x_2(t) &=& p_3 x_1(t) x_2(t) - p_4 x_2(t) - u(t) x_2(t)
-\end{eqnarray*} </p>
+<!-- <p> Alternatively, we could use a model formulation that incorporates a time-varying perturbation.  As an example, consider a version of the Lotka-Volterra equations that includes a term to describe removal (harvesting/culling) of the predator population: -->
+<!-- \begin{eqnarray*} -->
+<!--     \frac{d}{dt} x_1(t) &=& p_1 x_1(t) - p_2 x_1(t) x_2(t)\\ -->
+<!--     \frac{d}{dt} x_2(t) &=& p_3 x_1(t) x_2(t) - p_4 x_2(t) - u(t) x_2(t) -->
+<!-- \end{eqnarray*} </p> -->
 
-<p> Here $u(t)$, called an _input signal_ is a function that represents the effort exerted in removal of predators. With this input signal in place, we can now use the model to explore the consequences of a range of removal schedules. In particular, optimization can be used to identify the removal strategy that best achieves some performance goal. </p>
+<!-- <p> Here $u(t)$, called an _input signal_ is a function that represents the effort exerted in removal of predators. With this input signal in place, we can now use the model to explore the consequences of a range of removal schedules. In particular, optimization can be used to identify the removal strategy that best achieves some performance goal. </p> -->
 
-<p> As a concrete example, consider the goal of maximizing harvest over some fixed time period (e.g.~a year). Let's consider two cases. To begin, suppose that the harvesting rate must be fixed throughout the system behaviour. In this case, the harvesting rate is constant. Let's call it $u(t) = u_0$. We can then account for the total harvest by introducing a new state variable that tracks the progress of the harvest:
-\begin{eqnarray*}
-    \frac{d}{dt} x_1(t) &=& p_1 x_1(t) - p_2 x_1(t) x_2(t)\\
-    \frac{d}{dt} x_2(t) &=& p_3 x_1(t) x_2(t) - p_4 x_2(t) - u(t) x_2(t)\\
-    \frac{d}{dt} x_3(t) &=& u(t) x_2(t)
-\end{eqnarray*} </p>
+<!-- <p> As a concrete example, consider the goal of maximizing harvest over some fixed time period (e.g.~a year). Let's consider two cases. To begin, suppose that the harvesting rate must be fixed throughout the system behaviour. In this case, the harvesting rate is constant. Let's call it $u(t) = u_0$. We can then account for the total harvest by introducing a new state variable that tracks the progress of the harvest: -->
+<!-- \begin{eqnarray*} -->
+<!--     \frac{d}{dt} x_1(t) &=& p_1 x_1(t) - p_2 x_1(t) x_2(t)\\ -->
+<!--     \frac{d}{dt} x_2(t) &=& p_3 x_1(t) x_2(t) - p_4 x_2(t) - u(t) x_2(t)\\ -->
+<!--     \frac{d}{dt} x_3(t) &=& u(t) x_2(t) -->
+<!-- \end{eqnarray*} </p> -->
 
-<p> Then the value of $x_3(t)$ is the accumulated harvest from time zero to time $t$. If our goal is to maximize the total harvest over a year, we aim to maximize $x_3(1)$ (where $t$ is in units of years) over the choice of the fixed harvesting effort $u_0$. </p>
-[Details of implementation; exercise]
+<!-- <p> Then the value of $x_3(t)$ is the accumulated harvest from time zero to time $t$. If our goal is to maximize the total harvest over a year, we aim to maximize $x_3(1)$ (where $t$ is in units of years) over the choice of the fixed harvesting effort $u_0$. </p> -->
+<!-- [Details of implementation; exercise] -->
 
-<p> Let's now consider the case in which we can change the harvesting effort through the year: we'll allow the input $u(t)$ to be a time-varying function. One would expect we'd be able to achieve a larger harvest in this case (compared with a fixed harvest rate), because there's more freedom in the design of the harvesting strategy. We'll see below that this is indeed true. However, the optimization task as currently posed is problematic. So far, we've been optimizing over functions (SSE, total harvest) that depend on a finite set of numerical values, and so we searched a finite-dimensional space for the extrema. We're now faced with optimizing over *any* function $u(t)$. This is what's technically called an infinite-dimensional search space. The search for extrema in this case has been investigated in the theory of _optimal control_ and closely related work in the _calculus of variations_. See (Lenhart and Workman, 2007) if you'd like to learn more. Here, we'll restrict ourselves to a simple short-cut for solving this problem. We need to find a way to _parameterize_ the set of possible input curves $u(t)$. A common strategy is as follows:
+<!-- <p> Let's now consider the case in which we can change the harvesting effort through the year: we'll allow the input $u(t)$ to be a time-varying function. One would expect we'd be able to achieve a larger harvest in this case (compared with a fixed harvest rate), because there's more freedom in the design of the harvesting strategy. We'll see below that this is indeed true. However, the optimization task as currently posed is problematic. So far, we've been optimizing over functions (SSE, total harvest) that depend on a finite set of numerical values, and so we searched a finite-dimensional space for the extrema. We're now faced with optimizing over *any* function $u(t)$. This is what's technically called an infinite-dimensional search space. The search for extrema in this case has been investigated in the theory of _optimal control_ and closely related work in the _calculus of variations_. See (Lenhart and Workman, 2007) if you'd like to learn more. Here, we'll restrict ourselves to a simple short-cut for solving this problem. We need to find a way to _parameterize_ the set of possible input curves $u(t)$. A common strategy is as follows: -->
 
-__Sample-and-hold input parametrization__
+<!-- __Sample-and-hold input parametrization__ -->
 
-<p> We suppose that the input $u(t)$ (harvesting effort) is a piece-wise constant function, which changes values only at pre-specified timepoints (e.g. monthly, as shown in figure XYZ). Then we can specify any such function as a set of 12 numerical values, one for each month: ($u_1$, $u_2$, $u_3$, ..., $u_{11}$, $u_{12}$). As youd expect, the optimization task (which is now an optimal control task) can be solved by searching for the maximizer of total harvest over this 12-dimensional search space. More details in Lin et al. 2014. </p>
-[Implementation]; note: easiest way to implement is as a series of separate simulations. Also note:  solution is not differentiable at timepoints where $u$ jumps.
-exercise: change number of sub-intervals, note increase/decrease in maximum achieved]
+<!-- <p> We suppose that the input $u(t)$ (harvesting effort) is a piece-wise constant function, which changes values only at pre-specified timepoints (e.g. monthly, as shown in figure XYZ). Then we can specify any such function as a set of 12 numerical values, one for each month: ($u_1$, $u_2$, $u_3$, ..., $u_{11}$, $u_{12}$). As youd expect, the optimization task (which is now an optimal control task) can be solved by searching for the maximizer of total harvest over this 12-dimensional search space. More details in Lin et al. 2014. </p> -->
+<!-- [Implementation]; note: easiest way to implement is as a series of separate simulations. Also note:  solution is not differentiable at timepoints where $u$ jumps. -->
+<!-- exercise: change number of sub-intervals, note increase/decrease in maximum achieved] -->
 
-### Uncertainty Analysis and Bayesian Approahces
+## Uncertainty Analysis and Bayesian Calibration
 
 <p> The regression tasks discussed above resulted in estimates of parameter values based on the provided datasets. Regression is usually followed by _uncertainty analysis_, which provides some measure of confidence in those estimated parameter values. For instance, in the case of linear regression, 95\% confidence intervals on the estimates (best fit line slope and intercept) and corresponding confidence intervals on the model predictions are supported by extensive statistical theory, and can be easily generated in R. </p> 
 
@@ -707,38 +723,42 @@ legend("topleft",legend=c("Prior Distribution for Vm", "Posterior Distribution f
        inset=.02, fill=c(c1,c2), cex=0.8)
 ```
 
-### Optimal Experimental Design 
+<!-- ### Optimal Experimental Design  -->
 
-<p> Experimental design involves choices about what experiments to perform, what measurements to take, and, for time-varying processes, when to take those measurements. Most experimental design exercises are carried out in the face of constraints on available resources (time, personnel, reagents, funding, etc.). The goal of experimental design is then to identify the 'best' experiments to execute, given the imposed resource constraints. In cases where we can express the 'quality' experimental results in terms of a numerical performance, and can likewsise express constraints numerically, we can then frame the experimental design task as an optimization task; this is _optimal experimental design_. There is a rich history of optimal experimental design for linear systems (Pukelsheim, 2006.). Here, we consider a more challenging task of optimal experimental design in a nonlinear setting. Consider the case in which a nonlinear regression has been applied to find a best fit model to some pre-existing data, along with an estimate of the quality of that fit. We then consider an experimental design task that targets the refinement of that estimate: the `best' experimental results will be those that most shrink the confidence intervals when that data is included in the regression analysis. </p>
+<!-- <p> Experimental design involves choices about what experiments to perform, what measurements to take, and, for time-varying processes, when to take those measurements. Most experimental design exercises are carried out in the face of constraints on available resources (time, personnel, reagents, funding, etc.). The goal of experimental design is then to identify the 'best' experiments to execute, given the imposed resource constraints. In cases where we can express the 'quality' experimental results in terms of a numerical performance, and can likewsise express constraints numerically, we can then frame the experimental design task as an optimization task; this is _optimal experimental design_. There is a rich history of optimal experimental design for linear systems (Pukelsheim, 2006.). Here, we consider a more challenging task of optimal experimental design in a nonlinear setting. Consider the case in which a nonlinear regression has been applied to find a best fit model to some pre-existing data, along with an estimate of the quality of that fit. We then consider an experimental design task that targets the refinement of that estimate: the `best' experimental results will be those that most shrink the confidence intervals when that data is included in the regression analysis. </p> -->
 
-<p> We quantify the degree of confidence in the parameter estimate with the _Fisher Information Matrix_ (FIM) which is constructed from (i) the sensitivities of the model predictions to the values of the model parameters, and (ii) the variance in the data. The sensitivities account for how much effect a changing the value of model parameters affects the model predictions that will be used for calibration. If the parameter values have little influence over those predictions, then we can't expect to have much confidence in estimate the parameter values based on tuning of those predictions. Likewise, if the dataset shows wide variation, then we'll expect to have less confidence from tuning the model to agree with the observed behaviours. A simple measure of overall confidence is provided by the determinant of the Fisher information matrix. (This is referred to as D-optimality in a common alphabetic classification of related optimality objectives). This determinant is a estimate of the size of a 95% confidence ellipsoid that corresponds to a level set of the cost surface (Figure XYZ). </p>
-[IMPLEMENT D-optimal design for simple model, e.g. Michaelis-Menton or Hill.]
+<!-- <p> We quantify the degree of confidence in the parameter estimate with the _Fisher Information Matrix_ (FIM) which is constructed from (i) the sensitivities of the model predictions to the values of the model parameters, and (ii) the variance in the data. The sensitivities account for how much effect a changing the value of model parameters affects the model predictions that will be used for calibration. If the parameter values have little influence over those predictions, then we can't expect to have much confidence in estimate the parameter values based on tuning of those predictions. Likewise, if the dataset shows wide variation, then we'll expect to have less confidence from tuning the model to agree with the observed behaviours. A simple measure of overall confidence is provided by the determinant of the Fisher information matrix. (This is referred to as D-optimality in a common alphabetic classification of related optimality objectives). This determinant is a estimate of the size of a 95% confidence ellipsoid that corresponds to a level set of the cost surface (Figure XYZ). </p> -->
+<!-- [IMPLEMENT D-optimal design for simple model, e.g. Michaelis-Menton or Hill.] -->
 
-### Optimal distribution of intracellular metabolic fluxes (Flux Balance Analysis)
+<!-- ### Optimal distribution of intracellular metabolic fluxes (Flux Balance Analysis) -->
 
-<p> We've been focusing on the use of iterative optimization algorithms to solve nonlinear optimization tasks. For some problems, such sophisticated (and computationally intensive) techniques are not need. One important class of such tasks is referred to as _linear programming_, in which we seek to find the optima of a linear objective function while in as search space that is bounded by linear constraints. An example:
- \begin{eqnarray*}
- \mbox{maximize} \ 3x_1 - 4x_2
- \mbox{subject to} \ 2x_1 + 5x_2 < 3 \ \mbox{and} \ -6x_1 + 4x_2 < -6
- \end{eqnarray*} </p>
-<p> There are iterative algorithms for solving such problems, that are guaranteed to reach the solution after a finite number of steps (in contrast to the global optimization algorithms discussed earlier). These algorithms, such as the simplex method, step from vertex to vertex within the valid solution space until they arrive at the desired extremum. [Fig XYZ] </p>
-[Implement solution to toy problem.]
+<!-- <p> We've been focusing on the use of iterative optimization algorithms to solve nonlinear optimization tasks. For some problems, such sophisticated (and computationally intensive) techniques are not need. One important class of such tasks is referred to as _linear programming_, in which we seek to find the optima of a linear objective function while in as search space that is bounded by linear constraints. An example: -->
+<!--  \begin{eqnarray*} -->
+<!--  \mbox{maximize} \ 3x_1 - 4x_2 -->
+<!--  \mbox{subject to} \ 2x_1 + 5x_2 < 3 \ \mbox{and} \ -6x_1 + 4x_2 < -6 -->
+<!--  \end{eqnarray*} </p> -->
+<!-- <p> There are iterative algorithms for solving such problems, that are guaranteed to reach the solution after a finite number of steps (in contrast to the global optimization algorithms discussed earlier). These algorithms, such as the simplex method, step from vertex to vertex within the valid solution space until they arrive at the desired extremum. [Fig XYZ] </p> -->
+<!-- [Implement solution to toy problem.] -->
 
-<p> Linear programming task arise regularly in planning, scheduling, and other management tasks. One biological context in which they occur is prediction of  the distribution of intracellular metabolic fluxes. Genomic analysis allows us to identify the suite of metabolic enzyme that can be expressed within a given cell, and thus identify the set of metabolic processes that may be active in that cell. If we think of these metabolic processes occurring in the context of balanced cell growth, we can safely assume that the net production rate of all metabolic intermediates is zero (i.e.~rate of production is balanced by rate of consumption). If we assign a label to the rate of each reaction (i.e.~the reaction flux) in an intracellular metabolic network, this balance condition imposes a set of linear constraints on the components of a flux vector. For example, consider an idealized cell with a simple metabolism as in figiure XYZ. The balance conditions at intermediate metabolites $s_1$, $s_2$, $s_3$, and $s_4$ gives rise to constraints:
- $v_1=v_3$, $v_2=v_4$, $v_3+v_4=v_5$, $v_5=v_6+v_7$. Next, consider the case in which the rates of uptake and secretion of (at least some) nutrients and products have been measured. In our case, suppose we have measured $v_1=1 uM/hr$, $v_2=3 um/hr$. .... Not surprisingly, these few measurements of fluxes outside the cell do not provide enough information to determine the values of all fluxes in the intracellular metabolic network. (This is described by saying that the system is _underdetermined_.) Nevertheless, there are cases in which we want to make such a prediction. To address such cases, the technique of Flux Balance Analysis imposes an assumption about the cell's internal flux allocation. The assumption is that the cell regulates the internal fluxes to maximize some objective. In the case of microbial cells, this is most commonly presumed to be growth rate. With this objective in place, expressed typically in terms of maximizing biomass: written as a linear combination of particular intracellular reactions, the task of predicting all intracellular fluxes becomes a linear programming task. </p>
- [implement example]
+<!-- <p> Linear programming task arise regularly in planning, scheduling, and other management tasks. One biological context in which they occur is prediction of  the distribution of intracellular metabolic fluxes. Genomic analysis allows us to identify the suite of metabolic enzyme that can be expressed within a given cell, and thus identify the set of metabolic processes that may be active in that cell. If we think of these metabolic processes occurring in the context of balanced cell growth, we can safely assume that the net production rate of all metabolic intermediates is zero (i.e.~rate of production is balanced by rate of consumption). If we assign a label to the rate of each reaction (i.e.~the reaction flux) in an intracellular metabolic network, this balance condition imposes a set of linear constraints on the components of a flux vector. For example, consider an idealized cell with a simple metabolism as in figiure XYZ. The balance conditions at intermediate metabolites $s_1$, $s_2$, $s_3$, and $s_4$ gives rise to constraints: -->
+<!--  $v_1=v_3$, $v_2=v_4$, $v_3+v_4=v_5$, $v_5=v_6+v_7$. Next, consider the case in which the rates of uptake and secretion of (at least some) nutrients and products have been measured. In our case, suppose we have measured $v_1=1 uM/hr$, $v_2=3 um/hr$. .... Not surprisingly, these few measurements of fluxes outside the cell do not provide enough information to determine the values of all fluxes in the intracellular metabolic network. (This is described by saying that the system is _underdetermined_.) Nevertheless, there are cases in which we want to make such a prediction. To address such cases, the technique of Flux Balance Analysis imposes an assumption about the cell's internal flux allocation. The assumption is that the cell regulates the internal fluxes to maximize some objective. In the case of microbial cells, this is most commonly presumed to be growth rate. With this objective in place, expressed typically in terms of maximizing biomass: written as a linear combination of particular intracellular reactions, the task of predicting all intracellular fluxes becomes a linear programming task. </p> -->
+<!--  [implement example] -->
 
 ## References
 
 Ashyraliyev, M., Fomekong‐Nanfack, Y., Kaandorp, J. A., & Blom, J. G. (2009). Systems biology: parameter estimation for biochemical models. The FEBS journal, 276(4), 886-902.
  
- Lenhart, Suzanne, and John T. Workman. Optimal control applied to biological models. CRC press, 2007.
- 
- Lin, Qun, Ryan Loxton, and Kok Lay Teo. "The control parameterization method for nonlinear optimal control: a survey." Journal of Industrial and management optimization 10.1 (2014): 275-309.
- 
+ <!-- Lenhart, Suzanne, and John T. Workman. Optimal control applied to biological models. CRC press, 2007. -->
+
+ <!-- Lin, Qun, Ryan Loxton, and Kok Lay Teo. "The control parameterization method for nonlinear optimal control: a survey." Journal of Industrial and management optimization 10.1 (2014): 275-309. -->
+
  Beaumont, Mark A. "Approximate bayesian computation." Annual review of statistics and its application 6 (2019): 379-403.
  
- Pukelsheim, Friedrich. Optimal design of experiments. Society for Industrial and Applied Mathematics, 2006.
+ Cho, Yong-Soon, and Hyeong-Seok Lim. "Comparison of various estimation methods for the parameters of Michaelis-Menten equation based on in vitro elimination kinetic simulation data." Translational and clinical pharmacology 26.1 (2018): 39-47.
+ 
+ Fairway, Julien, (2002) Practical Regression and Anova using R. https://cran.r-project.org/doc/contrib/Faraway-PRA.pdf
+ 
+ <!-- Pukelsheim, Friedrich. Optimal design of experiments. Society for Industrial and Applied Mathematics, 2006. -->
 
 
 
