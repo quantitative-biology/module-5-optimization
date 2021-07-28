@@ -88,108 +88,134 @@ where $\bar{x}$ and $\bar{y}$ are the averages
 
 <p> This formula is somewhat unwieldy, but is straightforward to implement. In R, the command ```lm``` implements this formula, as the following example illustrates. </p>
 
-To plot your dataset, use the __plot()__ command. In this example, we will use the cars dataset and plot a distance vs. speed graph. The code used will be __plot(cars)__. 
+We'll work with a dataset called __cars__ that is included in R. It's shown below (via the __plot()__ command).
+
 
 ```{r, echo = TRUE}
 plot(cars)
 ```
 
-By using the __lm()__ command with the two variables we get the intercept and the slope of the line. The code used will be __lm(dist~speed)__. 
+The __lm()__ command applies the formula described above to arrive at the line of best fit (i.e. the minimizer of the sum of squared errors.  We use teh command in the form  __lm(dist~speed)__, referring to the labels for the data (as shown above) to generate the parameters ($b$ and $m$) that specify the line $y=mx+b$. (The __attach__ command ensures that the data is accessible.)
 
 ```{r, echo = TRUE}
 attach(cars)
 lm(dist~speed)
 ```
 
-As shown above, the intercept is -17.579 and the slope of the line is 3.932. 
+The intercept is -17.579 and the slope is 3.932. 
 
-There are two ways to add the line of best fit to the plot. The first is using the command __abline(-17.579, 3.932)__, and the second method is to use __abline(lm(dist~speed))__. 
+We can plot the data together with the line of best fit with the __abline__ command: 
+<!-- or __abline(lm(dist~speed))__.  -->
 
 ```{r, echo = TRUE}
 attach(cars)
 plot(cars)
-abline(lm(dist~speed))
+abline(-17.579, 3.932)
 ```
 
 ### Nonlinear Regression
 
 <p> Nonlinear regression is the task of fitting a nonlinear model (e.g. a curve) to a dataset. The setup for this task is identical to linear regression. We begin by selecting a parameterized family of models (i.e. curves), and aim to identify the model (i.e. curve) that minimizes the sum of squared errors when compared to the data. The family of models can be chosen based on an understanding of the mechanism that relates the input and output data. For example, if we are investigating  the rate law for a single-substrate enzyme-catalysed reaction, we might choose the family of curves specified by Michaelis-Menten kinetics: 
 \begin{eqnarray*}
-y = \frac{V_{\mbox{\tiny max}} S}{K_M+S}
+V = \frac{V_{\mbox{max}} S}{K_M+S}
 \end{eqnarray*} 
-Our goal would then be to identify values for the parameters $V_{\mbox{\tiny max}}$ and $K_M$ that minimize the sum of squared errors when comparing with observed data. </p>
+Our goal would then be to identify values for the parameters $V_{\mbox{max}}$ and $K_M$ that minimize the sum of squared errors when comparing with observed data. </p>
 <p> __Regression via linearizing transformation__
 In several important cases, the nonlinear regression task can be transformed into a linear regression task. In the case of Michaelis-Menten kinetics, several linearizing transformations have been proposed (e.g. Eadie–Hofstee and Lineweaver–Burk [Cho and Lim, 2018]). Another example commonly encountered in Biology is fitting exponential curves (e.g. population growth or drug clearance).  In those cases, a logarithm modifies the data so that a linear trend is captured: e.g. $y = e^{rt}$, after applying a logarithm becomes $y^{trans} = \ln(y) = \ln (e^{rt})= rt$. Linear regression on transformed data $(t_i, y^{trans}_i)$ then provides an estimate of the value of $r$.  </p>
 
-<p> Unfortunately, linearizing transformations are only available in a handful of special cases. In general, the nonlinear regression task must be addressed directly. An example of the procedure in R follows:  
+<p> Unfortunately, linearizing transformations are only available in a handful of special cases. Moreover, they often introduce biases that can make interpretation of the resulting model difficult. 
 
-```{r}
-mm <- structure(list(S = c(3.6, 1.8, 0.9, 0.45, 0.225, 0.1125, 3.6, 
-                           1.8, 0.9, 0.45, 0.225, 0.1125, 3.6, 1.8, 0.9, 0.45, 0.225, 0.1125, 
-                           0), v = c(0.004407692, 0.004192308, 0.003553846, 0.002576923, 
-                                     0.001661538, 0.001064286, 0.004835714, 0.004671429, 0.0039, 0.002857143, 
+In general, the nonlinear regression task must be addressed directly. An example of the general procedure in R follows. We begin by defining a dataset against which we will fit a Michaelis-Menten curve. 
+
+```{r, echo = TRUE}
+MM_data <- structure(list(S = c(4.32, 2.16, 1.08, 0.54, 0.27, 0.135, 3.6, 
+                           1.8, 0.9, 0.45, 0.225, 0.1125, 2.88, 1.44, 0.72, 0.36, 0.18, 0.9, 
+                           0), v = c(0.004835714, 0.004192308, 0.003553846, 0.002576923, 
+                                     0.001661538, 0.001064286, 0.004407692, 0.004671429, 0.0039, 0.002857143, 
                                      0.00175, 0.001057143, 0.004907143, 0.004521429, 0.00375, 0.002764286, 
-                                     0.001857143, 0.001121429, 0)), .Names = c("S", "v"), class = "data.frame",
+                                     0.001857143, 0.001121429, 0)), .Names = c("S", "V"), class = "data.frame",
                 row.names = c(NA,-19L))
+plot(MM_data)
 ```
 
-The ```nls``` function takes as inputs the dataset and the model, as well as 'guesses' for the values of the parameters (in this case $V_{\mbox{\tiny max}}$ and $K_M$).
+Like the ```lm``` command, the ```nls``` function takes as inputs the dataset and the model. In addition, ```nls``` requires that the user provides 'guesses' for the values of the parameters to be estimated (in this case $V_{\mbox{max}}$ and $K_M$). In this case, we can roughly estimate $V_{\mbox{max}} \approx  0.005$ as the maximal $V$-value that can be achieved, and $K_M \approx 0.2$ as the $S$-value at which $V$ reaches half of its maximal value.
 
-```{r}
-model.nls <- nls(v ~ Vm * S/(K+S), data = mm, 
-                 start = list(K = max(mm$v)/2, Vm = max(mm$v)))
+```{r, echo = TRUE}
+model.nls <- nls(V ~ Vmax * S/(Km+S), data = MM_data, 
+                 start = list(Km = 0.3, Vmax = 0.005))
 summary(model.nls)
 ```
 
-Below is the plot of the original points and the fitted curve using nls().   
+This output from ```nls``` provides the parameter estimates that characterize the best-fit model ($K_M = 0.4772154$ and $V_{\mbox max} = 0.0053061$), as well as additional information about the confidence of this estimate (some of which will be discussed further below). We can now plot the best fit model along with the dataset:  
 
-```{r}
-params <- summary(model.nls)$coeff[,1]
-plot(mm)
+```{r, echo = TRUE}
+params <- summary(model.nls)$coeff[,1] #extracting the parameter estimates
+plot(MM_data)
 curve((params[2]*x)/(params[1]+x), from = 0, to = 4, add=TRUE, col='firebrick')
 ```
 </p>
-<p> From that demonstration, the reader might have the mistaken impression that nonlinear regression and linear regression are very similar tasks.  Although the problem set-up is similar (first chose family of curves, then minimize SSE), the optimization task is very different, and the solution procedures follow very different protocols. As we saw above, the solution to the linear regression task can be stated as a general formula. For nonlinear regression, no such formula exists. Worse, as we'll discuss in the next section there is no procedure (algorithm) that is guaranteed to find the solution! </p>
+<p> From the implementation of ```nls```, the reader might have the mistaken impression that nonlinear regression and linear regression are very similar tasks.  Although the problem set-up is similar (first chose family of curves, then minimize SSE), the optimization task is very different, and the solution procedures follow very different protocols. (The first hint of this is the need to provide ``guesses'' to ```nls```.) As we saw above, the solution to the linear regression task can be stated as a general formula. For nonlinear regression, no such formula exists. Worse, as we'll discuss in the next section there is no procedure (algorithm) that is guaranteed to find the solution! </p>
 
 ## Iterative Optimization Algorithms
 
-<p> The best techniques for addressing the general nonlinear regression task are iterative global optimization routines. As we'll cover below, these algorithms all follow a basic idea: we start with an initial 'guess' of what the solution (best-fit parameters) might be, and then take steps through the parameter space to improve the quality of the solution. In the exercise above, the ```nls``` command executed a particularly simple version of this kind of algorithm. That's why the ```nls``` requires that the user supply an 'initial guess'. This function also allows optional arguments that specify the number of steps (iterations) that the algorithm will take, and also the specific algorithm to be used (from a pre-specified set of choices). </p>
+<p> The best techniques for addressing the general nonlinear regression task are iterative global optimization routines. As we'll discuss below, these algorithms all follow a basic idea: we start with a 'guess' which established initial estimates for the parameter values and then take steps through parameter space to improve the quality of that estimate. In the exercise above, the ```nls``` command executed this kind of algorithm, which is why it requires that the user supply an 'initial guess'. </p>
 
 ### Gradient Descent
 
-<p> Perhaps the simplest iterative optimization algorithm is __gradient descent__, which can be understood intuitively in terms of finding your way to a valley bottom in a think fog. The fog obscures your vision so that you can only detect changes in elevation in your immediate vicinity. To make your way to the valley bottom, it would be reasonable to take each step of your journey in the direction of steepest decline. This strategy, illustrated in figure XYZ, is guaranteed to lead to a local minimum, but cannot guarantee arrival at the lowest point: the global minimum. </p>
-<p> Mathematically, the local change in elevation is determined by evaluating the objective at points nearby the 'current position', and then using those to determine the direction of steepest descent. (technically, this involves a linearization of the function at the current position, or equivalently a calculation of the 'gradient vector'.) A 'step' is then taken in the direction, and the process is repeated form this new 'current position'. Beyond that basic idea, a number of details have to be specified: how long should each step be? How many steps should be taken? Or should there be some other 'termination condition' that will trigger the end of the journey? (Each of these involve a tradeoff: often of precision vs. execution time. For instance, small steps guarantee a smooth path down the steepest route (as water would follow), but can take a very long time to complete the journey. Termination conditions are often specified in terms of the local topography: the algorithm stops when the 'current position' is at a sufficiently flat point (no downhill direction detected). </p>
+<p> A simple iterative optimization algorithm is __gradient descent__, which can be understood intuitively via a thought experiment. Imagine finding your way to a valley bottom in a think fog. The fog obscures your vision so that you can only detect changes in elevation in your immediate vicinity. To make your way to the valley bottom, it would be reasonable to take each step of your journey in the direction of steepest decline. This strategy is guaranteed to lead to a local minimum, but cannot guarantee arrival at the lowest point: the global minimum. That this, the search may lead to a local minimum at which there is no direction of local descent, and so the algorithm gets `stuck'.</p>
 
-```{r,echo=FALSE}
-library(numDeriv)
-grad.descent = function(f, x0, max.iter=200, step.size=0.05,
+<p> Mathematically, the local change in elevation is determined by evaluating the optimization objective at points nearby the current estimate, and then using those to determine the direction of steepest descent. (technically, this involves a linearization of the function at the current position, or equivalently a calculation of the _gradient vector_). A step is then taken in the direction, and the process is repeated from this updated estimate. To implement this algorithm, a number of details have to be specified: how long should each step be? How many steps should be taken? Or should there be some other 'termination condition' that will trigger the end of the journey? (Each of these decisions involve a trade-off, typically a trade-off of precision vs. computation time. For instance, taking very small steps will guarantee a smooth path down the steepest route, but might take a very long time to complete the journey. Termination conditions are often specified in terms of the local topography: the algorithm stops when the current estimate is at a sufficiently flat position (no downhill direction detected). </p>
+
+<p>To illustrate the gradient descent approach, consider the following algorithm, which incorporates two termination conditions: a maximum number of allowed iterations,and a threshold for shallowness: </p>
+
+```{r,echo=TRUE}
+library(numDeriv)       # contains functions for calculating gradient
+
+#define function that implement gradient descent. Inputs are the objective function f, the initial parameter estimate x0, the maximum number of iterations to be applied, the size of each step, and a threshold gradient below which the landscape is considered flat (and so iterations are terminated)
+grad.descent = function(f, x0, step.size=0.05, max.iter=200, 
                         stopping.deriv=0.01, ...) {
-  n = length(x0)
-  xmat = matrix(0,nrow=n,ncol=max.iter)
-  xmat[,1] = x0
+  n = length(x0)  # record the number of parameters to be estimated (i.e. the dimension of the parameter space)
+  xmat = matrix(0,nrow=n,ncol=max.iter) # initialize a matrix to record the sequence of estimates
+  xmat[,1] = x0   # the first row of matrxi xmat is the initial estimate 'guess'
   for (k in 2:max.iter) {
-    # Calculate the gradient
-    grad.cur = grad(f,xmat[,k-1],...)
-    # Should we stop?
-    if (all(abs(grad.cur) < stopping.deriv)) {
+     # Calculate the gradient (a vector indicating steepness and direct of greatest ascent)
+    grad.current = grad(f,xmat[,k-1],...)   
+    # Check termination condition: has a flat valley bottom been reached?
+    if (all(abs(grad.current) < stopping.deriv)) {
       k = k-1; break
       3
     }
-    # Move in the opposite direction of the grad
-    xmat[,k] = xmat[,k-1] - step.size * grad.cur
+    # Step in the opposite direction of the grad
+    xmat[,k] = xmat[,k-1] - step.size * grad.current
   }
-  xmat = xmat[,1:k] # Trim
+  xmat = xmat[,1:k] # Trim any unused columns from xmat
   return(list(x=xmat[,k], xmat=xmat, k=k))
 }
 ```
 
-First, let's work with a simple function with global minimum only.
+ <p>We'll begin by demonstrating the performance of this algorithm on a simple function with a single local minimum. </p>
 
 ```{r}
 simpleFun = function(x) {
   return(x[1]^2 + 1/3*x[2]^2)
 }
 ```
+
+```{r,echo=FALSE,message=FALSE}
+simpleFun = function(x,y) {
+  return(x^2 + 1/3*y^2)
+}
+x <- seq(-2, 2, length= 30)
+y <- x
+z <- outer(x, y, simpleFun)
+z[is.na(z)] <- 1
+
+require(lattice)
+wireframe(z, drape=T, expand = 0.5, col = "blue")
+
+```
+
+ <p>In this case, we expect that the minimum (valley bottom) will be reached from any initial 'guess'. Starting from four distinct points, the algorithm follows the paths shown below. </p>
 
 ```{r,echo=FALSE}
 x0 = c(-1.9,-1.9)
@@ -221,7 +247,7 @@ surface = function(f, from.x=0, to.x=1, from.y=0, to.y=1,
 }
 ```
 
-We start from different initial points and plot the iteration steps to see if they result in the same spot.
+
 
 ```{r,echo=FALSE}
 r = surface(simpleFun,from.x=-2,to.x=2,from.y=-2,to.y=2,xlab="",ylab="",zlab="")
@@ -258,15 +284,39 @@ points(points(trans3d(gd3$x[1],gd3$x[2],simpleFun(gd3$x),r),
               col="black",cex=2))
 ```
 
-It can be seen from the plot that the global minimum found are the same no matter where you start.   
+ <p>The global minimum was reached in every case. </p>
 
-Then let's take a look at a more complex function which has local minimum and global minimum.    
+
+ <p>Next, let's consider a  function that has multiple local minima. The second plot below is interactive, allowing you to rotate the surface.</p>   
 
 ```{r}
 complicatedFun = function(x) {
   return((1/2*x[1]^2-1/4*x[2]^2+3)*cos(2*x[1]+1-exp(x[2])))
 }
 ```
+```{r,echo=FALSE,message=FALSE}
+complicated = function(x,y) {
+  return((1/2*x^2-1/4*y^2+3)*cos(2*x+1-exp(y)))
+}
+x <- seq(-2, 2, length= 30)
+y <- x
+z <- outer(x, y, complicated)
+z[is.na(z)] <- 1
+
+require(lattice)
+wireframe(z, drape=T, expand = 0.5, col = "blue")
+```
+
+
+```{r,echo=FALSE,message=FALSE,warning=FALSE}
+library(MASS)
+library(plotly)
+fig <- plot_ly(x = x, y = y, z = z,color = "blue") %>% add_surface()
+
+fig
+```
+
+<p> Again, we'll apply gradient descent from a set of initial guess positions: </p>
 
 ```{r,echo=FALSE}
 x0 = c(0.5,0.5)
@@ -304,34 +354,10 @@ points(trans3d(gd1$xmat[1,],gd1$xmat[2,],apply(gd1$xmat,2,complicatedFun),r),
       col="orange")
 ```
 
-It can be seen that different starting points give different results. Choice of starting point matters, and it will not always give the optimal value (global minimum).  
+<p> Here we see that from some initial guess values, the algorithm successfully reaches the global minimuml from others, it gets stuck at a local minimum. </p>
 
-Below is the plot of the same function from a different perspective to better review the structure.
 
-```{r,echo=FALSE,message=FALSE}
-complicated = function(x,y) {
-  return((1/2*x^2-1/4*y^2+3)*cos(2*x+1-exp(y)))
-}
-x <- seq(-2, 2, length= 30)
-y <- x
-z <- outer(x, y, complicated)
-z[is.na(z)] <- 1
-
-require(lattice)
-wireframe(z, drape=T, expand = 0.5, col = "blue")
-```
-
-The interactive plot below allows you play around with the function.
-
-```{r,echo=FALSE,message=FALSE,warning=FALSE}
-library(MASS)
-library(plotly)
-fig <- plot_ly(x = x, y = y, z = z,color = "blue") %>% add_surface()
-
-fig
-```
-
-<p> The default optimization algorithm used by ```nls``` is the Gauss-Newton method, which is a generalization of Newton's method for solving nonlinear equations (which may be familiar from an introductory calculus). This is a refinement of gradient descent in which the local curvature of the function is used to project the position of the bottom of the local valley _assuming that the surface is shaped like a parabola._ On parabolic surfaces, this achieves descent to the bottom in one iteration. On non-parabolic surfaces (i.e.~most surfaces), the results is a sequence of iterations, but often many fewer than would be required using gradient descent. </p>
+<p> The default optimization algorithm used by ```nls``` is the Gauss-Newton method, which is a generalization of Newton's method for solving nonlinear equations (which may be familiar from introductory calculus). This is a refinement of gradient descent in which the local curvature of the function is used to project the position of the bottom of the local valley _assuming that the surface is shaped like a parabola._ On parabolic surfaces, this achieves descent to the bottom in one iteration. On non-parabolic surfaces (i.e.~most surfaces), the results is a sequence of iterations, but often many fewer than would be required using gradient descent. </p>
 <p> Both gradient descent and Gauss-Newton method are design to reach the bottom of the valley in which the initial guess lies. If that's a local minimum but not the global minimum, then the algorithm will not be successful.  So, how does one select a 'good' initial guess? Unfortunately, there's no general answer to this question. In many cases, one can use previous knowledge of the system under investigation to begin with a solid initial guess. (This is closely related to the choice of a prior distribution in Bayesian approaches.) If no such previous knowledge is available, sometimes a `guess' is all we have. In those cases, we may have little confidence that the algorithm will arrive at a global minimum. The simplest way to gain some confidence of achieving a global minimum is the multi-start strategy: choose many initial guesses, and run the algorithm from each. This can be computationally expensive, but if the same minimum is reached from initial spread widely over the parameters space, one begins to gain confidence that this is the true global minimum. </p>
 <p> A number of methods have been developed to complement the multi-start approach. These are known as __global optimization routines__. They are also known as _heuristic methods_, because their performance cannot be guaranteed in general: there are no guarantees that they'll find the global minimum, nor are there solid estimates of how many iterations will be required for them to carry out a satisfactory search of the parameter space. We will consider two commonly used methods: simulated annealing and genetic algorithms. </p>
 
