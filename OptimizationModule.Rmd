@@ -112,7 +112,7 @@ mm <- structure(list(S = c(3.6, 1.8, 0.9, 0.45, 0.225, 0.1125, 3.6,
                 row.names = c(NA,-19L))
 ```
 
-We need to provide the starting values $V_m$ and $K$. $V_m$ is the maximum value, the asymoptote of the curve. The value of $K_m$ is equal to $S$ when $V_m$ is half-way ($\frac12 V_m$).
+The ```nls``` function takes as inputs the dataset and the model, as well as 'guesses' for the values of the parameters (in this case $V_{\mbox{\tiny max}}$ and $K_M$).
 
 ```{r}
 model.nls <- nls(v ~ Vm * S/(K+S), data = mm, 
@@ -128,7 +128,7 @@ plot(mm)
 curve((params[2]*x)/(params[1]+x), from = 0, to = 4, add=TRUE, col='firebrick')
 ```
 </p>
-<p> From that exercise, the reader might have the impression that nonlinear regression and linear regression are very similar exercises. That would be a false impression. Although the problem set-up is similar (chose family of curves, minimize SSE), the optimization task is different, and it's 'solution' follow a very different protocol. As we saw above, the solution to the linear regression task can be stated as a general formula. For nonlinear regression, no such formula exists. Worse, there is no procedure (algorithm) that is guaranteed to find the solution! </p>
+<p> From that demonstration, the reader might have the mistaken impression that nonlinear regression and linear regression are very similar tasks.  Although the problem set-up is similar (first chose family of curves, then minimize SSE), the optimization task is very different, and the solution procedures follow very different protocols. As we saw above, the solution to the linear regression task can be stated as a general formula. For nonlinear regression, no such formula exists. Worse, as we'll discuss in the next section there is no procedure (algorithm) that is guaranteed to find the solution! </p>
 
 ## Iterative Optimization Algorithms
 
