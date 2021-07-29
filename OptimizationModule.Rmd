@@ -98,8 +98,8 @@ plot(cars)
 The __lm()__ command applies the formula described above to arrive at the line of best fit (i.e. the minimizer of the sum of squared errors.  We use teh command in the form  __lm(dist~speed)__, referring to the labels for the data (as shown above) to generate the parameters ($b$ and $m$) that specify the line $y=mx+b$. (The __attach__ command ensures that the data is accessible.)
 
 ```{r, echo = TRUE}
-attach(cars)
-lm(dist~speed)
+#attach(cars)
+#lm(dist~speed)
 ```
 
 The intercept is -17.579 and the slope is 3.932. 
@@ -108,9 +108,9 @@ We can plot the data together with the line of best fit with the __abline__ comm
 <!-- or __abline(lm(dist~speed))__.  -->
 
 ```{r, echo = TRUE}
-attach(cars)
-plot(cars)
-abline(-17.579, 3.932)
+#attach(cars)
+#plot(cars)
+#abline(-17.579, 3.932)
 ```
 
 ### Nonlinear Regression
@@ -586,17 +586,17 @@ Here $x_1$ is the size of the prey population; $x_2$ is the size of the predator
 
 ```{r,echo=FALSE}
 library(ggplot2)
-data("cars")
+#data("cars")
 ```
 
 ```{r,echo=FALSE}
-cars.lm <- lm(dist ~ speed, data = cars)
+#cars.lm <- lm(dist ~ speed, data = cars)
 ```
 
 ```{r,echo=FALSE}
-new.dat <- seq(min(cars$speed),max(cars$speed),by = 0.05)
-pred_interval <- predict(cars.lm, newdata = data.frame(speed=new.dat), 
-                         interval = 'prediction',level = 0.95)
+#new.dat <- seq(min(cars$speed),max(cars$speed),by = 0.05)
+#pred_interval <- predict(cars.lm, newdata = data.frame(speed=new.dat), 
+#                         interval = 'prediction',level = 0.95)
 ```
 
 The plot below shows 95\% confidence intervals on the model predictions. 
