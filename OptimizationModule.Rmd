@@ -92,14 +92,14 @@ We'll work with a dataset called __cars__ that is included in R. It's shown belo
 
 
 ```{r, echo = TRUE}
-plot(cars)
+#plot(cars)
 ```
 
 The __lm()__ command applies the formula described above to arrive at the line of best fit (i.e. the minimizer of the sum of squared errors.  We use teh command in the form  __lm(dist~speed)__, referring to the labels for the data (as shown above) to generate the parameters ($b$ and $m$) that specify the line $y=mx+b$. (The __attach__ command ensures that the data is accessible.)
 
 ```{r, echo = TRUE}
-attach(cars)
-lm(dist~speed)
+#attach(cars)
+#lm(dist~speed)
 ```
 
 The intercept is -17.579 and the slope is 3.932. 
@@ -109,9 +109,9 @@ We can plot the data together with the line of best fit with the __abline__ comm
 
 
 ```{r, echo = TRUE}
-attach(cars)
-plot(cars)
-abline(-17.579, 3.932)
+#attach(cars)
+#plot(cars)
+#abline(-17.579, 3.932)
 ```
 
 ### Nonlinear Regression
@@ -144,7 +144,7 @@ V <- c(0.004835714, 0.004192308, 0.003553846, 0.002576923,
                                      0.001661538, 0.001064286, 0.004407692, 0.004671429, 0.0039, 0.002857143, 
                                      0.00175, 0.001057143, 0.004907143, 0.004521429, 0.00375, 0.002764286, 
                                      0.001857143, 0.001121429, 0)
-MMdata=cbind(S,V)
+MM_data=cbind(S,V)
 plot(MM_data)
 ```
 
@@ -586,44 +586,44 @@ Here $x_1$ is the size of the prey population; $x_2$ is the size of the predator
 
 ```{r,echo=FALSE}
 library(ggplot2)
-data("cars")
+#data("cars")
 ```
 
 ```{r,echo=FALSE}
-cars.lm <- lm(dist ~ speed, data = cars)
+#cars.lm <- lm(dist ~ speed, data = cars)
 ```
 
 ```{r,echo=FALSE}
-new.dat <- seq(min(cars$speed),max(cars$speed),by = 0.05)
-pred_interval <- predict(cars.lm, newdata = data.frame(speed=new.dat), 
-                         interval = 'prediction',level = 0.95)
+#new.dat <- seq(min(cars$speed),max(cars$speed),by = 0.05)
+#pred_interval <- predict(cars.lm, newdata = data.frame(speed=new.dat), 
+#                         interval = 'prediction',level = 0.95)
 ```
 
 The plot below shows 95\% confidence intervals on the model predictions. 
 
 ```{r,echo=FALSE}
-plot(cars$speed,cars$dist,xlab="speed", ylab="dist", main="Regression",pch=16)
-abline(cars.lm,col="firebrick",lwd=2)
-lines(new.dat, pred_interval[,2], col="steelblue", lty=2,lwd=2)
-lines(new.dat, pred_interval[,3], col="steelblue", lty=2,lwd=2)
-legend(4, 105, legend=c("Best-fitted Line", "Prediction interval"),
-       col=c("firebrick", "steelblue"), lty=1:2, cex=0.8)
+#plot(cars$speed,cars$dist,xlab="speed", ylab="dist", #main="Regression",pch=16)
+#abline(cars.lm,col="firebrick",lwd=2)
+#lines(new.dat, pred_interval[,2], col="steelblue", lty=2,lwd=2)
+#lines(new.dat, pred_interval[,3], col="steelblue", lty=2,lwd=2)
+#legend(4, 105, legend=c("Best-fitted Line", "Prediction interval"),
+#       col=c("firebrick", "steelblue"), lty=1:2, cex=0.8)
 ```
 
 The confint() function finds 95\% confidence intervals on the estimates (best fit line slope and intercept).
 
 ```{r}
-confint(cars.lm)
+#confint(cars.lm)
 ```
 
 This can also be derived using the confidence interval formula: $\text{estimate}\pm \text{critical value}\times\text{standard error}$
 
 ```{r}
-lm_summ <- summary(cars.lm)
-c("lower" = lm_summ$coef[2,1] - qt(0.975, df = lm_summ$df[2]) * lm_summ$coef[2, 2],
-  "upper" = lm_summ$coef[2,1] + qt(0.975, df = lm_summ$df[2]) * lm_summ$coef[2, 2])
-c("lower" = lm_summ$coef[1,1] - qt(0.975, df = lm_summ$df[2]) * lm_summ$coef[1, 2],
-  "upper" = lm_summ$coef[1,1] + qt(0.975, df = lm_summ$df[2]) * lm_summ$coef[1, 2])
+#lm_summ <- summary(cars.lm)
+#c("lower" = lm_summ$coef[2,1] - qt(0.975, df = lm_summ$df[2]) * #lm_summ$coef[2, 2],
+#  "upper" = lm_summ$coef[2,1] + qt(0.975, df = lm_summ$df[2]) * #lm_summ$coef[2, 2])
+#c("lower" = lm_summ$coef[1,1] - qt(0.975, df = lm_summ$df[2]) * #lm_summ$coef[1, 2],
+#  "upper" = lm_summ$coef[1,1] + qt(0.975, df = lm_summ$df[2]) * #lm_summ$coef[1, 2])
 ```
 
 <p> For nonlinear regression (including calibration of dynamic models), the theory is less helpful, but estimates of uncertainty intervals can be achieved (as discussed below in the section on optimal experimental design). </p>
@@ -647,10 +647,13 @@ c("lower" = lm_summ$coef[1,1] - qt(0.975, df = lm_summ$df[2]) * lm_summ$coef[1, 
 For the Michaelis-Menten example, the estimated values for $K$ and $V_m$ are 0.4398016 and 0.0054252 respectively. Now we simulate numbers for $K$ and $V_m$, and accept the value if the distances between the simulated values and the true values are under the threshold.
 
 ```{r}
-# select numbers for S that match the range for the original dataset
-S = seq(0,5,0.2)
-# calculate true values for v with estimated parameters
-v = 0.0054252*S/(0.4398016+S)
+# use the original dataset
+S = c(3.6, 1.8, 0.9, 0.45, 0.225, 0.1125, 3.6, 1.8, 0.9, 0.45, 0.225, 0.1125, 
+      3.6, 1.8, 0.9, 0.45, 0.225, 0.1125, 0)
+v = c(0.004407692, 0.004192308, 0.003553846, 0.002576923, 0.001661538, 
+      0.001064286, 0.004835714, 0.004671429, 0.0039, 0.002857143,
+      0.00175, 0.001057143, 0.004907143, 0.004521429, 0.00375, 0.002764286,
+      0.001857143, 0.001121429, 0)
 
 # functions to randomly draw values for K and Vm
 draw_K <- function () {
@@ -703,8 +706,8 @@ Here we randomly sample $K$ and $V_m$ 200000 times, it can be seen from the hist
 ```{r}
 # set seed
 set.seed(132)
-# simulate 200000 times with a threshold of 0.0005
-sampled_parameter_values_squared_distances = sample_by_rejection(v, 200000, 0.0005, accept_or_reject_with_squared_distance)
+# simulate 200000 times with a threshold of 0.001
+sampled_parameter_values_squared_distances = sample_by_rejection(v, 200000, 0.001, accept_or_reject_with_squared_distance)
 
 # number of accepted values among 200000 simulations
 sum(sampled_parameter_values_squared_distances$accepted_or_rejected)
@@ -712,14 +715,14 @@ sum(sampled_parameter_values_squared_distances$accepted_or_rejected)
 ```{r}
 c1 <- rgb(173,216,230,max = 255, alpha = 80, names = "lt.blue")
 c2 <- rgb(255,192,203, max = 255, alpha = 80, names = "lt.pink")
-prior1 <- hist(sampled_parameter_values_squared_distances[1:1200,3],col = c1,
+prior1 <- hist(sampled_parameter_values_squared_distances[1:3000,3],col = c1,
                xlab = "K", main="Prior Versus Posterior Distribution for K") 
 post1 <- hist(sampled_parameter_values_squared_distances[which(sampled_parameter_values_squared_distances$accepted_or_rejected==1),3], col=c2, xlab = "K", add=TRUE)
 abline(v=0.005425,col="firebrick",lwd=2)
 legend("bottomright",legend=c("Prior Distribution for K", "Posterior Distribution for K"),
        inset=.02, fill=c(c1,c2), cex=0.8)
 
-prior2 = hist(sampled_parameter_values_squared_distances[1:1200,2],col = c1,
+prior2 = hist(sampled_parameter_values_squared_distances[1:2500,2],col = c1,
               xlab = "Vm", main="Prior Distribution for Vm") 
 post2 = hist(sampled_parameter_values_squared_distances[which(sampled_parameter_values_squared_distances$accepted_or_rejected==1),2],col = c2, xlab = "Vm", add=TRUE)
 abline(v=0.439802,col="firebrick",lwd=2)
@@ -731,19 +734,6 @@ legend("bottomright",legend=c("Prior Distribution for Vm", "Posterior Distributi
 
 ```{r,message=FALSE,warning=FALSE}
 library(EasyABC)
-mm <- structure(list(S = c(3.6, 1.8, 0.9, 0.45, 0.225, 0.1125, 3.6, 
-                           1.8, 0.9, 0.45, 0.225, 0.1125, 3.6, 1.8, 0.9, 0.45, 0.225, 0.1125, 
-                           0), v = c(0.004407692, 0.004192308, 0.003553846, 0.002576923, 
-                                     0.001661538, 0.001064286, 0.004835714, 0.004671429, 0.0039,
-                                     0.002857143, 0.00175, 0.001057143, 0.004907143, 0.004521429,
-                                     0.00375, 0.002764286, 0.001857143, 0.001121429, 0)), 
-                .Names = c("S", "v"), class = "data.frame", row.names = c(NA,-19L))
-
-# target dataset
-summary_data=c(0.004407692, 0.004192308, 0.003553846, 0.002576923, 
-              0.001661538, 0.001064286, 0.004835714, 0.004671429, 0.0039,
-              0.002857143,0.00175, 0.001057143, 0.004907143, 0.004521429,
-              0.00375, 0.002764286,0.001857143, 0.001121429, 0)
 ```
 
 ```{r}
@@ -754,7 +744,7 @@ set.seed(123)
 mm_model <- function(par) {
   Vm <- par[1]
   K <- par[2]
-  S <- mm$S
+  S <- S
   samples <- S*Vm/(S+K)
   return(samples)
 }
@@ -769,11 +759,11 @@ mm_prior = list(c("unif",0,0.01),c("unif",0,1))
 ```{r}
 # use ABC_sequential() to obtain a rough posterior distribution of parameter values
 ABC_sequential <- ABC_sequential(method="Beaumont", model=mm_model,prior=mm_prior, 
-                                 nb_simul=10000, summary_stat_target=summary_data,
+                                 nb_simul=20000, summary_stat_target=v,
                                  tolerance_tab=tolerance)
 ```
 
-After 100000 simulations, it can be seen from the histograms that the most frequent values are close to the estimated values derived from the non linear regression model.
+After 20000 simulations, it can be seen from the histograms that the most frequent values are close to the estimated values derived from the non linear regression model.
 
 ```{r}
 c1 <- rgb(173,216,230,max = 255, alpha = 80, names = "lt.blue")
@@ -782,12 +772,14 @@ c2 <- rgb(255,192,203, max = 255, alpha = 80, names = "lt.pink")
 hist(runif(15000,0,0.01),main="Prior Versus Posterior Distribution for K",
      col = c1,xlab = "K")
 hist(ABC_sequential$param[5000:10000,1],col = c2, add=TRUE)
+abline(v=0.005425,col="firebrick",lwd=2)
 legend("topleft",legend=c("Prior Distribution for K", "Posterior Distribution for K"),
        inset=.02, fill=c(c1,c2), cex=0.8)
 
 hist(runif(10000,0,1),main="Prior Versus Posterior Distribution for Vm",
      col = c1,xlab = "K")
 hist(ABC_sequential$param[5000:10000,2],col = c2, add=TRUE)
+abline(v=0.439802,col="firebrick",lwd=2)
 legend("topleft",legend=c("Prior Distribution for Vm", "Posterior Distribution for Vm"),
        inset=.02, fill=c(c1,c2), cex=0.8)
 ```
