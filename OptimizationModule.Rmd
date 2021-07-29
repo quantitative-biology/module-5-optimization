@@ -92,7 +92,7 @@ We'll work with a dataset called __cars__ that is included in R. It's shown belo
 
 
 ```{r, echo = TRUE}
-plot(cars)
+#plot(cars)
 ```
 
 The __lm()__ command applies the formula described above to arrive at the line of best fit (i.e. the minimizer of the sum of squared errors.  We use teh command in the form  __lm(dist~speed)__, referring to the labels for the data (as shown above) to generate the parameters ($b$ and $m$) that specify the line $y=mx+b$. (The __attach__ command ensures that the data is accessible.)
@@ -602,28 +602,28 @@ library(ggplot2)
 The plot below shows 95\% confidence intervals on the model predictions. 
 
 ```{r,echo=FALSE}
-plot(cars$speed,cars$dist,xlab="speed", ylab="dist", main="Regression",pch=16)
-abline(cars.lm,col="firebrick",lwd=2)
-lines(new.dat, pred_interval[,2], col="steelblue", lty=2,lwd=2)
-lines(new.dat, pred_interval[,3], col="steelblue", lty=2,lwd=2)
-legend(4, 105, legend=c("Best-fitted Line", "Prediction interval"),
-       col=c("firebrick", "steelblue"), lty=1:2, cex=0.8)
+#plot(cars$speed,cars$dist,xlab="speed", ylab="dist", #main="Regression",pch=16)
+#abline(cars.lm,col="firebrick",lwd=2)
+#lines(new.dat, pred_interval[,2], col="steelblue", lty=2,lwd=2)
+#lines(new.dat, pred_interval[,3], col="steelblue", lty=2,lwd=2)
+#legend(4, 105, legend=c("Best-fitted Line", "Prediction interval"),
+#       col=c("firebrick", "steelblue"), lty=1:2, cex=0.8)
 ```
 
 The confint() function finds 95\% confidence intervals on the estimates (best fit line slope and intercept).
 
 ```{r}
-confint(cars.lm)
+#confint(cars.lm)
 ```
 
 This can also be derived using the confidence interval formula: $\text{estimate}\pm \text{critical value}\times\text{standard error}$
 
 ```{r}
-lm_summ <- summary(cars.lm)
-c("lower" = lm_summ$coef[2,1] - qt(0.975, df = lm_summ$df[2]) * lm_summ$coef[2, 2],
-  "upper" = lm_summ$coef[2,1] + qt(0.975, df = lm_summ$df[2]) * lm_summ$coef[2, 2])
-c("lower" = lm_summ$coef[1,1] - qt(0.975, df = lm_summ$df[2]) * lm_summ$coef[1, 2],
-  "upper" = lm_summ$coef[1,1] + qt(0.975, df = lm_summ$df[2]) * lm_summ$coef[1, 2])
+#lm_summ <- summary(cars.lm)
+#c("lower" = lm_summ$coef[2,1] - qt(0.975, df = lm_summ$df[2]) * #lm_summ$coef[2, 2],
+#  "upper" = lm_summ$coef[2,1] + qt(0.975, df = lm_summ$df[2]) * #lm_summ$coef[2, 2])
+#c("lower" = lm_summ$coef[1,1] - qt(0.975, df = lm_summ$df[2]) * #lm_summ$coef[1, 2],
+#  "upper" = lm_summ$coef[1,1] + qt(0.975, df = lm_summ$df[2]) * #lm_summ$coef[1, 2])
 ```
 
 <p> For nonlinear regression (including calibration of dynamic models), the theory is less helpful, but estimates of uncertainty intervals can be achieved (as discussed below in the section on optimal experimental design). </p>
