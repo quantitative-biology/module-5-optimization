@@ -193,6 +193,7 @@ grad.descent = function(f, x0, step.size=0.05, max.iter=200,
 }
 ```
 
+####Example 1
  <p>We'll begin by demonstrating the performance of this algorithm on a simple function with a single local minimum. </p>
 
 ```{r}
@@ -203,7 +204,7 @@ simpleFun = function(x) {
 
 ```{r,echo=FALSE,message=FALSE}
 simpleFun = function(x) {
-  return(x[0]^2 + 1/3*x[1]^2)
+  return(x[1]^2 + 1/3*x[2]^2)
 }
 
 simpleplotFun = function(x,y) {
@@ -215,7 +216,7 @@ z <- outer(x, y, simpleplotFun)
 z[is.na(z)] <- 1
 
 require(lattice)
-wireframe(z, drape=T, expand = 0.5, col = "blue")
+wireframe(z, drape=T, expand = 0.5, col = "blue", xlab=NULL, ylab=NULL, zlab=NULL)
 
 ```
 
@@ -290,6 +291,7 @@ points(points(trans3d(gd3$x[1],gd3$x[2],simpleFun(gd3$x),r),
 
  <p>The global minimum was reached in every case. </p>
 
+####Example 2
 
  <p>Next, let's consider a  function that has multiple local minima. The second plot below is interactive, allowing you to rotate the surface.</p>   
 
@@ -369,9 +371,23 @@ points(trans3d(gd1$xmat[1,],gd1$xmat[2,],apply(gd1$xmat,2,complicatedFun),r),
 
 #### Simulated Annealing
 
-<p> __Simulated annealing__ is motivated by the process of annealing: a heat treatment by which the physical properties of metals can be altered. This is an iterative algorithm; as in gradient descent, the algorithm starts at an initial guess, and then steps from point to point in the search space. However, there is a random element to the process followed by simulated annealing: that means that the path followed from a particular initial condition won't be repeated if the algorithm is run again from the same point. (Algorithms that incorporate randomness are often referred to as _Monte Carlo_ methods, after the European gambling centre.)  At each step, the algorithm begins by identify a candidate next position. (This point could be selected by a variant of the gradient descent step, or some other method).  The value of the objective at this candidate point is then compared with the objective value at the current point. If the objective is lower at the new point (i.e.~this step takes the algorithm downhill), then the step is taken and a new iteration begins. If the value of the objective is larger at the candidate (i.e.~the step makes things _worse_), the step can still be taken, but only with a small probability. Both the size of the candidate steps and the probability of accepting 'wrong' (uphill) steps are tied to a __cooling schedule__: a decreasing `temperature' profile: at high temperatures, large steps are considered and 'wrong' steps are taken frequently; as the temperature drops, only smaller steps are considered, and fewer 'wrong' steps are allowed. (By analogy, imagine a ping-pong ball resting on a table into which has been carved a rolling landscape. One strategy to move the ball to the lowest valley bottom is to shake the table to jostle it about. Mirroring simulated annealing, we would begin by applying violent shakes (high temperature) which would result in the ball bouncing across much of the table. By slowly reducing the severity of the shaking, the ball would settle into a local minimum at a valley bottom. The hope is that if the cooling schedule is well-chosen, the ball would have sampled many valleys, and would end up at the bottom of the lowest. Simulated annealing is often combined with a multi-start strategy to further ensure wise sampling of the search space. </p>
+<p> __Simulated annealing__ is motivated by the process of annealing: a heat treatment by which the physical properties of metals can be altered. Simulated annealing is an iterative algorithm; the algorithm starts at an initial guess, and then steps through the search space. In contrast with gradient descent, there is a random element to the process followed by simulated annealing. Consequently, the path followed from a particular initial condition won't be repeated if the algorithm is run again from the same point. (Algorithms that incorporate randomness are often referred to as _Monte Carlo_ methods, in reference to the European gambling centre.)  At each step, the algorithm begins by identify a candidate next position. (This point could be selected by a variant of gradient descent, or some other method).  The value of the objective at this candidate point is then compared with the objective value at the current point. If the objective is lower at the new point (i.e. this step takes the algorithm downhill), then the step is taken and a new iteration begins. If the value of the objective is larger at the candidate (i.e. the step makes things _worse_), the step can still be taken, but only with a small probability. Both the size of the candidate steps and the probability of accepting 'wrong' (uphill) steps are tied to a __cooling schedule__: a decreasing `temperature' profile: at high temperatures, large steps are considered and 'wrong' steps are taken frequently; as the temperature drops, only smaller steps are considered, and fewer 'wrong' steps are allowed. By analogy, imagine a ping-pong ball resting on a curved landscape. One strategy to move the ball to the lowest valley bottom is to shake the table. Mirroring simulated annealing, we could begin by applying violent shakes (high temperature) which would result in the ball bouncing across much of the landscape. By slowly reducing the severity of the shaking, the ball would settle into a local minimum at a valley bottom. The hope is that if the cooling schedule is well-chosen, the ball would have sampled many valleys, and would end up at the bottom of the lowest valley. Simulated annealing is often combined with a multi-start strategy to further ensure broad sampling of the search space. </p>
 
-Let's first solve the complicated function above using simulated annealing using the same initial points as above.
+<p> To illustrate, we'll apply simulated annealing to the optimization task in Example 2 above, using the same initial guess points. We'll use the ```GenSA``` library to implement the algorithm (add link https://cran.r-project.org/web/packages/GenSA/GenSA.pdf). Calls to ```GenSA``` requires that we specify the objective function, an initial guess, and upper and lower bounds for the search values for each parameter. (Optional input parameters allow the user to modify internal features of the algorithm such as the cooling schedule and stepping protocol.)
+
+```{r,echo=TRUE}
+library(GenSA)
+
+#dimension <- 2
+#global.min <- 0
+#tol <- 1e-13
+lower <- rep(-2, dimension)
+upper <- rep(2, dimension)
+
+out0 <- GenSA(par = x0, lower = lower, upper = upper,fn = complicatedFun)
+out0[c("value","par","counts")]
+```
+
 
 ```{r,message=FALSE}
 library(GenSA)
@@ -486,7 +502,7 @@ We next consider a heuristic algorithm in which multiple paths through the searc
 
 #### Genetic Algorithms
 
-<p> __Genetic algorithms__ are inspired by Darwinian evolution. The algorithm begins with the specification of a population of initial guess points. At each iteration of the algorithm, this population 'evolves' toward improved estimates of the global minimum. This 'evolution' step involves three substeps: selection, mutation, and cross-over. In the selection step, the population is pruned by removing a fraction that are not sufficiently fit (where fitness corresponds to the value of the objective function being minimized). Then, mutations are introduced into the remaining population by introducing small random perturbations to their position in the search space. Finally, a new generation is generated by crossing members of the current population; this can be done in several ways, the simplest is to generate crosses as averages of the numerical values of the two 'parents'. The expectation is that, through several generations, this process will lead to a population with high fitness (minimal objective) that has thoroughly explored the search space (and may consist of subpopulations at  local minima as well as representatives at the global minimum. Genetic algorithms are a subest of the more general class of _evolutionary algorithms_ all of which involve simultaneous 'exploration' of the search space through multiple paths.  
+<p> __Genetic algorithms__ are inspired by Darwinian evolution. The algorithm begins with the specification of a population of initial guesses. At each iteration of the algorithm, this population 'evolves' toward improved estimates of the global minimum. This 'evolution' step involves three substeps: selection, mutation, and cross-over. In the selection step, the population is pruned by removing a fraction that are not sufficiently fit (where fitness corresponds to the value of the objective function being minimized). Then, mutations are introduced into the remaining population by adding small random perturbations to their position in the search space. Finally, a new generation is generated by crossing members of the current population. This can be done in several ways; the simplest is to generate crosses as averages of the numerical values of the two 'parents'. The hope is that, through several generations, this process will lead to a population with high fitness (minimal objective) after a thorough exploration of the search space. Genetic algorithms are a subset of the more general class of _evolutionary algorithms_ all of which involve simultaneous 'exploration' of the search space through multiple paths.  
 
 ```{r,echo=FALSE,message=FALSE}
 library(GA)
@@ -624,9 +640,9 @@ c("lower" = lm_summ$coef[1,1] - qt(0.975, df = lm_summ$df[2]) * lm_summ$coef[1, 
   "upper" = lm_summ$coef[1,1] + qt(0.975, df = lm_summ$df[2]) * lm_summ$coef[1, 2])
 ```
 
-<p> An alternative approach to the regression task combines calibration and uncertainty in a single process: Bayesian methods. The basic idea behind Bayesian analysis (founded on Bayes Theorem, which may be familiar from elementary probability), is to start with an initial parameter estimate (analogous to the initial guess needed in nonlinear regression) and then use the available data to refine that estimate. The difference is that instead of the initial guess and refined estimate being single numerical values, they are _distributions_. In Bayesian terminology, we being with a _prior_ distribution, which may be informed by expert knowledge (e.g.~a normal distribution centered at a good initial guess), or may be a wilde guess (e.g.~a uniform distribution over a wide range of possible values). Application of a Bayesian calibration scheme uses the available data to generate an improved description of the parameter value distributions, called the _posterior_ distribution. A successful Bayesian calibration could take a `wild guess' uniform prior and return a tightly-centered posterior, as in figure XYZ. Uncertainty can then be gleaned directly from the posterior, by reporting, e.g.~ a 95% confidence interval. One commonly cited concern with Bayesian techniques is the dependence of the result on the rather subjective selection of a prior. This is analogous to concerns about any bias introduced by choice of initial guess in the non-Bayesian (maximum likelihood-based) regression analysis described above. In both cases, multi-start techniques can be used to address this issue. </p>
+<p> __Bayesian methods__ address the regression task by combining calibration and uncertainty in a single process. The basic idea behind Bayesian analysis (founded on Bayes Theorem, which may be familiar from elementary probability), is to start with an initial parameter estimate (analogous to the initial guess needed in nonlinear regression) and then use the available data to refine that estimate. The difference is that instead of the initial guess and refined estimate being single numerical values, they are _distributions_. In Bayesian terminology, we being with a _prior_ distribution, which may be informed by expert knowledge (e.g.~a normal distribution centered at a good initial estimate), or may be a wild guess (e.g.~a uniform distribution over a wide range of possible values). Application of a Bayesian calibration scheme uses the available data to generate an improved distribution of the parameter values, called the  _posterior_ distribution. A successful Bayesian calibration could take a `wild guess' uniform prior and return a tightly-centered posterior. Uncertainty can then be gleaned directly from the posterior, by reporting, e.g.~ a 95% confidence interval. One commonly cited concern with Bayesian techniques is the dependence of the result on the rather subjective selection of a prior. This is analogous to concerns about any bias introduced by choice of initial guess in the non-Bayesian analysis described above. In both cases, multi-start techniques can be used to address this issue. </p>
 
-<p> Here we'll consider a simple numerical implementation of a Bayesian approach: approximate Bayesian computation. This approach is based on a simple idea: the _rejection method_, in which we sample repeatedly from the prior distribution and reject all samples that do not satisfy a pre-specified tolerance for quality of fit. (This is reminiscent of the selection step in genetic algorithms: culling unfit members of a population.) </p>
+<p> Here we'll consider a simple numerical implementation of a Bayesian approach: Approximate Bayesian Computation (ABC). This approach is based on a simple idea: the _rejection method_, in which we sample repeatedly from the prior distribution and reject all samples that do not satisfy a pre-specified tolerance for quality of fit. (This is reminiscent of the selection step in genetic algorithms: culling unfit members of a population.) </p>
 
 For the Michaelis-Menten example, the estimated values for $K$ and $V_m$ are 0.4398016 and 0.0054252 respectively. Now we simulate numbers for $K$ and $V_m$, and accept the value if the distances between the simulated values and the true values are under the threshold.
 
