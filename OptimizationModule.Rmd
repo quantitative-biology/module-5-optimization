@@ -262,7 +262,17 @@ surface = function(f, from.x=0, to.x=1, from.y=0, to.y=1,
 }
 ```
 
+<p> Below is a table showing the x values and the objective value derived by gradient descent starting from those four points. We could see the results are pretty close to each other. </p>
 
+```{r}
+x0_out <- c(gd$x, simpleFun(gd$x))
+x1_out <- c(gd1$x, simpleFun(gd1$x))
+x2_out <- c(gd2$x, simpleFun(gd2$x))
+x3_out <- c(gd3$x, simpleFun(gd3$x))
+output <- rbind(out0,out1,out2,out3)
+colnames(output) <- c("x1","x2","objective value")
+output
+```
 
 ```{r,echo=FALSE}
 r = surface(simpleFun,from.x=-2,to.x=2,from.y=-2,to.y=2,xlab="",ylab="",zlab="")
