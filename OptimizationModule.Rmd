@@ -225,7 +225,8 @@ z <- outer(x, y, simpleplotFun)
 z[is.na(z)] <- 1
 
 require(lattice)
-wireframe(z, drape=T, expand = 0.5, col = "blue", xlab=NULL, ylab=NULL, zlab=NULL)
+wireframe(z, drape=T, expand = 0.5, col = "blue", xlab=NULL, ylab=NULL, zlab=NULL,
+          scales = list(arrows = FALSE))
 
 ```
 
@@ -319,7 +320,8 @@ z <- outer(x, y, complicated)
 z[is.na(z)] <- 1
 
 require(lattice)
-wireframe(z, drape=T, expand = 0.5, col = "blue")
+wireframe(z, drape=T, expand = 0.5, col = "blue", xlab=NULL, ylab=NULL, zlab=NULL,
+          scales = list(arrows = FALSE))
 ```
 
 
