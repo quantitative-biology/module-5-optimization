@@ -647,10 +647,13 @@ c("lower" = lm_summ$coef[1,1] - qt(0.975, df = lm_summ$df[2]) * lm_summ$coef[1, 
 For the Michaelis-Menten example, the estimated values for $K$ and $V_m$ are 0.4398016 and 0.0054252 respectively. Now we simulate numbers for $K$ and $V_m$, and accept the value if the distances between the simulated values and the true values are under the threshold.
 
 ```{r}
-# select numbers for S that match the range for the original dataset
-S = seq(0,5,0.2)
-# calculate true values for v with estimated parameters
-v = 0.0054252*S/(0.4398016+S)
+# use the original dataset
+S = c(3.6, 1.8, 0.9, 0.45, 0.225, 0.1125, 3.6, 1.8, 0.9, 0.45, 0.225, 0.1125, 
+      3.6, 1.8, 0.9, 0.45, 0.225, 0.1125, 0)
+v = c(0.004407692, 0.004192308, 0.003553846, 0.002576923, 0.001661538, 
+      0.001064286, 0.004835714, 0.004671429, 0.0039, 0.002857143,
+      0.00175, 0.001057143, 0.004907143, 0.004521429, 0.00375, 0.002764286,
+      0.001857143, 0.001121429, 0)
 
 # functions to randomly draw values for K and Vm
 draw_K <- function () {
@@ -703,8 +706,8 @@ Here we randomly sample $K$ and $V_m$ 200000 times, it can be seen from the hist
 ```{r}
 # set seed
 set.seed(132)
-# simulate 200000 times with a threshold of 0.0005
-sampled_parameter_values_squared_distances = sample_by_rejection(v, 200000, 0.0005, accept_or_reject_with_squared_distance)
+# simulate 200000 times with a threshold of 0.001
+sampled_parameter_values_squared_distances = sample_by_rejection(v, 200000, 0.001, accept_or_reject_with_squared_distance)
 
 # number of accepted values among 200000 simulations
 sum(sampled_parameter_values_squared_distances$accepted_or_rejected)
@@ -712,14 +715,14 @@ sum(sampled_parameter_values_squared_distances$accepted_or_rejected)
 ```{r}
 c1 <- rgb(173,216,230,max = 255, alpha = 80, names = "lt.blue")
 c2 <- rgb(255,192,203, max = 255, alpha = 80, names = "lt.pink")
-prior1 <- hist(sampled_parameter_values_squared_distances[1:1200,3],col = c1,
+prior1 <- hist(sampled_parameter_values_squared_distances[1:3000,3],col = c1,
                xlab = "K", main="Prior Versus Posterior Distribution for K") 
 post1 <- hist(sampled_parameter_values_squared_distances[which(sampled_parameter_values_squared_distances$accepted_or_rejected==1),3], col=c2, xlab = "K", add=TRUE)
 abline(v=0.005425,col="firebrick",lwd=2)
 legend("bottomright",legend=c("Prior Distribution for K", "Posterior Distribution for K"),
        inset=.02, fill=c(c1,c2), cex=0.8)
 
-prior2 = hist(sampled_parameter_values_squared_distances[1:1200,2],col = c1,
+prior2 = hist(sampled_parameter_values_squared_distances[1:2500,2],col = c1,
               xlab = "Vm", main="Prior Distribution for Vm") 
 post2 = hist(sampled_parameter_values_squared_distances[which(sampled_parameter_values_squared_distances$accepted_or_rejected==1),2],col = c2, xlab = "Vm", add=TRUE)
 abline(v=0.439802,col="firebrick",lwd=2)
