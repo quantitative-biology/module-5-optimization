@@ -547,7 +547,7 @@ Plotting the results of the genetic algorithm search, we see improvement in the 
 plot(ga)
 ```
 
-The summary displayed below shows that the solutions reached by the genetic algorithm agrees with the soltuion found by simulated annealing.  
+The summary displayed below shows that the solutions reached by the genetic algorithm agrees with the solution found by simulated annealing.  
 
 ```{r}
 summary(ga)
