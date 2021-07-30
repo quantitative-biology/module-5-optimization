@@ -269,7 +269,7 @@ x0_out <- c(gd$x, simpleFun(gd$x))
 x1_out <- c(gd1$x, simpleFun(gd1$x))
 x2_out <- c(gd2$x, simpleFun(gd2$x))
 x3_out <- c(gd3$x, simpleFun(gd3$x))
-output <- rbind(out0,out1,out2,out3)
+output <- rbind(x0_out,x1_out,x2_out,x3_out)
 colnames(output) <- c("x1","x2","objective value")
 output
 ```
@@ -382,6 +382,19 @@ points(trans3d(gd1$xmat[1,],gd1$xmat[2,],apply(gd1$xmat,2,complicatedFun),r),
 ```
 
 <p> Here we see that from some initial guess values, the algorithm successfully reaches the global minimuml from others, it gets stuck at a local minimum. </p>
+
+<p> Below is a table showing the x values and the objective value derived by gradient descent starting from those five points. We could see the results are different with different initial guesses. </p>
+
+```{r,echo=FALSE}
+x0_out <- c(gd0$x, complicatedFun(gd0$x))
+x1_out <- c(gd1$x, complicatedFun(gd1$x))
+x2_out <- c(gd2$x, complicatedFun(gd2$x))
+x3_out <- c(gd3$x, complicatedFun(gd3$x))
+x4_out <- c(gd4$x, complicatedFun(gd4$x))
+output <- rbind(x0_out,x1_out,x2_out,x3_out,x4_out)
+colnames(output) <- c("x1","x2","objective value")
+output
+```
 
 
 <p> The default optimization algorithm used by ```nls``` is the Gauss-Newton method, which is a generalization of Newton's method for solving nonlinear equations (which may be familiar from introductory calculus). This is a refinement of gradient descent in which the local curvature of the function is used to project the position of the bottom of the local valley _assuming that the surface is shaped like a parabola_. On parabolic surfaces, this achieves descent to the bottom in one iteration. On non-parabolic surfaces (i.e.~most surfaces), the results is a sequence of iterations, but often many fewer than would be required using gradient descent. </p>
