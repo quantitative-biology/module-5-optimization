@@ -374,7 +374,7 @@ points(trans3d(gd1$xmat[1,],gd1$xmat[2,],apply(gd1$xmat,2,complicatedFun),r),
       col="orange")
 ```
 
-<p> Here we see that from some initial guess values, the algorithm successfully reaches the global minimuml from others, it gets stuck at a local minimum. </p>
+<p> Here we see that from some initial guess values, the algorithm successfully reaches the global minimum from others, it gets stuck at a local minimum. </p>
 
 
 #### Exercise 1
@@ -439,10 +439,18 @@ points(out1$trace.mat[,3][1:8000],pch=20,col="blue")
 ```
 
 #### Example 4
-<p> To give the simulated annealing algorithm a more challenging task, consider the following function, which has many local minima. </p>
+<p> To give the simulated annealing algorithm a more challenging task, consider the following function, which has many local minima.
+$$f(x,y) = (y+47)\sin\left (\sqrt{|y+(x/2)+47|)}-x\sin(\sqrt{|x-(y+47)|} \right)$$
+</p>
+
+```{r, ECHO=TRUE}
+f.egg<- function(x){
+  -(x[,2]+47)*sin(sqrt(abs(x[,2]+(x[,1]/2)+47)))-x[,1]*sin(sqrt(abs(x[,1]-(x[,2]+47))))
+}
+```
 
 ```{r,echo=FALSE}
-f.name <- "Eggholder function"
+f.name <- "Example 4"
 
 # make the function
 f.egg<- function(x){
@@ -493,14 +501,14 @@ upper <- rep(200, dimension)
 x0 <- c(100,100)
 ```
 
-Here we started from two different starting points and they resulted in the same final position.
+We start the algorithm from  two different initial guesses. Both runs result in the same solution:
 
 ```{r}
 egg.out <- GenSA(par = x0, lower = lower, upper = upper,fn = f.egg)
-egg.out[c("value","par","counts")]
+egg.out[c("value","par")]
 
 egg.out3 <- GenSA(par = x3, lower = lower, upper = upper,fn = f.egg)
-egg.out3[c("value","par","counts")]
+egg.out3[c("value","par")]
 ```
 
 The plot below shows how simulated annealing works for the two initial points respectively. The red line records the current minimum. The blue points represents function value. Although they have different starting position, it can be seen from the plots the optimized values are the same.
@@ -533,13 +541,15 @@ Plotting the results of the genetic algorithm search, we see improvement in the 
 plot(ga)
 ```
 
-The summary displayed below shows that the solutions reached by the genetic algorithm agrees with the soltuion found by simulated annealing.  
+The summary displayed below shows that the solutions reached by the genetic algorithm agrees with the solution found by simulated annealing.  
 
 ```{r}
 summary(ga)
 ```
 
-<p> Example: maybe biexponential or not, depending on complexity of cost surface. </p>
+#### Exercise 2
+
+Apply the a genetic algorithm with ```ga``` to confirm the minimum of the egg-carton function in Example 4:
 
 ## Calibration of Dynamic Models
 
