@@ -326,6 +326,7 @@ complicatedFun = function(x) {
   return((1/2*x[1]^2-1/4*x[2]^2+3)*cos(2*x[1]+1-exp(x[2])))
 }
 ```
+
 ```{r,echo=FALSE,message=FALSE}
 complicated = function(x,y) {
   return((1/2*x^2-1/4*y^2+3)*cos(2*x+1-exp(y)))
@@ -580,7 +581,7 @@ where components of the time-varying vector ${\bf x}(t)$ are the _states_ of the
 \end{eqnarray*} </p>
 Here $x_1$ is the size of the prey population; $x_2$ is the size of the predator population. The prey are presumed to have access to resources that allow exponential growth in the absence of predation (growth at rate $p_1 x_1(t)$. Interactions between prey and predator populations (assumed to occur at rate $x_1(t) x_2(t)$ lead to an decrease in the prey population and an increase in the predator population (characterized by parameters $p_2$ and $p_3$ respectively). Finally, the prey suffer an exponential decline in population size in the absence of prey (decay rate $p_4 x_2(t)$). A simulation of the model is shown in Figure. Note that simualtion of the model requires specification of (i) values for each of the model parameters, and (ii) initial conditions, i.e.~the size of each population at time $t=0$.
 
-```{r}
+```{r, echo = FALSE, warning = FALSE}
 library(deSolve)
 
 LotVmod <- function (Time, State, Pars) {
@@ -602,20 +603,67 @@ points(out$x~out$time, type = "l", add = TRUE)
 legend(3.8,20,legend = c("Prey", "Predator"), col = c("red", "black"), pch = 20)
 ```
 
-```{r}
+```{r, echo = FALSE, warning = FALSE}
 observations<-data.frame(t_obs<-out$time[seq(1,length(out$time),20)],
                   x_obs<-out$x[seq(1,length(out$x),20)],
                   y_obs<-out$y[seq(1,length(out$y),20)])
-obsplot<-plot(observations[,3]~observations[,1], col = "red", ylim = c(0,20), main = "Observations of a Predator-Prey Population System", xlab = "Time", ylab = "Population Density", pch = 20)
-points(observations[,2]~observations[,1], add = TRUE, pch = 20)
+# set random seed for noise to be added
+set.seed(12)
+#generate one random number in [0,1] for each observation
+unscaled_noise<-runif(length(t_obs))
+
+
+#generate corrupted observations
+corrupted_observations<-data.frame(t_obs,
+                  x_obs_corrupt<- x_obs+ ((unscaled_noise*2-1)*(0.1*x_obs)),
+                  y_obs_corrupt<- y_obs+ ((unscaled_noise*2-1)*(0.1*y_obs)) )
+
+#plot corrupted observation vector (scatterplot is needed...)
+corplot<-plot(corrupted_observations[,3]~corrupted_observations[,1], col = "red", ylim = c(0,20), main = "Observations of a Predator-Prey Population System", xlab = "Time", ylab = "Population Density", pch = 20)
+points(corrupted_observations[,2]~corrupted_observations[,1], add = TRUE, pch = 20)
 legend(4,20, legend = c("Prey", "Predator"), col = c("red", "black"), pch = 20)
-obsplot
+corplot
+
+#define SSE function
+determine_sse2 <- function(p) {
+
+
+  
+  #first four input parameters are the kinetic parameters of the model
+  newPars <- c(30,p[1],p[2],6)
+  #last tw parameters are the initial populations for x and y, respectively
+  newState <- c(x = 8.792889e-3, y = 1.595545)
+  
+  #time-grid is the same as before, no need to redefine
+  #Time <- seq(0, 6, by = .001)
+  
+  #kinetics is the same as before, no need to redefine
+newLotVmod <- function (Time, State, newPars) {
+    with(as.list(c(State, newPars)), {
+        dx = x*(30 - p[1]*y)
+        dy = -y*(p[2] - 6*x)
+        return(list(c(dx, dy)))
+    })
+}
+  
+  
+  new_out <- as.data.frame(ode(func = newLotVmod, y = newState, parms = newPars, times = Time))
+  
+  #generate vector of predictions to align with vector of observations
+  predictions<-data.frame(t_pred<-t_obs,
+                  x_pred<-new_out$x[seq(1,length(new_out$x),20)],
+                  y_pred<-new_out$y[seq(1,length(new_out$y),20)])
+  
+  
+  sse<-sum((x_obs_corrupt - x_pred)^2) + sum((y_obs_corrupt - y_pred)^2)
+  return(sse)
+}
+
 ```
 
 
 <p> Figure XYZ shows a dataset the corresponds to observations of a predator-prey population system. To calibrate the model Lotka-Volterra to this dataset we seek values for the four parameters $p_1$, $p_2$, $p_3$, and $p_4$ for which simulations of the model provide the 'best fit'. As in the regression tasks described previously, the standard measure for quality of fit is the sum of squared errors. We thus proceed with a minimization task: for each simulation of the model, we compare with the dataset and determine the sum of squared errors. We aim to minimize this fit over the space of model parameters. There's one additional feature we must account for: to specify a simulation we need numerical values for the model parameters and the initial conditions. Calling these initial conditions $p_5 = x_1(0)$ and $p_6=x_2(0)$, we are then pose our optimization problem as a search over a six-dimensional parameter space. In what follows, we illustrate the use of both simulated annealing and a genetic algorithm to calibrate this model.</p>
 
-<p> Matt: insert example </p>
 
 <!-- ## Other Topics -->
 
