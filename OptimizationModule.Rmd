@@ -448,7 +448,7 @@ out4[c("value","par","counts")]
 <p> The plot below provides some insight into how the simulated annealing run proceeded. Iterations (steps) are shown along the horizontal axis. The vertical axis shows values of the objective function. The blue points represents function value at teh current position, while the red shows the minimum achieved so far. The minimum is found rather quickly, but the algorithm continues to jump around (and occasionally get temporarily stuck at local minima) in an attempt to widely explore the search space.</p>
 
 ```{r}
-plot(out1$trace.mat[,4][1:8000],type="l",lwd=4,col="red")
+plot(out1$trace.mat[,4][1:8000],type="l",lwd=4,col="red",xlab="Iteration number",ylab="Objective value")
 points(out1$trace.mat[,3][1:8000],pch=20,col="blue")
 ```
 
