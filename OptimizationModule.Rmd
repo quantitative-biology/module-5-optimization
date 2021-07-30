@@ -88,31 +88,33 @@ where $\bar{x}$ and $\bar{y}$ are the averages
 
 <p> This formula is somewhat unwieldy, but is straightforward to implement. In R, the command ```lm``` implements this formula, as the following example illustrates. </p>
 
-We'll work with a dataset called __cars__ that is included in R. It's shown below (via the __plot()__ command).
+We'll work with a dataset called __iris__ that is included in R. It's shown below (via the `plot()` command).
 
 
 ```{r, echo = TRUE}
-#plot(cars)
+plot(iris$Sepal.Length~iris$Petal.Width, xlab = "Petal Width", ylab = "Sepal Length")
 ```
 
-The __lm()__ command applies the formula described above to arrive at the line of best fit (i.e. the minimizer of the sum of squared errors.  We use teh command in the form  __lm(dist~speed)__, referring to the labels for the data (as shown above) to generate the parameters ($b$ and $m$) that specify the line $y=mx+b$. (The __attach__ command ensures that the data is accessible.)
+The `lm()` command applies the formula described above to arrive at the line of best fit (i.e. the minimizer of the sum of squared errors.  We use the command in the form  `lm(iris$Sepal.Length~iris$Petal.Width)`, referring to the labels for the data (as shown above) to generate the parameters ($b$ and $m$) that specify the line $y=mx+b$. (The `attach` command ensures that the data is accessible.)
 
 ```{r, echo = TRUE}
-#attach(cars)
-#lm(dist~speed)
+lm(iris$Sepal.Length~iris$Petal.Width)
 ```
 
-The intercept is -17.579 and the slope is 3.932. 
+The intercept is 4.7776 and the slope is 0.8886. 
 
-We can plot the data together with the line of best fit with the __abline__ command: 
-<!-- or __abline(lm(dist~speed))__.  -->
+We can plot the data together with the line of best fit with the `abline` command: 
+<!-- or __abline(lm(iris$Sepal.Length~iris$Petal.Width))__.  -->
 
 
 ```{r, echo = TRUE}
-#attach(cars)
-#plot(cars)
-#abline(-17.579, 3.932)
+plot(iris$Sepal.Length~iris$Petal.Width, xlab = "Petal Width", ylab = "Sepal Length")
+abline(lm(iris$Sepal.Length~iris$Petal.Width))
 ```
+
+Here is a link to a linear regression example where you implemment values of X and Y and a plot with those values and a fitted line will be produced. 
+
+https://munkmuni.shinyapps.io/LinearRegression/
 
 ### Nonlinear Regression
 
@@ -206,19 +208,23 @@ Paraboloid = function(x) {
 
 ```{r,echo=FALSE,message=FALSE}
 simpleFun = function(x) {
-  return(x[1]^2 + 1/3*x[2]^2)
+  return((x[1]-3)^2 + 1/3*x[2]^2+2)
 }
 
 simpleplotFun = function(x,y) {
-  return(x^2 + 1/3*y^2)
+  return((x-3)^2 + 1/3*y^2+2)
 }
-x <- seq(-2, 2, length= 30)
-y <- x
+x <- seq(-10, 20, length= 30)
+y <- seq(-20, 20, length= 30)
 z <- outer(x, y, simpleplotFun)
 z[is.na(z)] <- 1
+z = as.vector(z)
+x <- data.frame(z = as.vector(z))
+x$x <- rep(seq(-10, 20, length= 30), 30)
+x$y <- rep(seq(-20, 20, length= 30), 30)
 
 require(lattice)
-wireframe(z, drape=T, expand = 0.5, col = "blue", xlab=NULL, ylab=NULL, zlab=NULL,
+wireframe(z ~ x*y,x, drape=T, expand = 0.5, col = "blue", xlab=NULL, ylab=NULL, zlab=NULL,
           scales = list(arrows = FALSE))
 
 ```
@@ -255,6 +261,20 @@ surface = function(f, from.x=0, to.x=1, from.y=0, to.y=1,
 }
 ```
 
+<<<<<<< HEAD
+=======
+<p> Below is a table showing the x values and the objective value derived by gradient descent starting from those four points. We could see the results are pretty close to each other. </p>
+
+```{r,echo=FALSE}
+x0_out <- c(gd$x, simpleFun(gd$x))
+x1_out <- c(gd1$x, simpleFun(gd1$x))
+x2_out <- c(gd2$x, simpleFun(gd2$x))
+x3_out <- c(gd3$x, simpleFun(gd3$x))
+output <- rbind(x0_out,x1_out,x2_out,x3_out)
+colnames(output) <- c("x1","x2","objective value")
+output
+```
+>>>>>>> 9b3bd0b0773ce90797941fb5d90a61967eaf8d69
 
 ```{r,echo=FALSE}
 r = surface(simpleFun,from.x=-2,to.x=2,from.y=-2,to.y=2,xlab="",ylab="",zlab="")
@@ -317,13 +337,18 @@ complicatedFun = function(x) {
 complicated = function(x,y) {
   return((1/2*x^2-1/4*y^2+3)*cos(2*x+1-exp(y)))
 }
+
 x <- seq(-2, 2, length= 30)
-y <- x
+y <- seq(-2, 2, length= 30)
 z <- outer(x, y, complicated)
 z[is.na(z)] <- 1
+z = as.vector(z)
+x <- data.frame(z = as.vector(z))
+x$x <- rep(seq(-2, 2, length= 30), 30)
+x$y <- rep(seq(-2, 2, length= 30), 30)
 
 require(lattice)
-wireframe(z, drape=T, expand = 0.5, col = "blue", xlab=NULL, ylab=NULL, zlab=NULL,
+wireframe(z ~ x*y,x, drape=T, expand = 0.5, col = "blue", xlab=NULL, ylab=NULL, zlab=NULL,
           scales = list(arrows = FALSE))
 ```
 
@@ -381,7 +406,23 @@ points(trans3d(gd1$xmat[1,],gd1$xmat[2,],apply(gd1$xmat,2,complicatedFun),r),
 
 Consider the following dataset, which corresponds to measurements of drug concentration in the blood over time. The trend in the data suggests it can be well-captured by a biexponential $D(t) = A (e^{r_1 t} + e^{r_2 t})$. Set up a sum of squared errors function and use the gradient descent function above to determine the best-fit estimates of the parameters $A$, $r_1$ and $r_2$.
 
+<<<<<<< HEAD
 ___________________________________________
+=======
+<p> Below is a table showing the x values and the objective value derived by gradient descent starting from those five points. We could see the results are different with different initial guesses. </p>
+
+```{r,echo=FALSE}
+x0_out <- c(gd0$x, complicatedFun(gd0$x))
+x1_out <- c(gd1$x, complicatedFun(gd1$x))
+x2_out <- c(gd2$x, complicatedFun(gd2$x))
+x3_out <- c(gd3$x, complicatedFun(gd3$x))
+x4_out <- c(gd4$x, complicatedFun(gd4$x))
+output <- rbind(x0_out,x1_out,x2_out,x3_out,x4_out)
+colnames(output) <- c("x1","x2","objective value")
+output
+```
+
+>>>>>>> 9b3bd0b0773ce90797941fb5d90a61967eaf8d69
 
 <p> The default optimization algorithm used by ```nls``` is the Gauss-Newton method, which is a generalization of Newton's method for solving nonlinear equations (which may be familiar from introductory calculus). This is a refinement of gradient descent in which the local curvature of the function is used to project the position of the bottom of the local valley _assuming that the surface is shaped like a parabola_. On parabolic surfaces, this achieves descent to the bottom in one iteration. On non-parabolic surfaces (i.e.~most surfaces), the results is a sequence of iterations, but often many fewer than would be required using gradient descent. </p>
 
@@ -434,7 +475,7 @@ out4[c("value","par","counts")]
 <p> The plot below provides some insight into how the simulated annealing run proceeded. Iterations (steps) are shown along the horizontal axis. The vertical axis shows values of the objective function. The blue points represents function value at teh current position, while the red shows the minimum achieved so far. The minimum is found rather quickly, but the algorithm continues to jump around (and occasionally get temporarily stuck at local minima) in an attempt to widely explore the search space.</p>
 
 ```{r}
-plot(out1$trace.mat[,4][1:8000],type="l",lwd=4,col="red")
+plot(out1$trace.mat[,4][1:8000],type="l",lwd=4,col="red",xlab="Iteration number",ylab="Objective value")
 points(out1$trace.mat[,3][1:8000],pch=20,col="blue")
 ```
 
