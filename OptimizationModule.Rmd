@@ -3,7 +3,7 @@
 ## Introduction
 
 <p> To improve is to make better; to optimize is to make best. Optimization is the act of identifying the extreme (cheapest, tallest, fastest...) over a collection of possibilities. You may recall studying optimization in introductory calculus where you may have solved simple design problems over the possible sizes of fences, or boxes, or something similar. Optimization over __design space__ (also called __decision space__) is a critical feature of many engineering tasks, and has a role in most areas of applied science, including biology. Examples include optimal manipulation of biological systems (e.g. optimal harvesting or optimal drug dosing) or optimal design of biological systems (e.g. robust synthetic genetic circuits). A complementary task is optimal experimental design, which aims to identify the 'best' experiment from a collection of possibilities. Model calibration, to be discussed further below, provides another example; here we seek the 'best fit' version of a model from a collection of possible options.</p>
-<p> Beyond its use in design, optimization is also used to investigate natural systems (i.e. in `pure' science), in cases where 'nature' presents us with an optimal version of a given phenomenon. For example, the principle of entropy maximization (equivalently energy minimization) justifies a wide variety of phenomena, from the shapes of soap bubbles to the configuration of proteins.  Darwinian evolution provides another mechanism for optimization. Assuming evolution has arrived at optimal designs, we can apply optimization to understand a variety of biological phenomena, from metabolic flux distribution, to brain wiring, to optimal foraging strategies.</p>
+<p> Beyond its use in design, optimization is also used to investigate natural systems (i.e. in 'pure' science), in cases where 'nature' presents us with an optimal version of a given phenomenon. For example, the principle of entropy maximization (equivalently energy minimization) justifies a wide variety of phenomena, from the shapes of soap bubbles to the configuration of proteins.  Darwinian evolution provides another mechanism for optimization. Assuming evolution has arrived at optimal designs, we can apply optimization to understand a variety of biological phenomena, from metabolic flux distribution, to brain wiring, to optimal foraging strategies.</p>
 <p> This module introduces optimization methods in R. Applications and illustrations are be drawn from a range of biological domains. The simple optimization tasks addressed by introductory calculus can be accomplished with paper-and-pencil calculations. As shown below, while the fundamental principles introduced by those exercises carry forward, most optimization tasks of interest in biology demand more extensive computational resources.</p>
 
 ## Fundamentals of Optimization
@@ -238,10 +238,10 @@ gd = grad.descent(simpleFun,x0,step.size=1/3)
 x1 = c(-1.9,1.1)
 gd1 = grad.descent(simpleFun,x1,step.size=1/3)
 
-x2 = c(1.9,-1.9)
+x2 = c(5,-5)
 gd2 = grad.descent(simpleFun,x2,step.size=1/3)
 
-x3 = c(1.9,1.1)
+x3 = c(5,7)
 gd3 = grad.descent(simpleFun,x3,step.size=1/3)
 
 surface = function(f, from.x=0, to.x=1, from.y=0, to.y=1,
@@ -277,7 +277,7 @@ output
 >>>>>>> 9b3bd0b0773ce90797941fb5d90a61967eaf8d69
 
 ```{r,echo=FALSE}
-r = surface(simpleFun,from.x=-2,to.x=2,from.y=-2,to.y=2,xlab="",ylab="",zlab="")
+r = surface(simpleFun,from.x=-5,to.x=10,from.y=-10,to.y=10,xlab="",ylab="",zlab="")
 points(trans3d(x0[1],x0[2],simpleFun(x0),r),col="red",cex=2)
 points(trans3d(gd$xmat[1,],gd$xmat[2,],apply(gd$xmat,2,simpleFun),r),
       col="blue")
@@ -333,6 +333,7 @@ complicatedFun = function(x) {
   return((1/2*x[1]^2-1/4*x[2]^2+3)*cos(2*x[1]+1-exp(x[2])))
 }
 ```
+
 ```{r,echo=FALSE,message=FALSE}
 complicated = function(x,y) {
   return((1/2*x^2-1/4*y^2+3)*cos(2*x+1-exp(y)))
@@ -356,6 +357,10 @@ wireframe(z ~ x*y,x, drape=T, expand = 0.5, col = "blue", xlab=NULL, ylab=NULL, 
 ```{r,echo=FALSE,message=FALSE,warning=FALSE}
 library(MASS)
 library(plotly)
+x <- seq(-2, 2, length= 30)
+y <- seq(-2, 2, length= 30)
+z <- outer(x, y, complicated)
+z[is.na(z)] <- 1
 fig <- plot_ly(x = x, y = y, z = z,color = "blue") %>% add_surface()
 
 fig
@@ -607,9 +612,93 @@ where components of the time-varying vector ${\bf x}(t)$ are the _states_ of the
 \end{eqnarray*} </p>
 Here $x_1$ is the size of the prey population; $x_2$ is the size of the predator population. The prey are presumed to have access to resources that allow exponential growth in the absence of predation (growth at rate $p_1 x_1(t)$. Interactions between prey and predator populations (assumed to occur at rate $x_1(t) x_2(t)$ lead to an decrease in the prey population and an increase in the predator population (characterized by parameters $p_2$ and $p_3$ respectively). Finally, the prey suffer an exponential decline in population size in the absence of prey (decay rate $p_4 x_2(t)$). A simulation of the model is shown in Figure XYZ. Note that simulation of the model requires specification of (i) values for each of the model parameters, and (ii) initial conditions, i.e.~the size of each population at time $t=0$.
 
+<<<<<<< HEAD
 <p> Figure XYZ shows a dataset the could corresponds to observations of a predator-prey population system. To calibrate the Lotka-Volterra to this dataset we seek values for the four parameters $p_1$, $p_2$, $p_3$, and $p_4$ for which simulations of the model provide the 'best fit'. As in the regression tasks described previously, the standard measure for quality of fit is the sum of squared errors. We thus proceed with a minimization task: for each simulation of the model, we compare with the dataset and determine the sum of squared errors. We aim to minimize this fit over the space of model parameters. There's one additional feature we must account for: to specify a simulation we need numerical values for the model parameters and the initial conditions. Calling these initial conditions $p_5 = x_1(0)$ and $p_6=x_2(0)$, we are then pose our optimization problem as a search over a six-dimensional parameter space. In what follows, we illustrate the use of both simulated annealing and a genetic algorithm to calibrate this model.</p>
+=======
+```{r, echo = FALSE, warning = FALSE}
+library(deSolve)
 
-<p> Matt: insert example </p>
+LotVmod <- function (Time, State, Pars) {
+    with(as.list(c(State, Pars)), {
+        dx = x*(p1 - p2*y)
+        dy = -y*(p3 - p4*x)
+        return(list(c(dx, dy)))
+    })
+}
+
+Pars <- c(p1 = 30, p2 = 5, p3 = 2, p4 = 6)
+State <- c(x = 8.792889e-3, y = 1.595545)
+Time <- seq(0, 6, by = 0.01)
+
+out <- as.data.frame(ode(func = LotVmod, y = State, parms = Pars, times = Time))
+
+plot(out$y~out$time, type = "l", xlab = "Time", ylab = "Population Density", main = "Model Simulation", col = "red", ylim = c(0,20))
+points(out$x~out$time, type = "l", add = TRUE)
+legend(3.8,20,legend = c("Prey", "Predator"), col = c("red", "black"), pch = 20)
+```
+
+```{r, echo = FALSE, warning = FALSE}
+observations<-data.frame(t_obs<-out$time[seq(1,length(out$time),20)],
+                  x_obs<-out$x[seq(1,length(out$x),20)],
+                  y_obs<-out$y[seq(1,length(out$y),20)])
+# set random seed for noise to be added
+set.seed(12)
+#generate one random number in [0,1] for each observation
+unscaled_noise<-runif(length(t_obs))
+
+
+#generate corrupted observations
+corrupted_observations<-data.frame(t_obs,
+                  x_obs_corrupt<- x_obs+ ((unscaled_noise*2-1)*(0.1*x_obs)),
+                  y_obs_corrupt<- y_obs+ ((unscaled_noise*2-1)*(0.1*y_obs)) )
+
+#plot corrupted observation vector (scatterplot is needed...)
+corplot<-plot(corrupted_observations[,3]~corrupted_observations[,1], col = "red", ylim = c(0,20), main = "Observations of a Predator-Prey Population System", xlab = "Time", ylab = "Population Density", pch = 20)
+points(corrupted_observations[,2]~corrupted_observations[,1], add = TRUE, pch = 20)
+legend(4,20, legend = c("Prey", "Predator"), col = c("red", "black"), pch = 20)
+corplot
+
+#define SSE function
+determine_sse2 <- function(p) {
+
+
+  
+  #first four input parameters are the kinetic parameters of the model
+  newPars <- c(30,p[1],p[2],6)
+  #last tw parameters are the initial populations for x and y, respectively
+  newState <- c(x = 8.792889e-3, y = 1.595545)
+  
+  #time-grid is the same as before, no need to redefine
+  #Time <- seq(0, 6, by = .001)
+  
+  #kinetics is the same as before, no need to redefine
+newLotVmod <- function (Time, State, newPars) {
+    with(as.list(c(State, newPars)), {
+        dx = x*(30 - p[1]*y)
+        dy = -y*(p[2] - 6*x)
+        return(list(c(dx, dy)))
+    })
+}
+  
+  
+  new_out <- as.data.frame(ode(func = newLotVmod, y = newState, parms = newPars, times = Time))
+  
+  #generate vector of predictions to align with vector of observations
+  predictions<-data.frame(t_pred<-t_obs,
+                  x_pred<-new_out$x[seq(1,length(new_out$x),20)],
+                  y_pred<-new_out$y[seq(1,length(new_out$y),20)])
+  
+  
+  sse<-sum((x_obs_corrupt - x_pred)^2) + sum((y_obs_corrupt - y_pred)^2)
+  return(sse)
+}
+
+```
+
+
+<p> Figure XYZ shows a dataset the corresponds to observations of a predator-prey population system. To calibrate the model Lotka-Volterra to this dataset we seek values for the four parameters $p_1$, $p_2$, $p_3$, and $p_4$ for which simulations of the model provide the 'best fit'. As in the regression tasks described previously, the standard measure for quality of fit is the sum of squared errors. We thus proceed with a minimization task: for each simulation of the model, we compare with the dataset and determine the sum of squared errors. We aim to minimize this fit over the space of model parameters. There's one additional feature we must account for: to specify a simulation we need numerical values for the model parameters and the initial conditions. Calling these initial conditions $p_5 = x_1(0)$ and $p_6=x_2(0)$, we are then pose our optimization problem as a search over a six-dimensional parameter space. In what follows, we illustrate the use of both simulated annealing and a genetic algorithm to calibrate this model.</p>
+>>>>>>> e85ba2b18cd43ba75de963b401b54a47a724e766
+
 
 #### Exercise 3:
 
