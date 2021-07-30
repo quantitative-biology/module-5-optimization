@@ -261,8 +261,8 @@ surface = function(f, from.x=0, to.x=1, from.y=0, to.y=1,
 }
 ```
 
-<<<<<<< HEAD
-=======
+
+
 <p> Below is a table showing the x values and the objective value derived by gradient descent starting from those four points. We could see the results are pretty close to each other. </p>
 
 ```{r,echo=FALSE}
@@ -274,7 +274,7 @@ output <- rbind(x0_out,x1_out,x2_out,x3_out)
 colnames(output) <- c("x1","x2","objective value")
 output
 ```
->>>>>>> 9b3bd0b0773ce90797941fb5d90a61967eaf8d69
+
 
 ```{r,echo=FALSE}
 r = surface(simpleFun,from.x=-5,to.x=10,from.y=-10,to.y=10,xlab="",ylab="",zlab="")
@@ -411,9 +411,8 @@ points(trans3d(gd1$xmat[1,],gd1$xmat[2,],apply(gd1$xmat,2,complicatedFun),r),
 
 Consider the following dataset, which corresponds to measurements of drug concentration in the blood over time. The trend in the data suggests it can be well-captured by a biexponential $D(t) = A (e^{r_1 t} + e^{r_2 t})$. Set up a sum of squared errors function and use the gradient descent function above to determine the best-fit estimates of the parameters $A$, $r_1$ and $r_2$.
 
-<<<<<<< HEAD
-___________________________________________
-=======
+
+
 <p> Below is a table showing the x values and the objective value derived by gradient descent starting from those five points. We could see the results are different with different initial guesses. </p>
 
 ```{r,echo=FALSE}
@@ -427,7 +426,7 @@ colnames(output) <- c("x1","x2","objective value")
 output
 ```
 
->>>>>>> 9b3bd0b0773ce90797941fb5d90a61967eaf8d69
+
 
 <p> The default optimization algorithm used by ```nls``` is the Gauss-Newton method, which is a generalization of Newton's method for solving nonlinear equations (which may be familiar from introductory calculus). This is a refinement of gradient descent in which the local curvature of the function is used to project the position of the bottom of the local valley _assuming that the surface is shaped like a parabola_. On parabolic surfaces, this achieves descent to the bottom in one iteration. On non-parabolic surfaces (i.e.~most surfaces), the results is a sequence of iterations, but often many fewer than would be required using gradient descent. </p>
 
@@ -612,9 +611,9 @@ where components of the time-varying vector ${\bf x}(t)$ are the _states_ of the
 \end{eqnarray*} </p>
 Here $x_1$ is the size of the prey population; $x_2$ is the size of the predator population. The prey are presumed to have access to resources that allow exponential growth in the absence of predation (growth at rate $p_1 x_1(t)$. Interactions between prey and predator populations (assumed to occur at rate $x_1(t) x_2(t)$ lead to an decrease in the prey population and an increase in the predator population (characterized by parameters $p_2$ and $p_3$ respectively). Finally, the prey suffer an exponential decline in population size in the absence of prey (decay rate $p_4 x_2(t)$). A simulation of the model is shown in Figure XYZ. Note that simulation of the model requires specification of (i) values for each of the model parameters, and (ii) initial conditions, i.e.~the size of each population at time $t=0$.
 
-<<<<<<< HEAD
+
 <p> Figure XYZ shows a dataset the could corresponds to observations of a predator-prey population system. To calibrate the Lotka-Volterra to this dataset we seek values for the four parameters $p_1$, $p_2$, $p_3$, and $p_4$ for which simulations of the model provide the 'best fit'. As in the regression tasks described previously, the standard measure for quality of fit is the sum of squared errors. We thus proceed with a minimization task: for each simulation of the model, we compare with the dataset and determine the sum of squared errors. We aim to minimize this fit over the space of model parameters. There's one additional feature we must account for: to specify a simulation we need numerical values for the model parameters and the initial conditions. Calling these initial conditions $p_5 = x_1(0)$ and $p_6=x_2(0)$, we are then pose our optimization problem as a search over a six-dimensional parameter space. In what follows, we illustrate the use of both simulated annealing and a genetic algorithm to calibrate this model.</p>
-=======
+
 ```{r, echo = FALSE, warning = FALSE}
 library(deSolve)
 
@@ -697,7 +696,7 @@ newLotVmod <- function (Time, State, newPars) {
 
 
 <p> Figure XYZ shows a dataset the corresponds to observations of a predator-prey population system. To calibrate the model Lotka-Volterra to this dataset we seek values for the four parameters $p_1$, $p_2$, $p_3$, and $p_4$ for which simulations of the model provide the 'best fit'. As in the regression tasks described previously, the standard measure for quality of fit is the sum of squared errors. We thus proceed with a minimization task: for each simulation of the model, we compare with the dataset and determine the sum of squared errors. We aim to minimize this fit over the space of model parameters. There's one additional feature we must account for: to specify a simulation we need numerical values for the model parameters and the initial conditions. Calling these initial conditions $p_5 = x_1(0)$ and $p_6=x_2(0)$, we are then pose our optimization problem as a search over a six-dimensional parameter space. In what follows, we illustrate the use of both simulated annealing and a genetic algorithm to calibrate this model.</p>
->>>>>>> e85ba2b18cd43ba75de963b401b54a47a724e766
+
 
 
 #### Exercise 3:
