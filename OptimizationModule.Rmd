@@ -658,9 +658,6 @@ legend(4,20, legend = c("Prey", "Predator"), col = c("red", "black"), pch = 20)
 corplot
 ```
 
-
-<p> Figure XYZ shows a dataset the corresponds to observations of a predator-prey population system. To calibrate the model Lotka-Volterra to this dataset we seek values for the four parameters $p_1$, $p_2$, $p_3$, and $p_4$ for which simulations of the model provide the 'best fit'. As in the regression tasks described previously, the standard measure for quality of fit is the sum of squared errors. We thus proceed with a minimization task: for each simulation of the model, we compare with the dataset and determine the sum of squared errors. We aim to minimize this fit over the space of model parameters. There's one additional feature we must account for: to specify a simulation we need numerical values for the model parameters and the initial conditions. Calling these initial conditions $p_5 = x_1(0)$ and $p_6=x_2(0)$, we then pose our optimization problem as a search over a six-dimensional parameter space. In what follows, we illustrate the use of both simulated annealing and a genetic algorithm to calibrate this model.</p>
-
 For this example, we will estimate the parameters $p_2$ and $p_3$.
 
 ```{r, echo = FALSE}
