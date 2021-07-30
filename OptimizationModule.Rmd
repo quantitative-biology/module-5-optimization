@@ -330,13 +330,18 @@ complicatedFun = function(x) {
 complicated = function(x,y) {
   return((1/2*x^2-1/4*y^2+3)*cos(2*x+1-exp(y)))
 }
+
 x <- seq(-2, 2, length= 30)
-y <- x
+y <- seq(-2, 2, length= 30)
 z <- outer(x, y, complicated)
 z[is.na(z)] <- 1
+z = as.vector(z)
+x <- data.frame(z = as.vector(z))
+x$x <- rep(seq(-2, 2, length= 30), 30)
+x$y <- rep(seq(-2, 2, length= 30), 30)
 
 require(lattice)
-wireframe(z, drape=T, expand = 0.5, col = "blue", xlab=NULL, ylab=NULL, zlab=NULL,
+wireframe(z ~ x*y,x, drape=T, expand = 0.5, col = "blue", xlab=NULL, ylab=NULL, zlab=NULL,
           scales = list(arrows = FALSE))
 ```
 
