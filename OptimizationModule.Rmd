@@ -350,6 +350,10 @@ wireframe(z ~ x*y,x, drape=T, expand = 0.5, col = "blue", xlab=NULL, ylab=NULL, 
 ```{r,echo=FALSE,message=FALSE,warning=FALSE}
 library(MASS)
 library(plotly)
+x <- seq(-2, 2, length= 30)
+y <- seq(-2, 2, length= 30)
+z <- outer(x, y, complicated)
+z[is.na(z)] <- 1
 fig <- plot_ly(x = x, y = y, z = z,color = "blue") %>% add_surface()
 
 fig
