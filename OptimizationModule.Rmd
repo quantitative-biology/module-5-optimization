@@ -570,6 +570,14 @@ Here $x_1$ is the size of the prey population; $x_2$ is the size of the predator
 
 <p> Matt: insert example </p>
 
+#### Exercise 3:
+
+<p> Fit all 4 parameters </p>
+
+#### Exercise 4
+
+<p> optimal control example </p>
+
 <!-- ## Other Topics -->
 
 <!-- ### Optimal Control -->
@@ -807,6 +815,17 @@ abline(v=0.439802,col="firebrick",lwd=2)
 legend("topleft",legend=c("Prior Distribution for Vm", "Posterior Distribution for Vm"),
        inset=.02, fill=c(c1,c2), cex=0.8)
 ```
+
+
+#### Exercise 5
+
+<p> rejection for fitting shallow function </p>
+
+#### Exercise 6
+
+<p> ABC for fitting Lotka-Volterra model. </p>
+
+
 
 <!-- ### Optimal Experimental Design  -->
 
