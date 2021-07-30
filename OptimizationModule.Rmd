@@ -88,31 +88,33 @@ where $\bar{x}$ and $\bar{y}$ are the averages
 
 <p> This formula is somewhat unwieldy, but is straightforward to implement. In R, the command ```lm``` implements this formula, as the following example illustrates. </p>
 
-We'll work with a dataset called __cars__ that is included in R. It's shown below (via the __plot()__ command).
+We'll work with a dataset called __iris__ that is included in R. It's shown below (via the `plot()` command).
 
 
 ```{r, echo = TRUE}
-#plot(cars)
+plot(iris$Sepal.Length~iris$Petal.Width, xlab = "Petal Width", ylab = "Sepal Length")
 ```
 
-The __lm()__ command applies the formula described above to arrive at the line of best fit (i.e. the minimizer of the sum of squared errors.  We use teh command in the form  __lm(dist~speed)__, referring to the labels for the data (as shown above) to generate the parameters ($b$ and $m$) that specify the line $y=mx+b$. (The __attach__ command ensures that the data is accessible.)
+The `lm()` command applies the formula described above to arrive at the line of best fit (i.e. the minimizer of the sum of squared errors.  We use the command in the form  `lm(iris$Sepal.Length~iris$Petal.Width)`, referring to the labels for the data (as shown above) to generate the parameters ($b$ and $m$) that specify the line $y=mx+b$. (The `attach` command ensures that the data is accessible.)
 
 ```{r, echo = TRUE}
-#attach(cars)
-#lm(dist~speed)
+lm(iris$Sepal.Length~iris$Petal.Width)
 ```
 
-The intercept is -17.579 and the slope is 3.932. 
+The intercept is 4.7776 and the slope is 0.8886. 
 
-We can plot the data together with the line of best fit with the __abline__ command: 
-<!-- or __abline(lm(dist~speed))__.  -->
+We can plot the data together with the line of best fit with the `abline` command: 
+<!-- or __abline(lm(iris$Sepal.Length~iris$Petal.Width))__.  -->
 
 
 ```{r, echo = TRUE}
-#attach(cars)
-#plot(cars)
-#abline(-17.579, 3.932)
+plot(iris$Sepal.Length~iris$Petal.Width, xlab = "Petal Width", ylab = "Sepal Length")
+abline(lm(iris$Sepal.Length~iris$Petal.Width))
 ```
+
+Here is a link to a linear regression example where you implemment values of X and Y and a plot with those values and a fitted line will be produced. 
+
+https://munkmuni.shinyapps.io/LinearRegression/
 
 ### Nonlinear Regression
 
