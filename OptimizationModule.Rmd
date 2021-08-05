@@ -708,7 +708,7 @@ library(GenSA)
 x1 = c(4,1)
 lower <- c(0.1,0.1)
 upper <- c(10,10)
-out0 <- GenSA(par = x1, lower = lower, upper = upper,fn = determine_sse2, control = list(maxit = 200))
+out0 <- GenSA(par = x1, lower = lower, upper = upper,fn = determine_sse2, control = list(maxit = 100))
 out0[c("value","par")]
 ```
 
@@ -716,8 +716,64 @@ Inputting the predicted values of $p_2$ and $p_3$ into the `GenSA` command gives
 
 
 #### Exercise 3:
+We will now try and estimate the parameters $p_1$, $p_2$, $p_3$ and $p_4$ as well as enter the predictions into the `GenSA` command in order to minimize the sum of squares error value. 
 
-<p> Fit all 4 parameters </p>
+```{r, echo = FALSE}
+determine_sse3 <- function(p) {
+
+
+  
+  #first four input parameters are the kinetic parameters of the model
+  newPars <- c(p[1],p[2],p[3],p[4])
+  #last tw parameters are the initial populations for x and y, respectively
+  newState <- c(x = 8.792889e-3, y = 1.595545)
+  
+  #time-grid is the same as before, no need to redefine
+  #Time <- seq(0, 6, by = .001)
+  
+  #kinetics is the same as before, no need to redefine
+newLotVmod <- function (Time, State, newPars) {
+    with(as.list(c(State, newPars)), {
+        dx = x*(p[1] - p[2]*y)
+        dy = -y*(p[3] - p[4]*x)
+        return(list(c(dx, dy)))
+    })
+}
+  
+  
+  new_out1 <- as.data.frame(ode(func = newLotVmod, y = newState, parms = newPars, times = Time))
+  
+  #generate vector of predictions to align with vector of observations
+  predictions1<-data.frame(t_pred1<-t_obs,
+                  x_pred1<-new_out1$x[seq(1,length(new_out1$x),20)],
+                  y_pred1<-new_out1$y[seq(1,length(new_out1$y),20)])
+  
+  
+  sse<-sum((x_obs_corrupt - x_pred1)^2) + sum((y_obs_corrupt - y_pred1)^2)
+  return(sse)
+}
+```
+
+Using the values of $p_2$ and $p_3$ determined using the GenSA call previously, we know that the value of those parameters that minimize the sum of squares error value is 4.974368 and 2.005188 respectively. Knowing that, we can input those values into the determine_sse function as well as predicted values for $p_1$ and $p_4$. 
+
+Our prediction for $p_1$ and $p_4$ will be 20 and 10 respectively. 
+
+```{r}
+determine_sse3(c(20,4.974368,2.005188,10))
+```
+
+As shown above, the sum of squares error value is 501.9846. 
+
+```{r}
+library(GenSA)
+x2 = c(20,4.974368,2.005188,10)
+lower <- c(0.1,0.1,0.1,0.1)
+upper <- c(35,35,35,35)
+out0 <- GenSA(par = x2, lower = lower, upper = upper,fn = determine_sse3, control = list(maxit = 50))
+out0[c("value","par")]
+```
+
+Inputting the predicted values of $p_1$, $p_2$, $p_3$ and $p_4$ into the `GenSA` function, gives us the parameters 29.246138, 4.879013, 2.018677 and 6.058124. These parameters minimize the sum of squared errors value to 4.989519. 
 
 #### Exercise 4
 
@@ -823,28 +879,26 @@ For the Michaelis-Menten example, the estimated values for $K$ and $V_m$ are 0.4
 
 ```{r}
 # use the original dataset
-S <- c(4.32, 2.16, 1.08, 0.54, 0.27, 0.135, 3.6, 
-                           1.8, 0.9, 0.45, 0.225, 0.1125, 2.88, 1.44, 0.72, 0.36, 0.18, 0.9, 
-                           0) 
-V <- c(0.004835714, 0.004192308, 0.003553846, 0.002576923, 
-                                     0.001661538, 0.001064286, 0.004407692, 0.004671429, 0.0039, 0.002857143, 
-                                     0.00175, 0.001057143, 0.004907143, 0.004521429, 0.00375, 0.002764286, 
-                                     0.001857143, 0.001121429, 0)
-
+S = c(3.6, 1.8, 0.9, 0.45, 0.225, 0.1125, 3.6, 1.8, 0.9, 0.45, 0.225, 0.1125, 
+      3.6, 1.8, 0.9, 0.45, 0.225, 0.1125, 0)
+v = c(0.004407692, 0.004192308, 0.003553846, 0.002576923, 0.001661538, 
+      0.001064286, 0.004835714, 0.004671429, 0.0039, 0.002857143,
+      0.00175, 0.001057143, 0.004907143, 0.004521429, 0.00375, 0.002764286,
+      0.001857143, 0.001121429, 0)
 
 # functions to randomly draw values for K and Vm
-draw_Km <- function () {
+draw_K <- function () {
   return (runif(1, min=0, max=1))
 }
-draw_Vmax <- function () {
+draw_Vm <- function () {
   return (runif(1, min=0, max=0.01))
 }
 ```
 
 ```{r}
 # simulate values for v
-simulate_data <- function (S, Km, Vmax) { 
-  return(Vmax*S/(Km+S))
+simulate_data <- function (S, K, Vm) { 
+  return(Vm*S/(K+S))
 }
 
 # calculate distances between true and simulated values
@@ -866,15 +920,15 @@ sample_by_rejection <- function (true_data, n_iterations, acceptance_threshold, 
   sampled_K <- vector(length = n_iterations, mode = "numeric")
   sampled_Vm <- vector (length = n_iterations, mode = "numeric")
   for (i in 1:n_iterations){
-    Km <- draw_Km()
-    Vmax <- draw_Vmax()
-    parameters = list("Km"=Km, "Vmax"=Vmax)
-    simulated_data <- simulate_data(S,Km,Vmax)
+    K <- draw_K()
+    Vm <- draw_Vm()
+    parameters = list("K"=K, "Vm"=Vm)
+    simulated_data <- simulate_data(S,K,Vm)
     accepted_or_rejected[i] = accept_or_reject_function(true_data, simulated_data, acceptance_threshold)
-    sampled_K[i] = Km
-    sampled_Vm[i] = Vmax
+    sampled_K[i] = K
+    sampled_Vm[i] = Vm
   }
-  return(data.frame(cbind("accepted_or_rejected" = accepted_or_rejected, "sampled_Kms" = sampled_Km, "sampled_Vmaxs" = sampled_Vmax)))
+  return(data.frame(cbind("accepted_or_rejected" = accepted_or_rejected, "sampled_Ks" = sampled_K, "sampled_Vms" = sampled_Vm)))
 }
 ```
 
@@ -889,6 +943,7 @@ sampled_parameter_values_squared_distances = sample_by_rejection(v, 200000, 0.00
 # number of accepted values among 200000 simulations
 sum(sampled_parameter_values_squared_distances$accepted_or_rejected)
 ```
+
 ```{r}
 c1 <- rgb(173,216,230,max = 255, alpha = 80, names = "lt.blue")
 c2 <- rgb(255,192,203, max = 255, alpha = 80, names = "lt.pink")
