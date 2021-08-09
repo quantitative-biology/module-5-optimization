@@ -95,7 +95,7 @@ We'll work with a dataset called __iris__ that is included in R. It's shown belo
 plot(iris$Sepal.Length~iris$Petal.Width, xlab = "Petal Width", ylab = "Sepal Length")
 ```
 
-The `lm()` command applies the formula described above to arrive at the line of best fit (i.e. the minimizer of the sum of squared errors.  We use the command in the form  `lm(iris$Sepal.Length~iris$Petal.Width)`, referring to the labels for the data (as shown above) to generate the parameters ($b$ and $m$) that specify the line $y=mx+b$. (The `attach` command ensures that the data is accessible.)
+The `lm()` command applies the formula described above to arrive at the line of best fit (i.e. the minimizer of the sum of squared errors).  We use the command in the form  `lm(iris$Sepal.Length~iris$Petal.Width)`, referring to the labels for the data (as shown above) to generate the parameters ($b$ and $m$) that specify the line $y=mx+b$.
 
 ```{r, echo = TRUE}
 lm(iris$Sepal.Length~iris$Petal.Width)
@@ -112,9 +112,9 @@ plot(iris$Sepal.Length~iris$Petal.Width, xlab = "Petal Width", ylab = "Sepal Len
 abline(lm(iris$Sepal.Length~iris$Petal.Width))
 ```
 
-Here is a link to a linear regression example where you implement values of X and Y and a plot with those values and a fitted line will be produced. 
+<!-- Here is a link to a linear regression example where you implement values of X and Y and a plot with those values and a fitted line will be produced.  -->
 
-https://munkmuni.shinyapps.io/LinearRegression/
+<!-- https://munkmuni.shinyapps.io/LinearRegression/ -->
 
 ### Nonlinear Regression
 
@@ -202,7 +202,7 @@ grad.descent = function(f, x0, step.size=0.05, max.iter=200,
 
 ```{r}
 Paraboloid = function(x) {
-  return((x[1]-3)^2 + 1/3*(x[2]+4)^2)
+  return((x[1]-3)^2 + 1/3*(x[2]+4)^2+2)
 }
 ```
 
@@ -263,19 +263,6 @@ surface = function(f, from.x=0, to.x=1, from.y=0, to.y=1,
 
 
 
-<p> Below is a table showing the x values and the objective value derived by gradient descent starting from those four points. We could see the results are pretty close to each other. </p>
-
-```{r,echo=FALSE}
-x0_out <- c(gd$x, simpleFun(gd$x))
-x1_out <- c(gd1$x, simpleFun(gd1$x))
-x2_out <- c(gd2$x, simpleFun(gd2$x))
-x3_out <- c(gd3$x, simpleFun(gd3$x))
-output <- rbind(x0_out,x1_out,x2_out,x3_out)
-colnames(output) <- c("x1","x2","objective value")
-output
-```
-
-
 ```{r,echo=FALSE}
 r = surface(simpleFun,from.x=-5,to.x=10,from.y=-10,to.y=10,xlab="",ylab="",zlab="")
 points(trans3d(x0[1],x0[2],simpleFun(x0),r),col="red",cex=2)
@@ -312,7 +299,8 @@ points(points(trans3d(gd3$x[1],gd3$x[2],simpleFun(gd3$x),r),
 ```
 
 
-<p> The table below shows the endpoints for each of these four search paths, all of which are roughly identical, and reach a roughly equivalent objective value. </p>
+
+<p> The table below shows the estimates and the corresponding objective values reached by gradient descent starting from those four points. Each run has arrived at essentially the same point. </p>
 
 ```{r,echo=FALSE}
 x0_out <- c(gd$x, simpleFun(gd$x))
@@ -323,6 +311,8 @@ output <- rbind(x0_out,x1_out,x2_out,x3_out)
 colnames(output) <- c("x1","x2","objective value")
 output
 ```
+
+
 
 #### Example 2
 
@@ -404,16 +394,7 @@ points(trans3d(gd1$xmat[1,],gd1$xmat[2,],apply(gd1$xmat,2,complicatedFun),r),
       col="orange")
 ```
 
-<p> Here we see that from some initial guess values, the algorithm successfully reaches the global minimum from others, it gets stuck at a local minimum. </p>
-
-
-#### Exercise 1
-
-Consider the following dataset, which corresponds to measurements of drug concentration in the blood over time. The trend in the data suggests it can be well-captured by a biexponential $D(t) = A (e^{r_1 t} + e^{r_2 t})$. Set up a sum of squared errors function and use the gradient descent function above to determine the best-fit estimates of the parameters $A$, $r_1$ and $r_2$.
-
-
-
-<p> Below is a table showing the x values and the objective value derived by gradient descent starting from those five points. We could see the results are different with different initial guesses. </p>
+<p> Here we see that from some initial guess values, the algorithm successfully reaches the global minimum from others, it gets stuck at a local minimum.  The table below shows the final estimate and the corresponding objective value reached by gradient descent starting from those five starting points. </p>
 
 ```{r,echo=FALSE}
 x0_out <- c(gd0$x, complicatedFun(gd0$x))
@@ -427,6 +408,11 @@ output
 ```
 
 
+#### Exercise 1
+
+Consider the following dataset, which corresponds to measurements of drug concentration in the blood over time. The trend in the data suggests it can be well-captured by a biexponential $D(t) = A (e^{r_1 t} + e^{r_2 t})$. Set up a sum of squared errors function and use the gradient descent function above to determine the best-fit estimates of the parameters $A$, $r_1$ and $r_2$.
+
+### Global Optimization
 
 <p> The default optimization algorithm used by ```nls``` is the Gauss-Newton method, which is a generalization of Newton's method for solving nonlinear equations (which may be familiar from introductory calculus). This is a refinement of gradient descent in which the local curvature of the function is used to project the position of the bottom of the local valley _assuming that the surface is shaped like a parabola_. On parabolic surfaces, this achieves descent to the bottom in one iteration. On non-parabolic surfaces (i.e.~most surfaces), the results is a sequence of iterations, but often many fewer than would be required using gradient descent. </p>
 
@@ -594,25 +580,24 @@ summary(ga)
 
 #### Exercise 2
 
-Apply the a genetic algorithm with ```ga``` to confirm the minimum of the egg-carton function in Example 4:
+Apply the a genetic algorithm with ```ga``` to confirm the minimum of the egg-carton function in Example 4.
 
 ## Calibration of Dynamic Models
 
-<p> The principles of nonlinear regression carry over directly to calibration of more complex models. In particular, in many domains of biology, dynamic models are used to describe the time-varying behaviour of systems (from biomolecular networks to cell-cell interactions to physiology to ecology). These models take many forms, but a commonly used formulation is  based on ordinary differential equations (i.e. _rate equations_). These models are deterministic (do not incorporate random effects) and assume that the dynamics occur in a spatially homogeneous (well-mixed) environment. Despite these limitations, these models can describe a wide variety of dynamic behaviours, and are useful starting points for investigations across biology. </p>
+<p> The principles of nonlinear regression carry over directly to calibration of more complex models. In particular, in many domains of biology, dynamic models are used to describe the time-varying behaviour of systems (from biomolecular networks to physiology to ecology). These models take many forms; a commonly used formulation isbased on ordinary differential equations (i.e. _rate equations_). These models are deterministic (do not incorporate random effects) and assume that the dynamics occur in a spatially homogeneous (well-mixed) environment. Despite these limitations, these models can describe a wide variety of dynamic behaviours, and are useful starting points for investigations across a variety of biological domains. </p>
 
 <p> Ordinary differential equation models used in biology often take the form
 \begin{equation*}
     \frac{d}{dt} {\bf x}(t) = {\bf f}({\bf x}(t), {\bf p})
 \end{equation*}
-where components of the time-varying vector ${\bf x}(t)$ are the _states_ of the system (e.g.~population sizes, molecular concentrations), the components of vector ${\bf p}$ are the _model parameters_: numerical values that represent fixed features of the system and its environment (e.g. interaction strengths, temperature, nutrient availability), and the vector-valued function ${\bf f}$ describes the rate of change of the state variables. As a concrete example, consider the Lotka-Volterra equations, a classical model describing interacting predator and prey populations:
+where components of the time-varying vector ${\bf x}(t)$ are the _states_ of the system (e.g. population sizes, molecular concentrations), the components of vector ${\bf p}$ are the _model parameters_: numerical values that represent fixed features of the system and its environment (e.g. interaction strengths, temperature, nutrient availability), and the vector-valued function ${\bf f}$ describes the rate of change of the state variables. As a concrete example, consider the Lotka-Volterra equations, a classical model describing interacting predator and prey populations:
 \begin{eqnarray*}
     \frac{d}{dt} x_1(t) &=& p_1 x_1(t) - p_2 x_1(t) x_2(t)\\
     \frac{d}{dt} x_2(t) &=& p_3 x_1(t) x_2(t) - p_4 x_2(t)\\
 \end{eqnarray*} </p>
-Here $x_1$ is the size of the prey population; $x_2$ is the size of the predator population. The prey are presumed to have access to resources that allow exponential growth in the absence of predation (growth at rate $p_1 x_1(t)$. Interactions between prey and predator populations (assumed to occur at rate $x_1(t) x_2(t)$ lead to an decrease in the prey population and an increase in the predator population (characterized by parameters $p_2$ and $p_3$ respectively). Finally, the prey suffer an exponential decline in population size in the absence of prey (decay rate $p_4 x_2(t)$). A simulation of the model is shown in Figure XYZ. Note that simulation of the model requires specification of (i) values for each of the model parameters, and (ii) initial conditions, i.e.~the size of each population at time $t=0$.
+Here $x_1$ is the size of the prey population; $x_2$ is the size of the predator population. The prey are presumed to have access to resources that allow exponential growth in the absence of predation: growth at rate $p_1 x_1(t)$. Interactions between prey and predator populations, assumed to occur at rate $x_1(t) x_2(t)$, lead to decrease of the prey population and increase of the predator population (characterized by parameters $p_2$ and $p_3$ respectively). Finally, the prey suffer an exponential decline in population size in the absence of prey: decay at rate $p_4 x_2(t)$. A simulation of the model is shown below. Note that simulation of the model requires specification of numerical values for each of the four model parameters, and initial conditions, i.e. the size of each population at time $t=0$.<\p>
 
 
-<p> Figure XYZ shows a dataset the could corresponds to observations of a predator-prey population system. To calibrate the Lotka-Volterra to this dataset we seek values for the four parameters $p_1$, $p_2$, $p_3$, and $p_4$ for which simulations of the model provide the 'best fit'. As in the regression tasks described previously, the standard measure for quality of fit is the sum of squared errors. We thus proceed with a minimization task: for each simulation of the model, we compare with the dataset and determine the sum of squared errors. We aim to minimize this fit over the space of model parameters. There's one additional feature we must account for: to specify a simulation we need numerical values for the model parameters and the initial conditions. Calling these initial conditions $p_5 = x_1(0)$ and $p_6=x_2(0)$, we are then pose our optimization problem as a search over a six-dimensional parameter space. In what follows, we illustrate the use of both simulated annealing and a genetic algorithm to calibrate this model.</p>
 
 ```{r, echo = FALSE, warning = FALSE}
 library(deSolve)
@@ -636,6 +621,8 @@ points(out$x~out$time, type = "l", add = TRUE)
 legend(3.8,20,legend = c("Prey", "Predator"), col = c("red", "black"), pch = 20)
 ```
 
+<p> The figure below shows a dataset the corresponds to observations of an oscillatory predator-prey  system. To calibrate the Lotka-Volterra model to this dataset we seek values for the four model parameters $p_1$, $p_2$, $p_3$, and $p_4$ for which simulation of the model provides the best fit. As in the regression tasks described previously, the standard measure for quality of fit is the sum of squared errors. We thus proceed with a minimization task: for each choice of numerical values of the four model parameters, we compare model simulation with the dataset and determine the sum of squared errors. We aim to minimize this fit over the space of model parameters. We will use the observed population values at time zero as initial condition for the simulations. </p>
+
 ```{r, echo = FALSE, warning = FALSE}
 observations<-data.frame(t_obs<-out$time[seq(1,length(out$time),20)],
                   x_obs<-out$x[seq(1,length(out$x),20)],
@@ -658,20 +645,18 @@ legend(4,20, legend = c("Prey", "Predator"), col = c("red", "black"), pch = 20)
 corplot
 ```
 
-For this example, we will estimate the parameters $p_2$ and $p_3$.
+To illustrate a simple case, we'll first consider the case that two of the model parameter values have been established independently: $p_1= 30$ and $p_4=6$. We'll then calibrate the model by estimating values for parameters $p_2$ and $p_3$. We begin by building a sum-of-squared errors function that takes values of $p_2$ and $p_3$ as arguments:
 
-```{r, echo = FALSE}
+```{r, echo = TRUE}
 #define SSE function
 determine_sse2 <- function(p) {
 
-
-  
-  #first four input parameters are the kinetic parameters of the model
-  newPars <- c(30,p[1],p[2],6)
-  #last tw parameters are the initial populations for x and y, respectively
+  #inputs are the two unknown model parameters
+  newPars <- c(p[1],p[2])
+  #initial populations are the observed values at time zero for x and y, respectively
   newState <- c(x = 8.792889e-3, y = 1.595545)
   
-  #time-grid is the same as before, no need to redefine
+  #define the time-grid (same as above)
   #Time <- seq(0, 6, by = .001)
   
   #kinetics is the same as before, no need to redefine
@@ -716,7 +701,7 @@ Inputting the predicted values of $p_2$ and $p_3$ into the `GenSA` command gives
 
 
 #### Exercise 3:
-We will now try and estimate the parameters $p_1$, $p_2$, $p_3$ and $p_4$ as well as enter the predictions into the `GenSA` command in order to minimize the sum of squares error value. 
+We will now try and estimate the parameters $p_1$, $p_2$, $p_3$ and $p_4$ as well as enter the predictions into the `GenSA` command in order to minimize the sum of squares error value.  There's one additional feature we must account for: to specify a simulation we need numerical values for the model parameters and the initial conditions. Calling these initial conditions $p_5 = x_1(0)$ and $p_6=x_2(0)$, we could then pose our optimization problem as a search over a six-dimensional parameter space. In what follows, we illustrate the use of both simulated annealing and a genetic algorithm to calibrate this model.
 
 ```{r, echo = FALSE}
 determine_sse3 <- function(p) {
@@ -773,7 +758,7 @@ out0 <- GenSA(par = x2, lower = lower, upper = upper,fn = determine_sse3, contro
 out0[c("value","par")]
 ```
 
-Inputting the predicted values of $p_1$, $p_2$, $p_3$ and $p_4$ into the `GenSA` function, gives us the parameters 29.246138, 4.879013, 2.018677 and 6.058124. These parameters minimize the sum of squared errors value to 4.989519. 
+Inputing the predicted values of $p_1$, $p_2$, $p_3$ and $p_4$ into the `GenSA` function, gives us the parameters 29.246138, 4.879013, 2.018677 and 6.058124. These parameters minimize the sum of squared errors value to 4.989519. 
 
 #### Exercise 4
 
@@ -937,8 +922,8 @@ Here we randomly sample $K$ and $V_m$ 200000 times, it can be seen from the hist
 ```{r}
 # set seed
 set.seed(132)
-# simulate 200000 times with a threshold of 0.001
-sampled_parameter_values_squared_distances = sample_by_rejection(v, 200000, 0.001, accept_or_reject_with_squared_distance)
+# simulate 200000 times with a threshold of 0.001 !!!switched to 200 for knit timing
+sampled_parameter_values_squared_distances = sample_by_rejection(v, 200, 0.001, accept_or_reject_with_squared_distance)
 
 # number of accepted values among 200000 simulations
 sum(sampled_parameter_values_squared_distances$accepted_or_rejected)
@@ -989,9 +974,9 @@ mm_prior = list(c("unif",0,0.01),c("unif",0,1))
 ```
 
 ```{r}
-# use ABC_sequential() to obtain a rough posterior distribution of parameter values
+# use ABC_sequential() to obtain a rough posterior distribution of parameter values  !!!switch to 2000 for knit timing
 ABC_sequential <- ABC_sequential(method="Beaumont", model=mm_model,prior=mm_prior, 
-                                 nb_simul=20000, summary_stat_target=v,
+                                 nb_simul=2000, summary_stat_target=v,
                                  tolerance_tab=tolerance)
 ```
 
