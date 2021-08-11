@@ -601,7 +601,6 @@ plot(ga1)
 summary(ga1)
 ```
 
-Apply the a genetic algorithm with ```ga``` to confirm the minimum of the egg-carton function in Example 4.
 
 ## Calibration of Dynamic Models
 
