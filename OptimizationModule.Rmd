@@ -579,8 +579,28 @@ summary(ga)
 ```
 
 #### Exercise 2
+Apply the genetic algorithm with ```ga``` to confirm the minimum of the egg-carton function in Example 4.
 
-Apply the a genetic algorithm with ```ga``` to confirm the minimum of the egg-carton function in Example 4.
+Here is the code for the egg-carton function:
+```{r, echo = TRUE}
+f.egg<- function(x,y){
+  -(y+47)*sin(sqrt(abs(y+(x/2)+47)))-x*sin(sqrt(abs(x-(y+47))))
+}
+```
+
+Here is the code for the genetic algorithm:
+```{r, echo = TRUE}
+ga1 <- ga(type = "real-valued", fitness = function(x) -f.egg(x[1],x[2]),
+         lower = c(-200, -200), upper = c(200, 200), maxiter = 30)
+```
+
+Now try plotting the results of the genetic algorithm search as well as getting a summary of the results to see if the fitness function value obtained through this method is the same as the value obtained through simulated annealing. 
+
+```{r, echo = TRUE}
+plot(ga1)
+summary(ga1)
+```
+
 
 ## Calibration of Dynamic Models
 
