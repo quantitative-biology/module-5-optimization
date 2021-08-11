@@ -91,13 +91,13 @@ where $\bar{x}$ and $\bar{y}$ are the averages
 We'll work with a dataset called __iris__ that is included in R. It's shown below (via the `plot()` command).
 
 
-```{r, echo = TRUE}
+```{r plot-iris-dataset, echo = TRUE}
 plot(iris$Sepal.Length~iris$Petal.Width, xlab = "Petal Width", ylab = "Sepal Length")
 ```
 
 The `lm()` command applies the formula described above to arrive at the line of best fit (i.e. the minimizer of the sum of squared errors).  We use the command in the form  `lm(iris$Sepal.Length~iris$Petal.Width)`, referring to the labels for the data (as shown above) to generate the parameters ($b$ and $m$) that specify the line $y=mx+b$.
 
-```{r, echo = TRUE}
+```{r linear_regression_iris_dataset, echo = TRUE}
 lm(iris$Sepal.Length~iris$Petal.Width)
 ```
 
@@ -107,7 +107,7 @@ We can plot the data together with the line of best fit with the `abline` comman
 <!-- or __abline(lm(iris$Sepal.Length~iris$Petal.Width))__.  -->
 
 
-```{r, echo = TRUE}
+```{r plot-linear_regression_iris_dataset, echo = TRUE}
 plot(iris$Sepal.Length~iris$Petal.Width, xlab = "Petal Width", ylab = "Sepal Length")
 abline(lm(iris$Sepal.Length~iris$Petal.Width))
 ```
@@ -130,7 +130,7 @@ In several important cases, the nonlinear regression task can be transformed int
 
 In general, the nonlinear regression task must be addressed directly. An example of the general procedure in R follows. We begin by defining a dataset against which we will fit a Michaelis-Menten curve. 
 
-```{r, echo = TRUE}
+```{r plot-Michaelis-Menten-dataset, echo = TRUE}
 
 S <- c(4.32, 2.16, 1.08, 0.54, 0.27, 0.135, 3.6, 
                            1.8, 0.9, 0.45, 0.225, 0.1125, 2.88, 1.44, 0.72, 0.36, 0.18, 0.9, 
@@ -145,14 +145,14 @@ plot(MM_data)
 
 Like the ```lm``` command, the ```nls``` function takes as inputs the dataset and the model. In addition, ```nls``` requires that the user provides 'guesses' for the values of the parameters to be estimated (in this case $V_{\mbox{max}}$ and $K_M$). In this case, we can roughly estimate $V_{\mbox{max}} \approx  0.005$ as the maximal $V$-value that can be achieved, and $K_M \approx 0.2$ as the $S$-value at which $V$ reaches half of its maximal value.
 
-```{r, echo = TRUE}
-model.nls <- nls(V ~ Vmax * S/(Km+S),start = list(Km = 0.3, Vmax = 0.005))
-summary(model.nls)
+```{r nonlinear_regression_Michaelis-Menten_dataset, echo = TRUE}
+MMmodel.nls <- nls(V ~ Vmax * S/(Km+S),start = list(Km = 0.3, Vmax = 0.005))
+summary(MMmodel.nls)
 ```
 
-This output from ```nls``` provides the parameter estimates that characterize the best-fit model ($K_M = 0.4772154$ and $V_{\mbox max} = 0.0053061$), as well as additional information about the confidence of this estimate (some of which will be discussed further below). We can now plot the best fit model along with the dataset:  
+This output from ```nls``` provides the parameter estimates that characterize the best-fit model ($K_M = 0.4772154$ and $V_{\mbox max} = 0.0053061$), as well as additional information about the confidence of this estimate (some of which will be discussed further below). (Further details on using the ```nls``` command can be found in Ritz and Streibig, 2008). We can now plot the best fit model along with the dataset:  
 
-```{r, echo = TRUE}
+```{r plot_nonlinear_regression_Michaelis-Menten_dataset, echo = TRUE}
 params <- summary(model.nls)$coeff[,1] #extracting the parameter estimates
 plot(MM_data)
 curve((params[2]*x)/(params[1]+x), from = 0, to = 4, add=TRUE, col='firebrick')
@@ -172,7 +172,7 @@ curve((params[2]*x)/(params[1]+x), from = 0, to = 4, add=TRUE, col='firebrick')
 
 <p>To illustrate the gradient descent approach, consider the following algorithm, which incorporates two termination conditions: a maximum number of allowed iterations,and a threshold for shallowness: </p>
 
-```{r,echo=TRUE}
+```{r gradient-descent,echo=TRUE}
 library(numDeriv)       # contains functions for calculating gradient
 
 #define function that implement gradient descent. Inputs are the objective function f, the initial parameter estimate x0, the maximum number of iterations to be applied, the size of each step, and a threshold gradient below which the landscape is considered flat (and so iterations are terminated)
@@ -200,13 +200,13 @@ grad.descent = function(f, x0, step.size=0.05, max.iter=200,
 #### Example 1
  <p>We'll begin by demonstrating the performance of this algorithm on a simple function with a single local minimum. </p>
 
-```{r}
+```{r define-convex-function, echo=TRUE}
 Paraboloid = function(x) {
   return((x[1]-3)^2 + 1/3*(x[2]+4)^2+2)
 }
 ```
 
-```{r,echo=FALSE,message=FALSE}
+```{r plot-wireframe-convex-function,echo=FALSE,message=FALSE}
 simpleFun = function(x) {
   return((x[1]-3)^2 + 1/3*x[2]^2+2)
 }
@@ -231,7 +231,7 @@ wireframe(z ~ x*y,x, drape=T, expand = 0.5, col = "blue", xlab=NULL, ylab=NULL, 
 
  <p>In this case, we expect that the minimum (valley bottom) will be reached from any initial 'guess'. Starting from four distinct points, the algorithm follows the paths shown below. </p>
 
-```{r,echo=FALSE}
+```{r gradient-descent-convex-function,echo=FALSE}
 x0 = c(-1.9,-1.9)
 gd = grad.descent(simpleFun,x0,step.size=1/3)
 
@@ -263,7 +263,7 @@ surface = function(f, from.x=0, to.x=1, from.y=0, to.y=1,
 
 
 
-```{r,echo=FALSE}
+```{r plot-paths-gradient-descent-convex-function,echo=FALSE}
 r = surface(simpleFun,from.x=-5,to.x=10,from.y=-10,to.y=10,xlab="",ylab="",zlab="")
 points(trans3d(x0[1],x0[2],simpleFun(x0),r),col="red",cex=2)
 points(trans3d(gd$xmat[1,],gd$xmat[2,],apply(gd$xmat,2,simpleFun),r),
@@ -302,7 +302,7 @@ points(points(trans3d(gd3$x[1],gd3$x[2],simpleFun(gd3$x),r),
 
 <p> The table below shows the estimates and the corresponding objective values reached by gradient descent starting from those four points. Each run has arrived at essentially the same point. </p>
 
-```{r,echo=FALSE}
+```{r final-output-plot-paths-gradient-descent-convex-function,echo=FALSE}
 x0_out <- c(gd$x, simpleFun(gd$x))
 x1_out <- c(gd1$x, simpleFun(gd1$x))
 x2_out <- c(gd2$x, simpleFun(gd2$x))
@@ -318,13 +318,13 @@ output
 
  <p>Next, let's consider a  function that has multiple local minima. The second plot below is interactive, allowing you to rotate the surface.</p>   
 
-```{r}
+```{r complicated-function, echo=TRUE}
 complicatedFun = function(x) {
   return((1/2*x[1]^2-1/4*x[2]^2+3)*cos(2*x[1]+1-exp(x[2])))
 }
 ```
 
-```{r,echo=FALSE,message=FALSE}
+```{r plot-wireframe-complicated-function,echo=FALSE,message=FALSE}
 complicated = function(x,y) {
   return((1/2*x^2-1/4*y^2+3)*cos(2*x+1-exp(y)))
 }
@@ -344,7 +344,7 @@ wireframe(z ~ x*y,x, drape=T, expand = 0.5, col = "blue", xlab=NULL, ylab=NULL, 
 ```
 
 
-```{r,echo=FALSE,message=FALSE,warning=FALSE}
+```{r plot-surface-complicated-function,echo=FALSE,message=FALSE,warning=FALSE}
 library(MASS)
 library(plotly)
 x <- seq(-2, 2, length= 30)
@@ -358,7 +358,7 @@ fig
 
 <p> Again, we'll apply gradient descent from a set of initial guess positions: </p>
 
-```{r,echo=FALSE}
+```{r gradient-descent-and-plot-paths-complicated-function,echo=FALSE}
 x0 = c(0.5,0.5)
 gd0 = grad.descent(complicatedFun,x0,step.size=0.01)
 x1 = c(-0.1,-1.3)
@@ -396,7 +396,7 @@ points(trans3d(gd1$xmat[1,],gd1$xmat[2,],apply(gd1$xmat,2,complicatedFun),r),
 
 <p> Here we see that from some initial guess values, the algorithm successfully reaches the global minimum from others, it gets stuck at a local minimum.  The table below shows the final estimate and the corresponding objective value reached by gradient descent starting from those five starting points. </p>
 
-```{r,echo=FALSE}
+```{r final-output-plot-paths-gradient-descent-complicated-function,echo=FALSE}
 x0_out <- c(gd0$x, complicatedFun(gd0$x))
 x1_out <- c(gd1$x, complicatedFun(gd1$x))
 x2_out <- c(gd2$x, complicatedFun(gd2$x))
@@ -426,7 +426,7 @@ Consider the following dataset, which corresponds to measurements of drug concen
 
 <p> To illustrate, we'll apply simulated annealing to the optimization task in Example 2 above, using the same initial guess points. We'll use the ```GenSA``` library to implement the algorithm (add link https://cran.r-project.org/web/packages/GenSA/GenSA.pdf). Calls to ```GenSA``` requires that we specify the objective function, an initial guess, and upper and lower bounds for the search values for each parameter. (Optional input parameters allow the user to modify internal features of the algorithm such as the cooling schedule and stepping protocol.)
 
-```{r,echo=TRUE}
+```{r simulated-annealing-complicated-function,echo=TRUE}
 library(GenSA)
 
 out0 <- GenSA(par = x0, lower = c(-2,-2), upper = c(2,2),fn = complicatedFun)
@@ -434,7 +434,7 @@ out0[c("value","par")]
 ```
 <p> The result of this call is recorded in the variable ```out0``` which indicates the minimal value of the objective achieved (-4.906786) and the parameter values at which this minimum occurs $(x,y)= (2.0000000, 0.6014984)$. Next, we'll call ```GenSA``` form each of the initial guesses that were provided to the gradient descent algorithm above. </p>
 
-```{r,message=FALSE}
+```{r multi-start-simulated-annealing-complicated-function,message=FALSE}
 library(GenSA)
 
 set.seed(1234) # The user can use any seed.
@@ -460,11 +460,11 @@ out4 <- GenSA(par = x4, lower = lower, upper = upper,fn = complicatedFun)
 out4[c("value","par","counts")]
 ```
 
-<p> We see that simulated anneaing has avoided getting 'stuck' in the local minima, and has achieved the same optimized value from every initial guess. </p>
+<p> We see that simulated annealing has avoided getting 'stuck' in the local minima, and has achieved the same optimized value from every initial guess. </p>
 
-<p> The plot below provides some insight into how the simulated annealing run proceeded. Iterations (steps) are shown along the horizontal axis. The vertical axis shows values of the objective function. The blue points represents function value at teh current position, while the red shows the minimum achieved so far. The minimum is found rather quickly, but the algorithm continues to jump around (and occasionally get temporarily stuck at local minima) in an attempt to widely explore the search space.</p>
+<p> The plot below provides some insight into how the simulated annealing run proceeded. Iterations (steps) are shown along the horizontal axis. The vertical axis shows values of the objective function. The blue points represents function value at the current position, while the red shows the minimum achieved so far. The minimum is found rather quickly, but the algorithm continues to jump around (and occasionally get temporarily stuck at local minima) in an attempt to widely explore the search space.</p>
 
-```{r}
+```{r output-simulated-annealing-complicated-function}
 plot(out1$trace.mat[,4][1:8000],type="l",lwd=4,col="red",xlab="Iteration number",ylab="Objective value")
 points(out1$trace.mat[,3][1:8000],pch=20,col="blue")
 ```
@@ -474,13 +474,13 @@ points(out1$trace.mat[,3][1:8000],pch=20,col="blue")
 $$f(x,y) = (y+47)\sin\left (\sqrt{|y+(x/2)+47|)}-x\sin(\sqrt{|x-(y+47)|} \right)$$
 </p>
 
-```{r, ECHO=TRUE}
+```{r define-egg-carton-function, ECHO=TRUE}
 f.egg<- function(x){
   -(x[,2]+47)*sin(sqrt(abs(x[,2]+(x[,1]/2)+47)))-x[,1]*sin(sqrt(abs(x[,1]-(x[,2]+47))))
 }
 ```
 
-```{r,echo=FALSE}
+```{r plot-wireframe-egg-carton-function, echo=FALSE}
 f.name <- "Example 4"
 
 # make the function
@@ -521,20 +521,20 @@ wireframe(y ~ x1 * x2 # y, x1, and x2 axes to plot
 )
 ```
 
-```{r,echo=FALSE}
+```{r define-egg-carton-function-again,echo=FALSE}
 f.egg<- function(x){
   -(x[2]+47)*sin(sqrt(abs(x[2]+(x[1]/2)+47)))-x[1]*sin(sqrt(abs(x[1]-(x[2]+47))))
 }
 
-lower <- rep(-200, dimension)
-upper <- rep(200, dimension)
+lower <- rep(-200, 2)
+upper <- rep(200, 2)
 
 x0 <- c(100,100)
 ```
 
 We start the algorithm from  two different initial guesses. Both runs result in the same solution:
 
-```{r}
+```{r egg-carton-simulated-annealing-runs, echo=TRUE}
 egg.out <- GenSA(par = x0, lower = lower, upper = upper,fn = f.egg)
 egg.out[c("value","par")]
 
@@ -544,7 +544,7 @@ egg.out3[c("value","par")]
 
 The plot below shows how simulated annealing works for the two initial points respectively. The red line records the current minimum. The blue points represents function value. Although they have different starting position, it can be seen from the plots the optimized values are the same.
 
-```{r,echo=FALSE}
+```{r plot-egg-carton-simulated-annealing-traces,echo=FALSE}
 plot(egg.out$trace.mat[,4],type="l",lwd=4,col="red")
 points(egg.out$trace.mat[,3],pch=20,col="blue")
 
@@ -560,7 +560,7 @@ We next consider a heuristic algorithm in which multiple paths through the searc
 
 </p>To implement a genetic algorithm, we'll make use of the ```ga``` function (https://cran.r-project.org/web/packages/GA/GA.pdf). As with simulated annealing, the call to ```ga``` requires that we specify the objective function, lower and upper bounds to define the search space, and the number of iterations to execute. B default, ```ga``` maximizes the objective function, so we enter our objective with a negative sign to achieve minimization. </p>
 
-```{r}
+```{r call GA, echo=TRUE}
 library(GA)
 ga <- ga(type = "real-valued", fitness = function(x) -complicated(x[1],x[2]),
          lower = c(-2, -2), upper = c(2, 2), maxiter = 30)
@@ -568,13 +568,13 @@ ga <- ga(type = "real-valued", fitness = function(x) -complicated(x[1],x[2]),
 
 Plotting the results of the genetic algorithm search, we see improvement in the overall behaviour from generation to generation. 
 
-```{r}
+```{r plot-GA-output, echo=TRUE}
 plot(ga)
 ```
 
 The summary displayed below shows that the solutions reached by the genetic algorithm agrees with the solution found by simulated annealing.  
 
-```{r}
+```{r report-summary-GA, echo=TRUE}
 summary(ga)
 ```
 
@@ -599,7 +599,7 @@ Here $x_1$ is the size of the prey population; $x_2$ is the size of the predator
 
 
 
-```{r, echo = FALSE, warning = FALSE}
+```{r simulate-and-plot-lotka-volterra, echo = FALSE, warning = FALSE}
 library(deSolve)
 
 LotVmod <- function (Time, State, Pars) {
@@ -623,7 +623,7 @@ legend(3.8,20,legend = c("Prey", "Predator"), col = c("red", "black"), pch = 20)
 
 <p> The figure below shows a dataset the corresponds to observations of an oscillatory predator-prey  system. To calibrate the Lotka-Volterra model to this dataset we seek values for the four model parameters $p_1$, $p_2$, $p_3$, and $p_4$ for which simulation of the model provides the best fit. As in the regression tasks described previously, the standard measure for quality of fit is the sum of squared errors. We thus proceed with a minimization task: for each choice of numerical values of the four model parameters, we compare model simulation with the dataset and determine the sum of squared errors. We aim to minimize this fit over the space of model parameters. We will use the observed population values at time zero as initial condition for the simulations. </p>
 
-```{r, echo = FALSE, warning = FALSE}
+```{r generate-and-plot-lotka-volterra-corrupted-data, echo = FALSE, warning = FALSE}
 observations<-data.frame(t_obs<-out$time[seq(1,length(out$time),20)],
                   x_obs<-out$x[seq(1,length(out$x),20)],
                   y_obs<-out$y[seq(1,length(out$y),20)])
@@ -647,7 +647,7 @@ corplot
 
 To illustrate a simple case, we'll first consider the case that two of the model parameter values have been established independently: $p_1= 30$ and $p_4=6$. We'll then calibrate the model by estimating values for parameters $p_2$ and $p_3$. We begin by building a sum-of-squared errors function that takes values of $p_2$ and $p_3$ as arguments:
 
-```{r, echo = TRUE}
+```{r define-lotka-volterra-sse-function, echo = TRUE}
 #define SSE function
 determine_sse2 <- function(p) {
 
@@ -668,8 +668,8 @@ newLotVmod <- function (Time, State, newPars) {
     })
 }
   
-  
-  new_out <- as.data.frame(ode(func = newLotVmod, y = newState, parms = newPars, times = Time))
+  #run the simulation with the user-specified values for p2 and p3
+  new_out <- as.data.frame(ode(func = newLotVmod, y = newState, parms = newPars, times = Time)) 
   
   #generate vector of predictions to align with vector of observations
   predictions<-data.frame(t_pred<-t_obs,
@@ -682,26 +682,69 @@ newLotVmod <- function (Time, State, newPars) {
 }
 ```
 
-```{r, echo = TRUE}
-determine_sse2(c(4,1))
-```
+We now call an optimization routine to search the space of $p_2$ and $p_3$ values to minimize this SSE function. We apply the simulated annealing function ```GenSA``` as described above:
 
-The predicted value of $p_2$ and $p_3$ is 4 and 1, respectively. The resulting sum of squares error is 1218.575. 
-
-```{r, echo = FALSE}
+```{r SA-call-lotka-volterra, echo = TRUE}
 library(GenSA)
 x1 = c(4,1)
 lower <- c(0.1,0.1)
 upper <- c(10,10)
-out0 <- GenSA(par = x1, lower = lower, upper = upper,fn = determine_sse2, control = list(maxit = 100))
+out0 <- GenSA(par = x1, lower = lower, upper = upper,fn = determine_sse2, control = list(maxit = 10)) #maxit =100, change to 10 for knit time
 out0[c("value","par")]
 ```
 
-Inputting the predicted values of $p_2$ and $p_3$ into the `GenSA` command gives us the parameters 4.974368 and 2.005188 which minimizes the sum of squares error value to 5.143125. 
+The search algorithm has identified values of $p_2=4.974368$ and $p_3=2.005188$ as minimzer, with the minimal sum of squares error value of 5.143125. 
+
+The best fit model simulation is shown along with the data below:
+
+```{r plot-lotka-volterra-best-fit-and-data, echo = FALSE, warning = FALSE}
+
+library(deSolve)
+
+LotVmod <- function (Time, State, Pars) {
+    with(as.list(c(State, Pars)), {
+        dx = x*(p1 - p2*y)
+        dy = -y*(p3 - p4*x)
+        return(list(c(dx, dy)))
+    })
+}
+
+Pars <- c(p1 = 30, p2 = 4.974368, p3 = 2.005188, p4 = 6)
+State <- c(x = 8.792889e-3, y = 1.595545)
+Time <- seq(0, 6, by = 0.01)
+
+out <- as.data.frame(ode(func = LotVmod, y = State, parms = Pars, times = Time))
+
+
+observations<-data.frame(t_obs<-out$time[seq(1,length(out$time),20)],
+                  x_obs<-out$x[seq(1,length(out$x),20)],
+                  y_obs<-out$y[seq(1,length(out$y),20)])
+# set random seed for noise to be added
+set.seed(12)
+#generate one random number in [0,1] for each observation
+unscaled_noise<-runif(length(t_obs))
+
+
+#generate corrupted observations
+corrupted_observations<-data.frame(t_obs,
+                  x_obs_corrupt<- x_obs+ ((unscaled_noise*2-1)*(0.1*x_obs)),
+                  y_obs_corrupt<- y_obs+ ((unscaled_noise*2-1)*(0.1*y_obs)) )
+
+#plot corrupted observation vector (scatterplot is needed...)
+corplot<-plot(corrupted_observations[,3]~corrupted_observations[,1], col = "red", ylim = c(0,20), main = "Observations of a Predator-Prey Population System", xlab = "Time", ylab = "Population Density", pch = 20)
+points(corrupted_observations[,2]~corrupted_observations[,1], add = TRUE, pch = 20)
+points(out$y~out$time, type = "l", col = "red", add = TRUE)
+points(out$x~out$time, type = "l", add = TRUE)
+legend(4,20, legend = c("Prey", "Predator"), col = c("red", "black"), pch = 20)
+corplot
+
+
+```
 
 
 #### Exercise 3:
-We will now try and estimate the parameters $p_1$, $p_2$, $p_3$ and $p_4$ as well as enter the predictions into the `GenSA` command in order to minimize the sum of squares error value.  There's one additional feature we must account for: to specify a simulation we need numerical values for the model parameters and the initial conditions. Calling these initial conditions $p_5 = x_1(0)$ and $p_6=x_2(0)$, we could then pose our optimization problem as a search over a six-dimensional parameter space. In what follows, we illustrate the use of both simulated annealing and a genetic algorithm to calibrate this model.
+
+<p>We will now try and estimate the parameters $p_1$, $p_2$, $p_3$ and $p_4$ as well as enter the predictions into the `GenSA` command in order to minimize the sum of squares error value.  There's one additional feature we must account for: to specify a simulation we need numerical values for the model parameters and the initial conditions. Calling these initial conditions $p_5 = x_1(0)$ and $p_6=x_2(0)$, we could then pose our optimization problem as a search over a six-dimensional parameter space. In what follows, we illustrate the use of both simulated annealing and a genetic algorithm to calibrate this model.</p>
 
 ```{r, echo = FALSE}
 determine_sse3 <- function(p) {
@@ -798,107 +841,94 @@ Inputing the predicted values of $p_1$, $p_2$, $p_3$ and $p_4$ into the `GenSA` 
 
 ## Uncertainty Analysis and Bayesian Calibration
 
-<p> The regression tasks discussed above resulted in estimates of parameter values based on the provided datasets. Regression is usually followed by _uncertainty analysis_, which provides some measure of confidence in those estimated parameter values. For instance, in the case of linear regression, 95\% confidence intervals on the estimates (best fit line slope and intercept) and corresponding confidence intervals on the model predictions are supported by extensive statistical theory, and can be readily generated in R, as follows. </p> 
+<p> So far, we've used regression analysis to provide estimates of parameter values based on data. Regression is usually followed by _uncertainty analysis_, which provides some measure of confidence in those parameter value estimates. For instance, in the case of linear regression, 95\% confidence intervals on the estimates (best fit line slope and intercept) and corresponding confidence intervals on the model predictions are supported by extensive statistical theory, and can be readily generated in R, as follows. </p> 
 
-```{r,echo=FALSE}
+```{r generate-prediction-confidence-intervals-linear-regression-iris,echo=TRUE}
 library(ggplot2)
-#data("cars")
-```
+data("iris")
 
-```{r,echo=FALSE}
-#cars.lm <- lm(dist ~ speed, data = cars)
-```
+iris.lm <- lm(Sepal.Length~ Petal.Width, data = iris)
 
-```{r,echo=FALSE}
-#new.dat <- seq(min(cars$speed),max(cars$speed),by = 0.05)
-#pred_interval <- predict(cars.lm, newdata = data.frame(speed=new.dat), 
-#                         interval = 'prediction',level = 0.95)
+new.dat <- seq(min(iris$Petal.Width),max(iris$Petal.Width),by = 0.05)
+pred_interval <- predict(iris.lm, newdata = data.frame(Petal.Width=new.dat), interval = 'prediction',level = 0.95)
 ```
 
 The plot below shows 95\% confidence intervals on the model predictions. 
 
-```{r,echo=FALSE}
-#plot(cars$speed,cars$dist,xlab="speed", ylab="dist", #main="Regression",pch=16)
-#abline(cars.lm,col="firebrick",lwd=2)
-#lines(new.dat, pred_interval[,2], col="steelblue", lty=2,lwd=2)
-#lines(new.dat, pred_interval[,3], col="steelblue", lty=2,lwd=2)
-#legend(4, 105, legend=c("Best-fitted Line", "Prediction interval"),
-#       col=c("firebrick", "steelblue"), lty=1:2, cex=0.8)
+```{r plot-prediction-confidence-intervals-linear-regression-iris,echo=FALSE}
+plot(iris$Petal.Width,iris$Sepal.Length,xlab="Sepal Length", ylab="Petal Width", main="Regression",pch=16)
+abline(iris.lm,col="firebrick",lwd=2)
+lines(new.dat, pred_interval[,2], col="steelblue", lty=2,lwd=2)
+lines(new.dat, pred_interval[,3], col="steelblue", lty=2,lwd=2)
+legend(4, 105, legend=c("Best-fit Line", "Prediction interval"),
+       col=c("firebrick", "steelblue"), lty=1:2, cex=0.8)
 ```
+
 
 The confint() function determines 95\% confidence intervals on the estimates of the parameters (the slope and intercept).
 
-```{r}
-#confint(cars.lm)
+```{r estimate-confidence-intervals-linear-regression-iris,echo=FALSE}}
+confint(iris.lm)
 ```
 
-This can also be derived using the confidence interval formula: $\text{estimate}\pm \text{critical value}\times\text{standard error}$
-
-```{r}
-#lm_summ <- summary(cars.lm)
-#c("lower" = lm_summ$coef[2,1] - qt(0.975, df = lm_summ$df[2]) * #lm_summ$coef[2, 2],
-#  "upper" = lm_summ$coef[2,1] + qt(0.975, df = lm_summ$df[2]) * #lm_summ$coef[2, 2])
-#c("lower" = lm_summ$coef[1,1] - qt(0.975, df = lm_summ$df[2]) * #lm_summ$coef[1, 2],
-#  "upper" = lm_summ$coef[1,1] + qt(0.975, df = lm_summ$df[2]) * #lm_summ$coef[1, 2])
-```
 
 <p> For nonlinear regression (including calibration of dynamic models), the theory is less helpful, but estimates of uncertainty intervals can be achieved: </p>
 
-```{r}
-confint(model.nls)
+```{r, generate-estimate-confidence-intervals-Michaelis-Menten, echo=TRUE}
+confint(MMmodel.nls)
 ```
 
-```{r}
-lm_summ <- summary(model.nls)
-c("lower" = lm_summ$coef[2,1] - qt(0.975, df = lm_summ$df[2]) * lm_summ$coef[2, 2],
-  "upper" = lm_summ$coef[2,1] + qt(0.975, df = lm_summ$df[2]) * lm_summ$coef[2, 2])
-c("lower" = lm_summ$coef[1,1] - qt(0.975, df = lm_summ$df[2]) * lm_summ$coef[1, 2],
-  "upper" = lm_summ$coef[1,1] + qt(0.975, df = lm_summ$df[2]) * lm_summ$coef[1, 2])
-```
 
-<p> __Bayesian methods__ address the regression task by combining calibration and uncertainty in a single process. The basic idea behind Bayesian analysis (founded on Bayes Theorem, which may be familiar from elementary probability), is to start with an initial parameter estimate (analogous to the initial guess needed in nonlinear regression) and then use the available data to refine that estimate. The difference is that instead of the initial guess and refined estimate being single numerical values, they are _distributions_. In Bayesian terminology, we being with a _prior_ distribution, which may be informed by expert knowledge (e.g.~a normal distribution centered at a good initial estimate), or may be a wild guess (e.g.~a uniform distribution over a wide range of possible values). Application of a Bayesian calibration scheme uses the available data to generate an improved distribution of the parameter values, called the  _posterior_ distribution. A successful Bayesian calibration could take a `wild guess' uniform prior and return a tightly-centered posterior. Uncertainty can then be gleaned directly from the posterior, by reporting, e.g.~ a 95% confidence interval. One commonly cited concern with Bayesian techniques is the dependence of the result on the rather subjective selection of a prior. This is analogous to concerns about any bias introduced by choice of initial guess in the non-Bayesian analysis described above. In both cases, multi-start techniques can be used to address this issue. </p>
+<!-- ```{r} -->
+<!-- lm_summ <- summary(model.nls) -->
+<!-- c("lower" = lm_summ$coef[2,1] - qt(0.975, df = lm_summ$df[2]) * lm_summ$coef[2, 2], -->
+<!--   "upper" = lm_summ$coef[2,1] + qt(0.975, df = lm_summ$df[2]) * lm_summ$coef[2, 2]) -->
+<!-- c("lower" = lm_summ$coef[1,1] - qt(0.975, df = lm_summ$df[2]) * lm_summ$coef[1, 2], -->
+<!--   "upper" = lm_summ$coef[1,1] + qt(0.975, df = lm_summ$df[2]) * lm_summ$coef[1, 2]) -->
+<!-- ``` -->
 
-<p> Here we'll consider a simple numerical implementation of a Bayesian approach: Approximate Bayesian Computation (ABC). This approach is based on a simple idea: the _rejection method_, in which we sample repeatedly from the prior distribution and reject all samples that do not satisfy a pre-specified tolerance for quality of fit. (This is reminiscent of the selection step in genetic algorithms: culling unfit members of a population.) </p>
+<p> __Bayesian methods__ address the regression task by combining calibration and uncertainty in a single process. The basic idea behind Bayesian analysis (founded on Bayes Theorem, which may be familiar from elementary probability), is to start with some knowledge about the parameter estimates (analogous to the initial guess supplied to nonlinear regression or global optimization) and then use the available data to refine that knowledge. In the Bayesian contect, instead of the initial guess and refined estimate being single numerical values, they are _distributions_. In Bayesian terminology, we being with a _prior_ distribution, which may be informed by previously established expert knowledge. A commonly used prior is a normal distribution centered at a good initial estimate; in other cases the piro may be a uniform distribution over a wide range of possible values, indicating very little previously established knowledge about the parameetr values. Application of a Bayesian calibration scheme uses the available data to generate an improved distribution of the parameter values, called the  _posterior_ distribution. A successful Bayesian calibration could take a `wild guess' uniform prior and return a tightly-centered posterior. Uncertainty can then be gleaned directly from the posterior distribution. </p>
 
-For the Michaelis-Menten example, the estimated values for $K$ and $V_m$ are 0.4398016 and 0.0054252 respectively. Now we simulate numbers for $K$ and $V_m$, and accept the value if the distances between the simulated values and the true values are under the threshold.
+<p> Here we'll consider a simple numerical implementation of a Bayesian approach: Approximate Bayesian Computation (ABC). This approach is based on a simple idea: the _rejection method_, in which we sample repeatedly from the prior distribution and reject all samples that do not satisfy a pre-specified tolerance for quality of fit. (This is reminiscent of the selection step in genetic algorithms: culling unfit members of a population.) The samples that are not rejected form the _posterior_ distribution.</p>
 
-```{r}
-# use the original dataset
+To illustrate, we'll revist the Michaelis-Menten example considered above. We select uniform priors for both parameters: $Km$ uniform on $[0,1]$ and $V_{max}$ uniform on $[0, 0.01]$. 
+
+
+```{r rejection-method-for-Michaelis-Menten-data, ECHO=TRUE}
+# recall the dataset
 S = c(3.6, 1.8, 0.9, 0.45, 0.225, 0.1125, 3.6, 1.8, 0.9, 0.45, 0.225, 0.1125, 
       3.6, 1.8, 0.9, 0.45, 0.225, 0.1125, 0)
-v = c(0.004407692, 0.004192308, 0.003553846, 0.002576923, 0.001661538, 
+V = c(0.004407692, 0.004192308, 0.003553846, 0.002576923, 0.001661538, 
       0.001064286, 0.004835714, 0.004671429, 0.0039, 0.002857143,
       0.00175, 0.001057143, 0.004907143, 0.004521429, 0.00375, 0.002764286,
       0.001857143, 0.001121429, 0)
 
-# functions to randomly draw values for K and Vm
-draw_K <- function () {
+# define functions to draw values for Km and Vmax from the prior distributions
+draw_Km <- function () {
   return (runif(1, min=0, max=1))
 }
-draw_Vm <- function () {
+draw_Vmax <- function () {
   return (runif(1, min=0, max=0.01))
 }
-```
 
-```{r}
-# simulate values for v
-simulate_data <- function (S, K, Vm) { 
-  return(Vm*S/(K+S))
+# Michaelis-Menten function 
+simulate_data <- function (S, Km, Vmax) { 
+  return(Vmax*S/(Km+S))
 }
 
-# calculate distances between true and simulated values
+# function to determine SSE between data and predictions
 compare_with_squared_distance <- function (true, simulated) {
   distance = sqrt(sum(mapply(function(x,y) (x-y)^2, true, simulated)))
   return(distance)
 }
 
-# returns true if the distance is less than the given threshold, false otherwise
+# function to check whether distance is below threshold (resturns TRUE) or not (returns FALSE)
 accept_or_reject_with_squared_distance <- function (true, simulated, acceptance_threshold) {
   distance = compare_with_squared_distance(true, simulated)
   if((distance < acceptance_threshold) ) return(T) else return(F)
 }
 
-# returns the sampled K and Vm values and if they are rejected or not
+# sampling algorithm: returns the sampled Km and Vmax values and whether this pair is accepted
 sample_by_rejection <- function (true_data, n_iterations, acceptance_threshold, accept_or_reject_function) {
   number_of_data_points = length(true_data)
   accepted_or_rejected <- vector(length = n_iterations)
@@ -917,19 +947,24 @@ sample_by_rejection <- function (true_data, n_iterations, acceptance_threshold, 
 }
 ```
 
-Here we randomly sample $K$ and $V_m$ 200000 times, it can be seen from the histograms that the values that occur most frequently are close to the estimated values derived from the non linear regression model.
+In the call below, we sample from the prior distributions of $Km$ and $V_max$ 200000 times. We set the accpetance threhsold as  0.001. That is, parameter pairs that give rise to SSE values below 0.001 are accepted; others are rejected. The histograms below show the uniform priors along with the posteriors. The algorithm has succesfully tightened the distributions about the best-fit parameter estimates established above. 
 
-```{r}
+```{r, echo=FALSE}
 # set seed
 set.seed(132)
-# simulate 200000 times with a threshold of 0.001 !!!switched to 200 for knit timing
-sampled_parameter_values_squared_distances = sample_by_rejection(v, 200, 0.001, accept_or_reject_with_squared_distance)
-
-# number of accepted values among 200000 simulations
-sum(sampled_parameter_values_squared_distances$accepted_or_rejected)
 ```
 
 ```{r}
+# simulate 200000 times with a threshold of 0.001 !!!switched to 200 for knit timing
+sampled_parameter_values_squared_distances = sample_by_rejection(v, 200, 0.001, accept_or_reject_with_squared_distance)
+
+# report the number of accepted values among the 200000 samples
+sum(sampled_parameter_values_squared_distances$accepted_or_rejected)
+```
+
+We see that only X of 200 000 samples were accepted, yielding an acceptance rate of XXX. The acceptance rate can be tuned by choice of the rejection threshold. A low acceptance rate gives rise to a computationally expensive algorithm, while a high accpetance rate can lead to poor estimation.
+
+```{r plot-rejection-histograms, echo=FALSE}
 c1 <- rgb(173,216,230,max = 255, alpha = 80, names = "lt.blue")
 c2 <- rgb(255,192,203, max = 255, alpha = 80, names = "lt.pink")
 prior1 <- hist(sampled_parameter_values_squared_distances[1:3000,3],col = c1,
@@ -947,36 +982,35 @@ legend("bottomright",legend=c("Prior Distribution for Vm", "Posterior Distributi
        inset=.02, fill=c(c1,c2), cex=0.8)
 ```
 
-<p> Typically, approximate Bayesian computation is implemented as an iterative method, in which a sequence of rejection steps is applied, withe the prior being refined at each step (generating, in essence, a sequence of posterior distributions, the last of which is considered to be the best description of the desired parameter estimates). </p>
-
-```{r,message=FALSE,warning=FALSE}
-library(EasyABC)
-```
+<p> Typically, approximate Bayesian computation is implemented as a sequential method, in which a sequence of rejection steps is applied, with the distribution being refined at each step (generating, in essence, a sequence of _posterior_ distributions, the last of which is considered to be the best description of the desired parameter estimates). Below, we illustare the use fo the ```EasyABC``` package to implement sequentail ABC for the Michaelis-Menten fitting task. </p>
 
 ```{r}
 # set seed
 set.seed(123)
+```
+
+```{r call-Easy_ABC, message=FALSE,warning=FALSE}
+library(EasyABC)
+
 
 # simulate data
 mm_model <- function(par) {
-  Vm <- par[1]
-  K <- par[2]
+  Vmax <- par[1]
+  Km <- par[2]
   S <- S
-  samples <- S*Vm/(S+K)
+  samples <- S*Vmax/(S+Km)
   return(samples)
 }
 
 # set tolerance levels
 tolerance=c(8,3)
 
-# identify prior distribution for parameters
+# define prior distribution for parameters
 mm_prior = list(c("unif",0,0.01),c("unif",0,1))
-```
 
-```{r}
-# use ABC_sequential() to obtain a rough posterior distribution of parameter values  !!!switch to 2000 for knit timing
+# use ABC_sequential() to obtain a posterior distribution of parameter values  !!!20000 reduced to 10000 for kintting time
 ABC_sequential <- ABC_sequential(method="Beaumont", model=mm_model,prior=mm_prior, 
-                                 nb_simul=2000, summary_stat_target=v,
+                                 nb_simul=10000, summary_stat_target=v,
                                  tolerance_tab=tolerance)
 ```
 
@@ -986,29 +1020,56 @@ After 20000 simulations, it can be seen from the histograms that the most freque
 c1 <- rgb(173,216,230,max = 255, alpha = 80, names = "lt.blue")
 c2 <- rgb(255,192,203, max = 255, alpha = 80, names = "lt.pink")
 
-hist(runif(15000,0,0.01),main="Prior Versus Posterior Distribution for K",
-     col = c1,xlab = "K")
+hist(runif(15000,0,0.01),main="Prior and Posterior Distributions for Km",
+     col = c1,xlab = "Km")
 hist(ABC_sequential$param[5000:10000,1],col = c2, add=TRUE)
-abline(v=0.005425,col="firebrick",lwd=2)
-legend("topleft",legend=c("Prior Distribution for K", "Posterior Distribution for K"),
+abline(V=0.005425,col="firebrick",lwd=2)
+legend("topleft",legend=c("Prior Distribution for Km", "Posterior Distribution for Km"),
        inset=.02, fill=c(c1,c2), cex=0.8)
 
-hist(runif(10000,0,1),main="Prior Versus Posterior Distribution for Vm",
-     col = c1,xlab = "K")
+hist(runif(10000,0,1),main="Prior and Posterior Distributions for Vmax",
+     col = c1,xlab = "Vmax")
 hist(ABC_sequential$param[5000:10000,2],col = c2, add=TRUE)
 abline(v=0.439802,col="firebrick",lwd=2)
-legend("topleft",legend=c("Prior Distribution for Vm", "Posterior Distribution for Vm"),
+legend("topleft",legend=c("Prior Distribution for Vm", "Posterior Distribution for Vmax"),
        inset=.02, fill=c(c1,c2), cex=0.8)
 ```
 
 
 #### Exercise 5
 
-<p> rejection for fitting shallow function </p>
+<p> Consider the task of finding the minimum of the function $f(x,y)=x^4 + y^2$, plotted below. Clearly, the minimum is zero, and numerical optimization routines will have no trouble estimating that solution. However, because the curvature at the minimum is much different along the $x$- and $y$-directions, most numerical algorithms will do a better job estimating one parameter compared to the other. This can be well-illustrated by applying the rejection method to this problem and noting the relative spread in the posterior distributions. Implement the rejection algorithm provided above with uniform prior distributions on [-1, 1] for both the $x$ and $y$ values. Choose a rejection threshold that provides an accpetance rate of about 5%. Which estimate is provided with more confidence (i.e. which posterior is more tightly distributed? How can you relate that back to the curvature of the function at the minimum?.  </p>
+
+```{r plot-wireframe-convex-function,echo=FALSE,message=FALSE}
+simpleFun = function(x) {
+  return((x[1])^4 + x[2]^2)
+}
+
+simpleplotFun = function(x,y) {
+  return(x^4 + y^2)
+}
+x <- seq(-5, 5, length= 30)
+y <- seq(-5, 5, length= 30)
+z <- outer(x, y, simpleplotFun)
+z[is.na(z)] <- 1
+z = as.vector(z)
+x <- data.frame(z = as.vector(z))
+x$x <- rep(seq(-5, 5, length= 30), 30)
+x$y <- rep(seq(-5, 5, length= 30), 30)
+
+require(lattice)
+wireframe(z ~ x*y,x, drape=T, expand = 0.5, col = "blue", xlab=x, ylab=y, zlab=NULL,
+          scales = list(arrows = FALSE))
+
+```
+
+
+
+
 
 #### Exercise 6
 
-<p> ABC for fitting Lotka-Volterra model. </p>
+<p> Apply the rejection algorithm to estimate the values of $p_2$ and $p_3$ by fitting the Lotka-Volterra model to the data provided above. Use uniform prior distributions of [0,10] for both parameters, and choose a rejection threshold that provides an acceptance rate of about 5%. Do you find that one parameter is more confidently estimated than the other? </p>
 
 
 
@@ -1046,6 +1107,8 @@ Ashyraliyev, M., Fomekong‐Nanfack, Y., Kaandorp, J. A., & Blom, J. G. (2009). 
  Cho, Yong-Soon, and Hyeong-Seok Lim. "Comparison of various estimation methods for the parameters of Michaelis-Menten equation based on in vitro elimination kinetic simulation data." Translational and clinical pharmacology 26.1 (2018): 39-47.
  
  Fairway, Julien, (2002) Practical Regression and Anova using R. https://cran.r-project.org/doc/contrib/Faraway-PRA.pdf
+ 
+ Ritz, C and Streibig, J. C., Nonlinear Regression with R, Springer, 2008.
  
  <!-- Pukelsheim, Friedrich. Optimal design of experiments. Society for Industrial and Applied Mathematics, 2006. -->
 
