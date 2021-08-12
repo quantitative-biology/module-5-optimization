@@ -143,7 +143,7 @@ MM_data=cbind(S,V)
 plot(MM_data)
 ```
 
-Like the ```lm``` command, the ```nls``` function takes as inputs the dataset and the model. In addition, ```nls``` requires that the user provides 'guesses' for the values of the parameters to be estimated (in this case $V_{\mbox{max}}$ and $K_M$). In this case, we can roughly estimate $V_{\mbox{max}} \approx  0.005$ as the maximal $V$-value that can be achieved, and $K_M \approx 0.2$ as the $S$-value at which $V$ reaches half of its maximal value.
+Like the ```lm``` command, the ```nls``` function takes as inputs the dataset and the model. In addition, ```nls``` requires that the user provides 'guesses' for the values of the parameters to be estimated (in this case $V_{\mbox{max}}$ and $K_M$). In this case, we can roughly estimate $V_{\mbox{max}} \approx  0.005$ as the maximal $V$-value that can be achieved, and $K_M \approx 0.2$ as the $S$-value at which $V$ reaches half of its maximal value. </p>
 
 ```{r nonlinear_regression_Michaelis-Menten_dataset, echo = TRUE}
 MMmodel.nls <- nls(V ~ Vmax * S/(Km+S),start = list(Km = 0.3, Vmax = 0.005))
@@ -153,11 +153,11 @@ summary(MMmodel.nls)
 This output from ```nls``` provides the parameter estimates that characterize the best-fit model ($K_M = 0.4772154$ and $V_{\mbox max} = 0.0053061$), as well as additional information about the confidence of this estimate (some of which will be discussed further below). (Further details on using the ```nls``` command can be found in Ritz and Streibig, 2008). We can now plot the best fit model along with the dataset:  
 
 ```{r plot_nonlinear_regression_Michaelis-Menten_dataset, echo = TRUE}
-params <- summary(model.nls)$coeff[,1] #extracting the parameter estimates
+params <- summary(MMmodel.nls)$coeff[,1] #extracting the parameter estimates
 plot(MM_data)
 curve((params[2]*x)/(params[1]+x), from = 0, to = 4, add=TRUE, col='firebrick')
 ```
-</p>
+
 <p> From the implementation of ```nls```, the reader might have the mistaken impression that nonlinear regression and linear regression are very similar tasks.  Although the problem set-up is similar (first chose family of curves, then minimize SSE), the optimization task is very different, and the solution procedures follow very different protocols. (The first hint of this is the need to provide ``guesses'' to ```nls```.) As we saw above, the solution to the linear regression task can be stated as a general formula. For nonlinear regression, no such formula exists. Worse, as we'll discuss in the next section there is no procedure (algorithm) that is guaranteed to find the solution! </p>
 
 ## Iterative Optimization Algorithms
@@ -410,7 +410,28 @@ output
 
 #### Exercise 1
 
-Consider the following dataset, which corresponds to measurements of drug concentration in the blood over time. The trend in the data suggests it can be well-captured by a biexponential $D(t) = A (e^{r_1 t} + e^{r_2 t})$. Set up a sum of squared errors function and use the gradient descent function above to determine the best-fit estimates of the parameters $A$, $r_1$ and $r_2$.
+Consider the following dataset, which corresponds to measurements of drug concentration in the blood over time. The trend in the data suggests it can be well-captured by a biexponential $C(t) = a_1 e^{r_1 t} + a_2 e^{r_2 t}$. Set up a sum of squared errors function and use the gradient descent function above to determine the best-fit estimates of the parameters $A$, $r_1$ and $r_2$.
+
+
+```{r exercise-1-dataset, echo = TRUE}
+
+T <- c(       0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100)
+  
+C <- c(6.3, 3.5, 2.8,  2.4,  2.0,   1.9,  1.6, 1.4,  1.3, 1.2,  1.1)
+      
+BE_data=cbind(T,C)
+plot(BE_data)
+```
+
+
+```{r exercise_1_nls_soln, echo = FALSE}
+BEmodel.nls <- nls(C ~ a_1*exp(r_1*T) + a_2*exp(r_2*T),start = list(a_1 = 3, a_2=3, r_1 = 0.01, r_2=0.1))
+summary(BEmodel.nls)
+
+params <- summary(BEmodel.nls)$coeff[,1] #extracting the parameter estimates
+plot(BE_data)
+curve(params[1]*exp(params[3]*x) + params[2]*exp(params[4]*x), from = 0, to = 100, add=TRUE, col='firebrick')
+```
 
 ### Global Optimization
 
@@ -827,29 +848,30 @@ Inputing the predicted values of $p_1$, $p_2$, $p_3$ and $p_4$ into the `GenSA` 
 
 <p> optimal control example </p>
 
-<!-- ## Other Topics -->
 
-<!-- ### Optimal Control -->
+<p> The behaviour of the Lotka-Volterra model described above depends on the values of the model parameters. Such models are often used to explore the effect of perturbations on a system. For instance, after successfully calibrating a model to given population's dynamics, one could propose interventions that could alter the value of one of the model parameters, e.g.~by restricting access to resources required for growth of the prey population. We could then simulate the model under this altered value of $p_1$ and thus generate predictions of the effect of this manipulation. </p>
 
-<!-- <p> The behaviour of the Lotka-Volterra model described above depends on the values of the model parameters. Such models are often used to explore the effect of perturbations on a system. For instance, after successfully calibrating a model to given population's dynamics, one could propose interventions that could alter the value of one of the model parameters, e.g.~by restricting access to resources required for growth of the prey population. We could then simulate the model under this altered value of $p_1$ and thus generate predictions of the effect of this manipulation. </p> -->
+<p> Alternatively, we could use a model formulation that incorporates a time-varying perturbation.  As an example, consider a version of the Lotka-Volterra equations that includes a term to describe removal (harvesting/culling) of the predator population: 
+ \begin{eqnarray*} 
+     \frac{d}{dt} x_1(t) &=& p_1 x_1(t) - p_2 x_1(t) x_2(t)\\ 
+     \frac{d}{dt} x_2(t) &=& p_3 x_1(t) x_2(t) - p_4 x_2(t) - u(t) x_2(t) 
+ \end{eqnarray*} </p> 
 
-<!-- <p> Alternatively, we could use a model formulation that incorporates a time-varying perturbation.  As an example, consider a version of the Lotka-Volterra equations that includes a term to describe removal (harvesting/culling) of the predator population: -->
-<!-- \begin{eqnarray*} -->
-<!--     \frac{d}{dt} x_1(t) &=& p_1 x_1(t) - p_2 x_1(t) x_2(t)\\ -->
-<!--     \frac{d}{dt} x_2(t) &=& p_3 x_1(t) x_2(t) - p_4 x_2(t) - u(t) x_2(t) -->
-<!-- \end{eqnarray*} </p> -->
+<p> Here $u(t)$, called an _input signal_ is a function that represents the effort exerted in removal of predators. With this input signal in place, we can now use the model to explore the consequences of a range of removal schedules. In particular, optimization can be used to identify the removal strategy that best achieves some performance goal. </p> 
 
-<!-- <p> Here $u(t)$, called an _input signal_ is a function that represents the effort exerted in removal of predators. With this input signal in place, we can now use the model to explore the consequences of a range of removal schedules. In particular, optimization can be used to identify the removal strategy that best achieves some performance goal. </p> -->
+<p> As a concrete example, consider the goal of maximizing harvest over some fixed time period (e.g.~a year). Suppose that the harvesting rate must be fixed throughout the time interval of interest. In this case, the harvesting rate is constant. Let's call it $u(t) = u_0$. We can then account for the total harvest by introducing a new state variable that tracks the progress of the harvest:
+\begin{eqnarray*}
+    \frac{d}{dt} x_1(t) &=& p_1 x_1(t) - p_2 x_1(t) x_2(t)\\
+    \frac{d}{dt} x_2(t) &=& p_3 x_1(t) x_2(t) - p_4 x_2(t) - u_0 x_2(t)\\
+    \frac{d}{dt} x_3(t) &=& u_0 x_2(t)
+\end{eqnarray*} </p>
 
-<!-- <p> As a concrete example, consider the goal of maximizing harvest over some fixed time period (e.g.~a year). Let's consider two cases. To begin, suppose that the harvesting rate must be fixed throughout the system behaviour. In this case, the harvesting rate is constant. Let's call it $u(t) = u_0$. We can then account for the total harvest by introducing a new state variable that tracks the progress of the harvest: -->
-<!-- \begin{eqnarray*} -->
-<!--     \frac{d}{dt} x_1(t) &=& p_1 x_1(t) - p_2 x_1(t) x_2(t)\\ -->
-<!--     \frac{d}{dt} x_2(t) &=& p_3 x_1(t) x_2(t) - p_4 x_2(t) - u(t) x_2(t)\\ -->
-<!--     \frac{d}{dt} x_3(t) &=& u(t) x_2(t) -->
-<!-- \end{eqnarray*} </p> -->
+<p> Then the value of $x_3(t)$ is the accumulated harvest from time zero to time $t$. If our goal is to maximize the total harvest over a year, we aim to maximize $x_3(1)$ over the choice of the fixed harvesting effort $u_0$. </p>
 
-<!-- <p> Then the value of $x_3(t)$ is the accumulated harvest from time zero to time $t$. If our goal is to maximize the total harvest over a year, we aim to maximize $x_3(1)$ (where $t$ is in units of years) over the choice of the fixed harvesting effort $u_0$. </p> -->
-<!-- [Details of implementation; exercise] -->
+Take parameter values of $p_1 = 30$, $p_2 = 5$, $p_3 = 2$, $p_4 = 6$, and initial state $x_1(0) = 0.0088$, $x_2(0)=1.6$. Determine the value of $u_0$ that maximizes the total harvest over a period of $t \in [0, 6].
+
+
+
 
 <!-- <p> Let's now consider the case in which we can change the harvesting effort through the year: we'll allow the input $u(t)$ to be a time-varying function. One would expect we'd be able to achieve a larger harvest in this case (compared with a fixed harvest rate), because there's more freedom in the design of the harvesting strategy. We'll see below that this is indeed true. However, the optimization task as currently posed is problematic. So far, we've been optimizing over functions (SSE, total harvest) that depend on a finite set of numerical values, and so we searched a finite-dimensional space for the extrema. We're now faced with optimizing over *any* function $u(t)$. This is what's technically called an infinite-dimensional search space. The search for extrema in this case has been investigated in the theory of _optimal control_ and closely related work in the _calculus of variations_. See (Lenhart and Workman, 2007) if you'd like to learn more. Here, we'll restrict ourselves to a simple short-cut for solving this problem. We need to find a way to _parameterize_ the set of possible input curves $u(t)$. A common strategy is as follows: -->
 
@@ -887,7 +909,7 @@ legend(4, 105, legend=c("Best-fit Line", "Prediction interval"),
 
 The confint() function determines 95\% confidence intervals on the estimates of the parameters (the slope and intercept).
 
-```{r estimate-confidence-intervals-linear-regression-iris,echo=FALSE}}
+```{r estimate-confidence-intervals-linear-regression-iris, echo=FALSE}
 confint(iris.lm)
 ```
 
@@ -952,18 +974,18 @@ accept_or_reject_with_squared_distance <- function (true, simulated, acceptance_
 sample_by_rejection <- function (true_data, n_iterations, acceptance_threshold, accept_or_reject_function) {
   number_of_data_points = length(true_data)
   accepted_or_rejected <- vector(length = n_iterations)
-  sampled_K <- vector(length = n_iterations, mode = "numeric")
-  sampled_Vm <- vector (length = n_iterations, mode = "numeric")
+  sampled_Km <- vector(length = n_iterations, mode = "numeric")
+  sampled_Vmax <- vector (length = n_iterations, mode = "numeric")
   for (i in 1:n_iterations){
-    K <- draw_K()
-    Vm <- draw_Vm()
-    parameters = list("K"=K, "Vm"=Vm)
-    simulated_data <- simulate_data(S,K,Vm)
+    Km <- draw_Km()
+    Vmax <- draw_Vmax()
+    parameters = list("Km"=Km, "Vmax"=Vmax)
+    simulated_data <- simulate_data(S,Km,Vmax)
     accepted_or_rejected[i] = accept_or_reject_function(true_data, simulated_data, acceptance_threshold)
-    sampled_K[i] = K
-    sampled_Vm[i] = Vm
+    sampled_Km[i] = Km
+    sampled_Vmax[i] = Vmax
   }
-  return(data.frame(cbind("accepted_or_rejected" = accepted_or_rejected, "sampled_Ks" = sampled_K, "sampled_Vms" = sampled_Vm)))
+  return(data.frame(cbind("accepted_or_rejected" = accepted_or_rejected, "sampled_Kms" = sampled_Km, "sampled_Vmaxs" = sampled_Vmax)))
 }
 ```
 
@@ -976,7 +998,7 @@ set.seed(132)
 
 ```{r}
 # simulate 200000 times with a threshold of 0.001 !!!switched to 200 for knit timing
-sampled_parameter_values_squared_distances = sample_by_rejection(v, 200, 0.001, accept_or_reject_with_squared_distance)
+sampled_parameter_values_squared_distances = sample_by_rejection(V, 2000, 0.001, accept_or_reject_with_squared_distance)
 
 # report the number of accepted values among the 200000 samples
 sum(sampled_parameter_values_squared_distances$accepted_or_rejected)
@@ -1060,7 +1082,7 @@ legend("topleft",legend=c("Prior Distribution for Vm", "Posterior Distribution f
 
 <p> Consider the task of finding the minimum of the function $f(x,y)=x^4 + y^2$, plotted below. Clearly, the minimum is zero, and numerical optimization routines will have no trouble estimating that solution. However, because the curvature at the minimum is much different along the $x$- and $y$-directions, most numerical algorithms will do a better job estimating one parameter compared to the other. This can be well-illustrated by applying the rejection method to this problem and noting the relative spread in the posterior distributions. Implement the rejection algorithm provided above with uniform prior distributions on [-1, 1] for both the $x$ and $y$ values. Choose a rejection threshold that provides an accpetance rate of about 5%. Which estimate is provided with more confidence (i.e. which posterior is more tightly distributed? How can you relate that back to the curvature of the function at the minimum?.  </p>
 
-```{r plot-wireframe-convex-function,echo=FALSE,message=FALSE}
+```{r plot-wireframe-ex5-function,echo=FALSE,message=FALSE}
 simpleFun = function(x) {
   return((x[1])^4 + x[2]^2)
 }
