@@ -687,9 +687,10 @@ Here $x_1$ is the size of the prey population; $x_2$ is the size of the predator
 
 
 
-```{r simulate-and-plot-lotka-volterra, echo = FALSE, warning = FALSE}
+```{r simulate-and-plot-lotka-volterra, echo = TRUE, warning = FALSE}
 library(deSolve)
 
+# define the dynamic model
 LotVmod <- function (Time, State, Pars) {
     with(as.list(c(State, Pars)), {
         dx = x*(alpha - beta*y)
@@ -698,18 +699,21 @@ LotVmod <- function (Time, State, Pars) {
     })
 }
 
+#specify the model parameters, the initial populations, and the time course
 Pars <- c(alpha = 30, beta = 5, gamma = 2, delta = 6)
 State <- c(x = 8.792889e-3, y = 1.595545)
 Time <- seq(0, 6, by = 0.01)
 
+#simulate the model
 out <- as.data.frame(ode(func = LotVmod, y = State, parms = Pars, times = Time))
 
-plot(out$y~out$time, type = "l", xlab = "Time", ylab = "Population Density", main = "Model Simulation", col = "red", ylim = c(0,20))
+#plot the output
+plot(out$y~out$time, type = "l", xlab = "Time", ylab = "Population Density", main = "Predatory-Prey Model Simulation", col = "red", ylim = c(0,20))
 points(out$x~out$time, type = "l", add = TRUE)
 legend(3.8,20,legend = c("Prey", "Predator"), col = c("red", "black"), pch = 20)
 ```
 
-<p> The figure below shows a dataset the corresponds to observations of an oscillatory predator-prey  system. To calibrate the Lotka-Volterra model to this dataset we seek values of the  model parameters  for which simulation of the model provides the best fit. As in the regression tasks described previously, the standard measure for quality of fit is the sum of squared errors. We thus proceed with a minimization task: for each choice of numerical values for the model parameters, we compare model simulation with the data and determine the sum of squared errors. We aim to minimize this measure of fit over the space of model parameters. We will use the observed population values at time zero as initial condition for the simulations. </p>
+<p> The figure below shows a dataset the corresponds to observations of an oscillatory predator-prey  system. To calibrate the Lotka-Volterra model to this data we seek values of the  model parameters  for which simulation of the model provides the best fit. As in the regression tasks described previously, the standard measure for quality of fit is the sum of squared errors. We thus proceed with a minimization task: for each choice of numerical values for the model parameters, we compare model simulation with the data and determine the sum of squared errors. We aim to minimize this measure of fit over the space of model parameters. We will use the observed population values at time zero as initial condition for the simulations. </p>
 
 ```{r generate-and-plot-lotka-volterra-corrupted-data, echo = FALSE, warning = FALSE}
 observations<-data.frame(t_obs<-out$time[seq(1,length(out$time),20)],
@@ -735,7 +739,7 @@ not_used<-corplot
 
 #### Example 10
 
-To illustrate a simple case, we'll first consider the case that two of the model parameter values have been established independently: $\alpha= 30$ and $\delta=6$. We'll then calibrate the model by estimating values for parameters $p_2$ and $p_3$. We begin by building a sum-of-squared errors function that takes values of $\beta$ and $\gamma$ as arguments:
+To illustrate, we'll first consider the case that two of the model parameter values have been established independently: $\alpha= 30$ and $\delta=6$. We'll then calibrate the model by estimating values for parameters $\beta$ and $\gamma$. We begin by building a sum-of-squared errors function that takes values of $\beta$ and $\gamma$ as arguments:
 
 ```{r define-lotka-volterra-sse-function, echo = TRUE}
 #define SSE function
@@ -821,20 +825,79 @@ corrupted_observations<-data.frame(t_obs,
                   y_obs_corrupt<- y_obs+ ((unscaled_noise*2-1)*(0.3*y_obs)) )
 
 #plot corrupted observation vector (scatterplot is needed...)
-corplot<-plot(corrupted_observations[,3]~corrupted_observations[,1], col = "red", ylim = c(0,20), main = "Observations of a Predator-Prey Population System", xlab = "Time", ylab = "Population Density", pch = 20)
-points(corrupted_observations[,2]~corrupted_observations[,1], add = TRUE, pch = 20)
-points(out$y~out$time, type = "l", col = "red", add = TRUE)
-points(out$x~out$time, type = "l", add = TRUE)
-legend(4,20, legend = c("Prey", "Predator"), col = c("red", "black"), pch = 20)
-not_used<-corplot
+corplot<-plot(corrupted_observations[,3]~corrupted_observations[,1], col = "red", ylim = c(0,20), main = "Observations and Fit of a Predator-Prey Population System", xlab = "Time", ylab = "Population Density", pch = 20)
+not_used1<-points(corrupted_observations[,2]~corrupted_observations[,1], add = TRUE, pch = 20)
+not_used2<-points(out$y~out$time, type = "l", col = "red", add = TRUE)
+not_used3<-points(out$x~out$time, type = "l", add = TRUE)
+not_used4<-legend(4,20, legend = c("Prey", "Predator"), col = c("red", "black"), pch = 20)
+not_used5<-corplot
 
 
 ```
 
 
-#### Exercise 3:
+#### Exercise 3x
 
-<p>We will now try and estimate the parameters $p_1$, $p_2$, $p_3$ and $p_4$ as well as enter the predictions into the `GenSA` command in order to minimize the sum of squares error value.  There's one additional feature we must account for: to specify a simulation we need numerical values for the model parameters and the initial conditions. Calling these initial conditions $p_5 = x_1(0)$ and $p_6=x_2(0)$, we could then pose our optimization problem as a search over a six-dimensional parameter space. In what follows, we illustrate the use of both simulated annealing and a genetic algorithm to calibrate this model.</p>
+<p> Extend Example 10 to calibrate all four model parameters $\alpha$, $\beta$, $\gamma$, and $\delta$ to the following dataset, with initial states $x=0.01$ and $y=1.0$. Use either simulated annealing 
+
+
+```{r exercise-3-generate-lotka-volterra-corrupted-data, echo = FALSE, warning = FALSE}
+
+library(deSolve)
+
+# define the dynamic model
+LotVmod <- function (Time, State, Pars) {
+    with(as.list(c(State, Pars)), {
+        dx = x*(alpha - beta*y)
+        dy = -y*(gamma - delta*x)
+        return(list(c(dx, dy)))
+    })
+}
+
+#specify the model parameters, the initial populations, and the time course
+Pars <- c(alpha = 10, beta = 3, gamma = 1, delta = 2)
+State <- c(x = 0.01, y = 1.1)
+Time <- seq(0, 8, by = 0.01)
+
+#simulate the model
+out <- as.data.frame(ode(func = LotVmod, y = State, parms = Pars, times = Time))
+
+#plot the output
+#plot(out$y~out$time, type = "l", xlab = "Time", ylab = "Population Density", main = "Predatory-Prey Model Simulation", col = "red", ylim = c(0,10))
+#points(out$x~out$time, type = "l", add = TRUE)
+#legend(3.8,20,legend = c("Prey", "Predator"), col = c("red", "black"), pch = 20)
+
+
+observations<-data.frame(t_obs<-out$time[seq(1,length(out$time),20)],
+                  x_obs_pure<-out$x[seq(1,length(out$x),20)],
+                  y_obs_pure<-out$y[seq(1,length(out$y),20)])
+# set random seed for noise to be added
+set.seed(12)
+#generate one random number in [0,1] for each observation
+unscaled_noise<-runif(length(t_obs))
+
+
+#generate corrupted observations
+corrupted_observations<-data.frame(t_obs,
+                  x_obs<- x_obs_pure+ ((unscaled_noise*2-1)*(0.1*x_obs)),
+                  y_obs<- y_obs_pure+ ((unscaled_noise*2-1)*(0.3*y_obs)) )
+
+#plot corrupted observation vector (scatterplot is needed...)
+corplot<-plot(corrupted_observations[,3]~corrupted_observations[,1], col = "red", ylim = c(0,10), main = "Exercise 3: Observations", xlab = "Time", ylab = "Population Density", pch = 20)
+dataset<-points(corrupted_observations[,2]~corrupted_observations[,1], add = TRUE, pch = 20)
+legend(4,20, legend = c("Prey", "Predator"), col = c("red", "black"), pch = 20)
+not_used<-corplot
+corrupted_observations <- setNames(corrupted_observations, c("t_obs_exercise3","x_obs_exercise3","y_obs_exercise3"))
+#print(corrupted_observations)
+
+#matrix <- data.matrix(corrupted_observations, rownames.force = NA)
+#prmatrix(matrix, rowlab=rep("",3), collab=rep("",3)))
+
+library(kableExtra)
+kable(corrupted_observations)
+
+```
+
 
 ```{r ex3-determine-sse, echo = FALSE}
 determine_sse3 <- function(p) {
@@ -872,31 +935,27 @@ newLotVmod <- function (Time, State, newPars) {
 }
 ```
 
-Using the values of $p_2$ and $p_3$ determined using the GenSA call previously, we know that the value of those parameters that minimize the sum of squares error value is 4.974368 and 2.005188 respectively. Knowing that, we can input those values into the determine_sse function as well as predicted values for $p_1$ and $p_4$. 
+<!-- Using the values of $p_2$ and $p_3$ determined using the GenSA call previously, we know that the value of those parameters that minimize the sum of squares error value is 4.974368 and 2.005188 respectively. Knowing that, we can input those values into the determine_sse function as well as predicted values for $p_1$ and $p_4$.  -->
 
-Our prediction for $p_1$ and $p_4$ will be 20 and 10 respectively. 
+<!-- Our prediction for $p_1$ and $p_4$ will be 20 and 10 respectively.  -->
 
-```{r }
-determine_sse3(c(20,4.974368,2.005188,10))
-```
+<!-- ```{r } -->
+<!-- determine_sse3(c(20,4.974368,2.005188,10)) -->
+<!-- ``` -->
 
-As shown above, the sum of squares error value is 501.9846. 
+<!-- As shown above, the sum of squares error value is 501.9846.  -->
 
-```{r}
-library(GenSA)
-x2 = c(20,4.974368,2.005188,10)
-lower <- c(0.1,0.1,0.1,0.1)
-upper <- c(35,35,35,35)
-out0 <- GenSA(par = x2, lower = lower, upper = upper,fn = determine_sse3, control = list(maxit = 50))
-out0[c("value","par")]
-```
+<!-- ```{r} -->
+<!-- library(GenSA) -->
+<!-- x2 = c(20,4.974368,2.005188,10) -->
+<!-- lower <- c(0.1,0.1,0.1,0.1) -->
+<!-- upper <- c(35,35,35,35) -->
+<!-- out0 <- GenSA(par = x2, lower = lower, upper = upper,fn = determine_sse3, control = list(maxit = 50)) -->
+<!-- out0[c("value","par")] -->
+<!-- ``` -->
 
-Inputing the predicted values of $p_1$, $p_2$, $p_3$ and $p_4$ into the `GenSA` function, gives us the parameters 29.246138, 4.879013, 2.018677 and 6.058124. These parameters minimize the sum of squared errors value to 4.989519. 
 
 #### Exercise 4
-
-<p> optimal control example </p>
-
 
 <p> The behaviour of the Lotka-Volterra model described above depends on the values of the model parameters. Such models are often used to explore the effect of perturbations on a system. For instance, after successfully calibrating a model to given population's dynamics, one could propose interventions that could alter the value of one of the model parameters, e.g.~by restricting access to resources required for growth of the prey population. We could then simulate the model under this altered value of $p_1$ and thus generate predictions of the effect of this manipulation. </p>
 
@@ -1013,16 +1072,16 @@ compare_with_squared_distance <- function (true, simulated) {
   return(distance)
 }
 
-# function to check whether distance is below threshold (resturns TRUE) or not (returns FALSE)
-accept_or_reject_with_squared_distance <- function (true, simulated, acceptance_threshold) {
-  distance = compare_with_squared_distance(true, simulated)
-  if((distance < acceptance_threshold) ) return(T) else return(F)
-}
+# function to check whether distance is below threshold (returns TRUE) or not (returns FALSE)
+#accept_or_reject_with_squared_distance <- function (true, simulated, acceptance_threshold) {
+#  distance = compare_with_squared_distance(true, simulated)
+#  if((distance < acceptance_threshold) ) return(T) else return(F)
+#}
 
 # sampling algorithm: returns the sampled Km and Vmax values and whether this pair is accepted
 sample_by_rejection <- function (true_data, n_iterations, acceptance_threshold, accept_or_reject_function) {
   number_of_data_points = length(true_data)
-  accepted_or_rejected <- vector(length = n_iterations)
+  accepted <- vector(length = n_iterations)
   sampled_Km <- vector(length = n_iterations, mode = "numeric")
   sampled_Vmax <- vector (length = n_iterations, mode = "numeric")
   for (i in 1:n_iterations){
@@ -1030,15 +1089,50 @@ sample_by_rejection <- function (true_data, n_iterations, acceptance_threshold, 
     Vmax <- draw_Vmax()
     parameters = list("Km"=Km, "Vmax"=Vmax)
     simulated_data <- simulate_data(S,Km,Vmax)
-    accepted_or_rejected[i] = accept_or_reject_function(true_data, simulated_data, acceptance_threshold)
+    distance <- compare_with_squared_distance(true_data, simulated_data)
+    if (distance < acceptance_threshold) {
+      accepted[i] <- 1
+    } else {
+      accepted[i] <- 0
+      }
+    #accepted_or_rejected[i] = accept_or_reject_function(true_data, simulated_data, acceptance_threshold)
     sampled_Km[i] = Km
     sampled_Vmax[i] = Vmax
   }
-  return(data.frame(cbind("accepted_or_rejected" = accepted_or_rejected, "sampled_Kms" = sampled_Km, "sampled_Vmaxs" = sampled_Vmax)))
+  return(data.frame(cbind("accepted" = accepted, "sampled_Kms" = sampled_Km, "sampled_Vmaxs" = sampled_Vmax)))
 }
+
+
+
+#sample_by_rejection(V, 20, 0.01, accept_or_reject_with_squared_distance)
+
 ```
 
-In the call below, we sample from the prior distributions of $Km$ and $V_max$ 200000 times. We set the accpetance threhsold as  0.001. That is, parameter pairs that give rise to SSE values below 0.001 are accepted; others are rejected. The histograms below show the uniform priors along with the posteriors. The algorithm has succesfully tightened the distributions about the best-fit parameter estimates established above. 
+
+<!-- ```{r} -->
+<!-- true_data<-V -->
+<!-- acceptance_threshold<-0.01 -->
+<!-- Km <- draw_Km() -->
+<!--     Vmax <- draw_Vmax() -->
+<!--     simulated_data <- simulate_data(S,Km,Vmax) -->
+<!--     Km -->
+<!--     Vmax -->
+<!--     simulated_data -->
+<!--     true_data -->
+<!--     distance <- compare_with_squared_distance(true_data, simulated_data) -->
+<!--     distance -->
+<!--     if (distance < acceptance_threshold) { -->
+<!--       accepted_or_rejected <- 1 -->
+<!--     } else { -->
+<!--       accepted_or_rejected <- 0 -->
+<!--       } -->
+<!--     #accepted_or_rejected <-accept_or_reject_with_squared_distance(true_data, simulated_data, acceptance_threshold) -->
+<!--     accepted_or_rejected -->
+<!-- ``` -->
+
+
+
+In the call below, we sample from the prior distributions of $Km$ and $Vmax$ 200000 times. We set the acceptance threshold as 0.001. That is, parameter pairs that give rise to SSE values below 0.001 are accepted; others are rejected. The histograms below show the uniform priors along with the posteriors. The algorithm has successfully tightened the distributions about the best-fit parameter estimates established above. 
 
 ```{r, echo=FALSE}
 # set seed
@@ -1047,31 +1141,34 @@ set.seed(132)
 
 ```{r}
 # simulate 200000 times with a threshold of 0.001 !!!switched to 200 for knit timing
-sampled_parameter_values_squared_distances = sample_by_rejection(V, 2000, 0.001, accept_or_reject_with_squared_distance)
+sampled_parameter_values_squared_distances = sample_by_rejection(V, 200000, 0.001, accept_or_reject_with_squared_distance)
 
 # report the number of accepted values among the 200000 samples
-sum(sampled_parameter_values_squared_distances$accepted_or_rejected)
+sum(sampled_parameter_values_squared_distances$accepted)
 ```
 
 We see that only X of 200 000 samples were accepted, yielding an acceptance rate of XXX. The acceptance rate can be tuned by choice of the rejection threshold. A low acceptance rate gives rise to a computationally expensive algorithm, while a high accpetance rate can lead to poor estimation.
 
-<!-- ```{r plot-rejection-histograms, echo=FALSE} -->
-<!-- c1 <- rgb(173,216,230,max = 255, alpha = 80, names = "lt.blue") -->
-<!-- c2 <- rgb(255,192,203, max = 255, alpha = 80, names = "lt.pink") -->
-<!-- prior1 <- hist(sampled_parameter_values_squared_distances[1:3000,3],col = c1, -->
-<!--                xlab = "K", main="Prior Versus Posterior Distribution for K")  -->
-<!-- post1 <- hist(sampled_parameter_values_squared_distances[which(sampled_parameter_values_squared_distances$accepted_or_rejected==1),3], col=c2, xlab = "K", add=TRUE) -->
-<!-- abline(v=0.005425,col="firebrick",lwd=2) -->
-<!-- legend("bottomright",legend=c("Prior Distribution for K", "Posterior Distribution for K"), -->
-<!--        inset=.02, fill=c(c1,c2), cex=0.8) -->
+```{r plot-rejection-histograms, echo=FALSE}
+c1 <- rgb(173,216,230,max = 255, alpha = 80, names = "lt.blue")
+c2 <- rgb(255,192,203, max = 255, alpha = 80, names = "lt.pink")
+#prior1 <- hist(sampled_parameter_values_squared_distances[1:1000,3],col = c1,
+ #              xlab = "K", main="Prior Versus Posterior Distribution for K")
+post1 <- hist(sampled_parameter_values_squared_distances[which(sampled_parameter_values_squared_distances$accepted==1),3], col=c2, xlab = "K", xlim=c(0,0.01))
+axis(side=1)
+#abline(v=0.005425,col="firebrick",lwd=2)
+#rect(0, 0, 0.1, 100, col="lt.blue", border=par("fg"), lty=NULL, lwd=par("lwd"), xpd=FALSE)
+rect(0, 0, 0.01, 80, col=c1, border=par("fg"), lwd=par("lwd"), xpd=FALSE)
+legend("bottomright",legend=c("Prior Distribution for K", "Posterior Distribution for K"),
+       inset=.02, fill=c(c1,c2), cex=0.8)
 
-<!-- prior2 = hist(sampled_parameter_values_squared_distances[1:2500,2],col = c1, -->
-<!--               xlab = "Vm", main="Prior Distribution for Vm")  -->
-<!-- post2 = hist(sampled_parameter_values_squared_distances[which(sampled_parameter_values_squared_distances$accepted_or_rejected==1),2],col = c2, xlab = "Vm", add=TRUE) -->
-<!-- abline(v=0.439802,col="firebrick",lwd=2) -->
-<!-- legend("bottomright",legend=c("Prior Distribution for Vm", "Posterior Distribution for Vm"), -->
-<!--        inset=.02, fill=c(c1,c2), cex=0.8) -->
-<!-- ``` -->
+prior2 = hist(sampled_parameter_values_squared_distances[1:2500,2],col = c1,
+              xlab = "Vm", main="Prior Distribution for Vm")
+post2 = hist(sampled_parameter_values_squared_distances[which(sampled_parameter_values_squared_distances$accepted==1),2],col = c2, xlab = "Vm", add=TRUE)
+abline(v=0.439802,col="firebrick",lwd=2)
+legend("bottomright",legend=c("Prior Distribution for Vm", "Posterior Distribution for Vm"),
+       inset=.02, fill=c(c1,c2), cex=0.8)
+```
 
 <p> Typically, approximate Bayesian computation is implemented as a sequential method, in which a sequence of rejection steps is applied, with the distribution being refined at each step (generating, in essence, a sequence of _posterior_ distributions, the last of which is considered to be the best description of the desired parameter estimates). Below, we illustare the use fo the ```EasyABC``` package to implement sequentail ABC for the Michaelis-Menten fitting task. </p>
 
