@@ -4,9 +4,9 @@
 
 <p> To improve is to make better; to optimize is to make best. Optimization is the act of identifying the extreme (cheapest, tallest, fastest...) over a collection of possibilities. Optimization over __design space__ (also called __decision space__) is a critical feature of many engineering tasks, and has a role in most areas of applied science, including biology. Examples include optimal manipulation of biological systems (e.g. optimal harvesting or optimal drug dosing) or optimal design of biological systems (e.g. robust synthetic genetic circuits). A complementary task is optimal experimental design, which aims to identify the 'best' experiment from a collection of possibilities. Model calibration, to be discussed further below, provides another example; here we seek the 'best fit' version of a model from a collection of possible options.</p>
 
-<p> Beyond its use in design, optimization is also used to investigate natural systems (i.e. in 'pure' science), in cases where nature presents us with an optimal version of a given phenomenon. For example, the principle of energy minimization justifies a wide variety of phenomena, from the shapes of soap bubbles to the configuration of proteins.  Darwinian evolution provides another mechanism for optimization. Assuming evolution has arrived at optimal designs, we can apply optimization to understand a variety of biological phenomena, from metabolic flux distribution, to brain wiring, to foraging strategies.</p>
+<p> Beyond its use in design, optimization is also used to investigate natural systems (i.e. in 'pure' science), in cases where nature presents us with an optimal version of a given phenomenon. For example, the principle of energy minimization justifies a wide variety of phenomena, from the shapes of soap bubbles to the configuration of proteins.  Darwinian evolution provides another example. Assuming evolution has arrived at optimal designs, we can apply optimization to understand a variety of biological phenomena, from metabolic flux distribution, to brain wiring, to foraging strategies.</p>
 
-<p> This module introduces optimization methods in R. Applications and illustrations are drawn from a range of biological domains. Although simple optimization tasks, such as those addressed by introductory calculus, can be accomplished with paper-and-pencil calculations, most optimization tasks of interest in biology demand computational techniques.</p>
+<p> This module introduces optimization methods in R. Although simple optimization tasks, such as those addressed by introductory calculus, can be accomplished with paper-and-pencil calculations, most optimization tasks of interest in biology demand computational techniques.</p>
 
 ## Fundamentals of Optimization
 
@@ -21,13 +21,13 @@ knitr::include_graphics("Figure1.png")
 <!--   Figure 1: Extreme Values -->
 <!-- </center></p> -->
 
-<p> More generally, we define _local_ extrema (maxima and minima) as cases that appear to be optimal if we restrict attention only to 'nearby' possibilities (i.e. $x$-values). There is an extensive theory of optimization methods; unfortunately most of these are dedicated to __identifying local optima__. These approaches cannot directly identify a global optimum -- instead they identify _candidate_ global optima, which then can be compared to identify the 'best' result. (A convenient special case occurs for problems where every local optimum is a global optimum; these are called convex optimization problems. Unfortunately, they typically occur only as special cases when addressing biological phenomena.) </p>
+<p> More generally, we define _local_ extrema (maxima and minima) as cases that appear to be optimal if we restrict attention only to 'nearby' possibilities (i.e. $x$-values). Most of the extensive theory of optimization methods is dedicated to identifying local optima. These approaches cannot directly identify a global optimum -- instead they identify _candidate_ global optima, which then can be compared to identify the 'best' result. (A convenient special case occurs for problems where every local optimum is a global optimum; these are called convex optimization problems. Unfortunately, they typically occur only as special cases when addressing biological phenomena.) </p>
 
 ### Fermat's Theorem
 
-<p> To illustrate these fundamentals, consider the following two academic examples that rely on basic calculus, specifically on __Fermat's Theorem__, which states that local extrema occur at points where the tangent line to a function's graph is horizontal, i.e. at points where the derivative (i.e. the slope of the tangent) is zero (Figure 2). </p>
+<p> To illustrate these fundamentals, consider the following two academic examples that rely on basic calculus, specifically on __Fermat's Theorem__, which states that local extrema occur at points where the tangent line to a function's graph is horizontal, i.e. at points where the derivative (the slope of the tangent) is zero (Figure 2). </p>
 
-```{r, echo=FALSE, out.height="50%", fig.cap="Figure 2: Fermat's Theorem: local extrema occur at points where the tangent line is horizontal. Some local extrema are also global extrema.", fig.alt="A graph showing local maxima and minima at which horizontal tangents occur"}
+```{r, echo=FALSE, out.height="50%", fig.cap="Figure 2: Fermat's Theorem: local extrema occur at points where the tangent line is horizontal or at endpoints of the domain. Some local extrema are also global extrema.", fig.alt="A graph showing local maxima and minima at which horizontal tangents occur"}
 knitr::include_graphics("Figure2.png")
 ```
 
@@ -59,7 +59,7 @@ knitr::include_graphics("Figure3.png")
 <p> Solution: Taking the derivative, we find $f'(x) = 12x^3-12x^2-108x+108 = 12(x-3)(x-1)(x+3)$. To find the point(s) where the derivative is zero, we solve:
 
 $$f'(x) = 0 \ \ \Leftrightarrow \ \ x = 3, 1, -3$$ 
-As shown in Figure 4, two of these points are local minima (and one is a local maximum). OF the two local minima, $x=-3$ is where the global minimum occurs.</p> 
+As shown in Figure 4, two of these points are local minima and one is a local maximum. Of the two local minima, $x=-3$ is where the global minimum occurs.</p> 
 
 ```{r, echo=FALSE, out.height="50%", fig.cap="Figure 4: Graph of $f(x) = 3x^4-4x^3-54x^2+108x$  (Example 2)$ ", fig.alt="Graph of $f(x) = 3x^4-4x^3-54x^2+108x$"}
 knitr::include_graphics("Figure4.png")
@@ -75,12 +75,11 @@ knitr::include_graphics("Figure4.png")
 
 ### Linear Regression
 
-<p> As mentioned above, finding the 'best fit' from a family of models is a common optimization task in science. The simplest example of this task is __linear regression__: the task of determining a line of best fit through a given set of points. </p> 
-<p> To illustrate, consider the dataset of $(x,y)$ pairs shown in Figure 5 below, which we can label as $(x_1, y_1)$, $(x_2, y_2)$, $\ldots$, $(x_N, y_N)$. Several lines are displayed. The optimization task is to identify the 'best' line: the one that best captures the trend in the data. To specify this task  mathematically, we need to decide on a measure of quality of fit. We start by recognizing that the line will (typically) fail to pass through most of the points in the dataset. Thus, at each point $x_i$ we can define an __error__, which is the difference between the observed $y$-value and the $y$-value on the line, which we'll call the __prediction__. If we call the line $y=mx+b$, then the error at $x_i$ can be defined as $e_i = y_i-(mx_i+b)$. We then need to combine these errors into a single quality of fit measure. This is typically done by _squaring_ the errors and adding them together. (Squaring ensures that both under- and over-estimations contribute equally.) We define the __sum of squared errors__ (SSE) as : 
-$$\mbox{SSE:} \ \ \ e_1^2+e_2^2+ \cdots e_N^2 \ \ = \ \ (y_1-(mx_1+b))^2 + (y_2-(mx_2+b))^2 + \cdots +(y_N-(mx_N+b))^2. $$</p>
+<p> As mentioned above, finding the 'best fit' from a family of models is a common optimization task in science. The simplest example is __linear regression__: the task of determining a line of best fit through a given set of points. </p> 
+<p> To illustrate, consider the dataset of $(x,y)$ pairs shown in Figure 5 below, which we can label as $(x_1, y_1)$, $(x_2, y_2)$, $\ldots$, $(x_N, y_N)$. Several lines are displayed. The optimization task is to identify the 'best' line: the one that best captures the trend in the data.</p> 
 
 
-```{r, echo=FALSE, out.height="50%", fig.cap="Figure 5: finding a line of best fit", fig.alt="Points on a plane and potential best fits lines"}
+```{r, echo=FALSE, out.height="50%", fig.cap="Figure 5: Finding a line of best fit", fig.alt="Points on a plane and potential best fits lines"}
 knitr::include_graphics("Figure5.png")
 ```
 
@@ -90,13 +89,18 @@ knitr::include_graphics("Figure5.png")
 <!-- </center></p> -->
 
 
+<p> To specify this task  mathematically, we need to decide on a measure of quality of fit. We start by recognizing that the line will (typically) fail to pass through most of the points in the dataset. Thus, at each point $x_i$ we can define an __error__, which is the difference between the observed $y$-value and the $y$-value on the line, which we'll call the __prediction__. If we call the line $y=mx+b$, then the error at $x_i$ can be defined as $e_i = y_i-(mx_i+b)$. We then need to combine these errors into a single quality-of-fit measure. This is typically done by squaring the errors and adding them together. (Squaring ensures that both under- and over-estimations contribute equally.) We define the __sum of squared errors__ (SSE) as : 
+$$\mbox{SSE:} \ \ \ e_1^2+e_2^2+ \cdots e_N^2 \ \ = \ \ (y_1-(mx_1+b))^2 + (y_2-(mx_2+b))^2 + \cdots +(y_N-(mx_N+b))^2. $$</p>
+
+
+
 <p> We can now pose the model-fitting task as an optimization problem. For each line (that is, each assignment of numerical values to $m$ and $b$), we associate a corresponding SSE. We seek the values of $m$ and $b$ for which the SSE is a global minimum. </p>
 
 #### Example 3
 <p> Consider a simplified version of linear regression, in which we know that our model (line) should pass through the origin (0,0). That is, instead of lines $y=mx+b$, we will consider only lines of the form $y=mx$. We thus have a single parameter value to determine: the slope $m$. To keep the algebra simple  we'll take a tiny dataset consisting of just two points: $(x_1, y_1) = (2,3)$ and $(x_2, y_2)= (5,4)$, as indicated in Figure 6, below. The line passes through points $(2,2m)$ and $(5, 5m)$. </p>
 
 
-```{r, echo=FALSE, out.height="50%", fig.cap="Figure 6: Example 3: finding a line of best fit through the origin", fig.alt="Defining error between points and line."}
+```{r, echo=FALSE, out.height="50%", fig.cap="Figure 6: Finding a line of best fit through the origin (Example 3)", fig.alt="Defining error between points and line."}
 knitr::include_graphics("Figure6.png")
 ```
 
@@ -112,12 +116,12 @@ In this simple case, the sum of squared errors is:
 \begin{equation*}
     \mbox{SSE} = \mbox{SSE}(m)= e_1^2+e_2^2 = (3-2m)^2+(4-5m)^2
 \end{equation*}  
-To apply Fermat's theorem we take the derivative and identify any values of $m$ for which it is zero:
+To apply Fermat's theorem we take the derivative and identify any values of $m$ for which the derivative is zero:
 \begin{eqnarray*}
     \frac{d}{dm} \mbox{SSE}(m) &=& 2(3-2m)(-2)+2(4-5m)(-5) \\
     &=& -4(3-2m) - 10(4-5m) = -12 +8m+-40+50m = -52+58m.
 \end{eqnarray*}
-<p> The only local extremum (and hence the only candidate for global minimum) is $m=52/58 = 26/29$. We conclude that the best fit line is $y=\frac{26}{29}x$</p>
+<p> The only local extremum (and hence the only candidate for global minimum) is $m=52/58 = 26/29$. We conclude that the best fit line is $y=\frac{26}{29}x$.</p>
 
 <p> The analysis in Example 3 can be extended to determine the general solution of the linear regression task (Fairway, 2002). The solution formula is as follows:</p>
 
@@ -137,20 +141,20 @@ where $\bar{x}$ and $\bar{y}$ are the averages
 
 #### Example 4
 
-We'll work with a dataset called __iris__ that is included in R. It's shown below (via the `plot()` command).
+We'll work with a dataset called __iris__ that is included in R. It's shown below (via the `plot` command).
 
 
 ```{r plot-iris-dataset, echo = TRUE}
 plot(iris$Sepal.Length~iris$Petal.Width, xlab = "Petal Width", ylab = "Sepal Length")
 ```
 
-The `lm()` command applies the formula described above to arrive at the line of best fit (i.e. the minimizer of the sum of squared errors).  The command below refers to the labels for the data (as shown above) to generate the parameters ($b$ and $m$) that specify the line $y=mx+b$.
+The `lm` command applies the formula described above to arrive at the line of best fit (i.e. the minimizer of the sum of squared errors).  The command below generates the parameters ($b$ and $m$) that specify the line $y=mx+b$.
 
 ```{r linear_regression_iris_dataset, echo = TRUE}
 lm(iris$Sepal.Length~iris$Petal.Width)
 ```
 
-The intercept is $b=4.7776$ and the slope is $m=0.8886$. 
+The best-fit line has intercept $b=4.7776$ and slope is $m=0.8886$. 
 
 We can plot the data together with the line of best fit with the `abline` command: 
 <!-- or __abline(lm(iris$Sepal.Length~iris$Petal.Width))__.  -->
@@ -167,19 +171,19 @@ abline(lm(iris$Sepal.Length~iris$Petal.Width))
 
 ### Nonlinear Regression
 
-<p> Nonlinear regression is the task of fitting a nonlinear model (e.g. a curve) to a dataset. The setup for this task is identical to linear regression. We begin by selecting a parameterized family of models (i.e. curves), and aim to identify the model (i.e. curve) that minimizes the sum of squared errors when compared to the data. The family of models is typically chosen based on the mechanism that produced the data. For example, if we are investigating  the rate law for a single-substrate enzyme-catalysed reaction, we might choose the family of curves specified by Michaelis-Menten kinetics, which relate reaction velocity $V$ to substraet concentration $S$: 
+<p> Nonlinear regression is the task of fitting a nonlinear model (e.g. a curve) to a dataset. The setup for this task is identical to linear regression. We begin by selecting a parameterized family of models (i.e. curves), and aim to identify the model (i.e. curve) that minimizes the sum of squared errors when compared to the data. The choice of model family is typically based on the mechanism that produced the data. For example, if we are investigating  the rate law for a single-substrate enzyme-catalysed reaction, we might choose the family of curves specified by Michaelis-Menten kinetics, which relate reaction velocity $V$ to substrate concentration $S$: 
 \begin{eqnarray*}
 V = \frac{V_{\mbox{max}} S}{K_M+S}
 \end{eqnarray*} 
 Our goal would then be to identify values for the parameters $V_{\mbox{max}}$ and $K_M$ that minimize the sum of squared errors when comparing with observed data. </p>
-<p> __Regression via linearizing transformation__
-In several important cases, the nonlinear regression task can be transformed into a linear regression task. In the case of Michaelis-Menten kinetics, several linearizing transformations have been proposed, e.g. Eadie–Hofstee and Lineweaver–Burk (Cho and Lim, 2018). Another common example is fitting exponential curves (e.g. population growth or drug clearance).  In those cases, a logarithm modifies the data so that a linear trend is captured: e.g. $y = e^{rt}$, after applying a logarithm becomes $Y = \ln(y) = \ln (e^{rt})= rt$. Linear regression on transformed data $(t_i, Y_i)$ then provides an estimate of the value of $r$.  </p>
+<p> __Regression via linearizing transformation:__
+In several important cases, the nonlinear regression task can be transformed into a linear regression task. In the case of Michaelis-Menten kinetics, several linearizing transformations have been proposed, e.g. Eadie–Hofstee and Lineweaver–Burk (Cho and Lim, 2018). Another common example is fitting exponential curves (to describe e.g. population growth or drug clearance).  In those cases, application of a logarithm transforms the data so that a linear trend is captured. For example, the relationship $y = e^{rt}$ becomes, after applying a logarithm, $Y = \ln(y) = \ln (e^{rt})= rt$. Linear regression on the transformed data $(t_i, Y_i)$ then provides an estimate of the value of $r$.  </p>
 
 <p> Unfortunately, linearizing transformations are only available in a handful of special cases. Moreover, they often introduce biases that can make interpretation of the resulting model difficult. 
 
 In general, the nonlinear regression task must be addressed directly. An example of the general procedure in R follows. 
 
-#### Exammple 5
+#### Example 5
 
 We begin by defining a dataset against which we will fit a Michaelis-Menten curve. 
 
@@ -194,22 +198,21 @@ plot(MM_data)
 The ```nls``` command can be used for nonlinear regression in R. Like the ```lm``` command, the ```nls``` function takes as inputs the dataset and the model. In addition, ```nls``` requires that the user provide 'guesses' for the values of the parameters to be estimated. In this case, we can roughly estimate $V_{\mbox{max}} \approx  0.5$ as the maximal $V$-value that can be achieved, and $K_M \approx 0.3$ as the $S$-value at which $V$ reaches half of its maximal value. </p>
 
 ```{r nonlinear_regression_Michaelis-Menten_dataset, echo = TRUE}
-MMmodel.nls <- nls(V ~ Vmax * S/(Km+S),start = list(Km = 0.3, Vmax = 0.5)) #perform the nonlinear regression analysis
-
+MMmodel.nls <- nls(V ~ Vmax*S/(Km+S),start = list(Km=0.3, Vmax=0.5)) #perform the nonlinear regression analysis
 params <- summary(MMmodel.nls)$coeff[,1] #extract the parameter estimates
 params
 ```
 
 <!-- #summary(MMmodel.nls) #report on the results -->
 
-We thus arrive at parameter estimates that characterize the best-fit model: $K_M = 0.4772154$ and $V_{\mbox max} = 0.0053061$). Further details on using the ```nls``` command can be found in (Ritz and Streibig, 2008). We can now plot the best fit model along with the dataset:  
+We thus arrive at parameter estimates that characterize the best-fit model: $K_M = 0.4187090$ and $V_{\mbox max} = 0.5331688$). Further details on using the ```nls``` command can be found in (Ritz and Streibig, 2008). We can now plot the best fit model along with the dataset:  
 
 ```{r plot_nonlinear_regression_Michaelis-Menten_dataset, echo = TRUE}
 plot(MM_data)
 curve((params[2]*x)/(params[1]+x), from = 0, to = 4.5, add=TRUE, col='firebrick')
 ```
 
-<p> From the implementation of ```nls```, the reader might have the mistaken impression that nonlinear regression and linear regression are very similar tasks.  Although the problem set-up is similar in both cases (chose model type, then minimize SSE), the strategy for optimization is very different. (The first hint of this is the need to provide a 'guesses' to ```nls```.) As we saw above, the solution to the linear regression task can be stated as a general formula. For nonlinear regression, no such formula exists. Worse, as we'll discuss in the next section there is no procedure (algorithm) that is guaranteed to find the solution! </p>
+<p> From the implementation of ```nls```, the reader might have the mistaken impression that nonlinear regression and linear regression are very similar tasks.  Although the problem set-up is similar in both cases (chose model type, then minimize SSE), the strategy for optimization is very different. (The first hint of this is the need to provide a set of 'guesses' to ```nls```.) As we saw above, the solution to the linear regression task can be stated as a general formula. For nonlinear regression, no such formula exists. Worse, as we'll discuss in the next section there is no procedure (algorithm) that is guaranteed to find the solution! </p>
 
 ## Iterative Optimization Algorithms
 
@@ -217,9 +220,9 @@ curve((params[2]*x)/(params[1]+x), from = 0, to = 4.5, add=TRUE, col='firebrick'
 
 ### Gradient Descent
 
-<p> A simple iterative optimization algorithm is __gradient descent__, which can be understood intuitively via a thought experiment. Imagine finding your way to a valley bottom in a think fog. The fog obscures your vision so that you can only observe changes in elevation in your immediate vicinity. To make your way to the valley bottom, it would be reasonable to take each step of your journey in the direction of steepest decline. This strategy is guaranteed to lead to a local minimum, but cannot guarantee arrival at the lowest point: the global minimum. That is, the search may lead to a local minimum at which there is no direction of local descent, and so the algorithm gets `stuck'.</p>
+<p> A simple iterative optimization algorithm is __gradient descent__, which can be understood intuitively via a thought experiment. Imagine finding your way to a valley bottom in a thick fog. The fog obscures your vision so that you can only observe changes in elevation in your immediate vicinity. To make your way to the valley bottom, it would be reasonable to take each step of your journey in the direction of steepest decline. This strategy is guaranteed to lead to a local minimum, but cannot guarantee arrival at the lowest point: the global minimum. That is, the search may lead to a local minimum at which there is no direction of local descent, and so the algorithm gets `stuck'.</p>
 
-<p> Mathematically, the local change in 'elevation' is determined by evaluating the optimization objective at points near the current estimate and then comparing to determine the direction of steepest descent. (Technically, this involves a linearization of the function at the current position, or equivalently a calculation of the _gradient vector_). A step is then taken in this direction, and the process is repeated from this updated estimate. To implement this algorithm, a number of details have to be specified: how long should each step be? How many steps should be taken? Or should there be some other 'termination condition' that will trigger the end of the journey? (Each of these decisions involve a trade-off between precision and computation time. For instance, taking very small steps will guarantee a smooth path down the steepest route, but might take a very long time to complete the journey. Termination conditions are often specified in terms of the local topography: the algorithm stops when the current estimate is at a sufficiently flat position (no downhill direction detected). </p>
+<p> Mathematically, the local change in 'elevation' is determined by evaluating the objective function at points near the current estimate  to determine the direction of steepest descent. (Technically, this involves a linearization of the function at the current position, or equivalently a calculation of the _gradient vector_). A step is then taken in this direction, and the process is repeated from this updated estimate. To implement this algorithm, a number of details have to be specified: how long should each step be? How many steps should be taken? Or should there be some other 'termination condition' that will trigger the end of the journey? (Each of these decisions involve a trade-off between precision and computation time. For instance, taking very small steps will guarantee a smooth path down the steepest route, but might take a very long time to complete the journey.) Termination conditions are often specified in terms of the local topography: the algorithm stops when the current estimate is at a sufficiently flat position (no downhill direction detected). </p>
 
 <p>To illustrate the gradient descent approach, consider the following algorithm, which incorporates two termination conditions: a maximum number of allowed iterations and a threshold for shallowness: </p>
 
@@ -239,7 +242,7 @@ grad.descent = function(f, x0, step.size=0.05, max.iter=200,
     if (all(abs(grad.current) < stopping.deriv)) {
       k = k-1; break
     }
-    # Step in the opposite direction of the grad
+    # Step in the opposite direction of the gradient
     xmat[,k] = xmat[,k-1] - step.size * grad.current
   }
   xmat = xmat[,1:k] # Trim any unused columns from xmat
@@ -409,17 +412,18 @@ fig
 <p> Again, we'll apply gradient descent from a set of initial guess positions: </p>
 
 ```{r gradient-descent-and-plot-paths-complicated-function,echo=TRUE}
+#define a set of initial guess values
 x0 = c(0.5,0.5)
-gd0 = grad.descent(complicatedFun,x0,step.size=0.01,max.iter=1000)
 x1 = c(-0.1,-1.3)
-gd1 = grad.descent(complicatedFun,x1,step.size=0.01,max.iter=1000)
 x2 = c(-1.5,1.3)
-gd2 = grad.descent(complicatedFun,x2,step.size=0.01,max.iter=1000)
 x3 = c(-1.2,-1.4)
-gd3 = grad.descent(complicatedFun,x3,step.size=0.01,max.iter=1000)
 x4 = c(-0.5,-0.5)
+#run the gradient descent algorithm from each
+gd0 = grad.descent(complicatedFun,x0,step.size=0.01,max.iter=1000)
+gd1 = grad.descent(complicatedFun,x1,step.size=0.01,max.iter=1000)
+gd2 = grad.descent(complicatedFun,x2,step.size=0.01,max.iter=1000)
+gd3 = grad.descent(complicatedFun,x3,step.size=0.01,max.iter=1000)
 gd4 = grad.descent(complicatedFun,x4,step.size=0.01,max.iter=1000)
-
 ```
 
 <p>  From some initial guess values, the algorithm successfully reaches the global minimum. From others, it gets stuck at a local minimum. The plot below shows the paths followed by the algorithm, leading to two separate valley bottoms. </p>
@@ -452,7 +456,7 @@ points(trans3d(gd1$xmat[1,],gd1$xmat[2,],apply(gd1$xmat,2,complicatedFun),r),
 
 <p>  The table below shows the final estimate and the corresponding objective value reached by gradient descent starting from those five starting points. </p>
 
-```{r final-output-plot-paths-gradient-descent-complicated-function,echo=TRUE}
+```{r final-output-plot-paths-gradient-descent-complicated-function,echo=FALSE}
 x0_out <- c(gd0$x, complicatedFun(gd0$x))
 x1_out <- c(gd1$x, complicatedFun(gd1$x))
 x2_out <- c(gd2$x, complicatedFun(gd2$x))
@@ -466,10 +470,10 @@ output
 
 #### Exercise 1
 
-Consider the following dataset, which corresponds to measurements of drug concentration in the blood over time. The trend in the data suggests it can be well-captured by a biexponential $C(t) = a_1 e^{r_1 t} + a_2 e^{r_2 t}$. Set up a sum of squared errors function and use either the gradient descent function above or the ```nls``` command to determine the best-fit estimates of the parameters $A$, $r_1$ and $r_2$. Next, try fitting the data to a single exponential $C(t) = a e^{r t}$. Can this simpler model also fit the data well?
+Consider the following dataset, which corresponds to measurements of drug concentration in the blood over time. The trend in the data suggests it can be well-captured by a biexponential $C(t) = a_1 e^{r_1 t} + a_2 e^{r_2 t}$. Set up a sum of squared errors function and use either the gradient descent function above or the ```nls``` command to determine the best-fit estimates of the parameters $A$, $r_1$ and $r_2$. Next, try fitting the data to a single exponential $C(t) = a e^{r t}$. Can this simple exponential model also fit the data well? (If you choose to apply gradient descent, you'll need to write a function that generates the sum of squared errors.)
 
 
-<!-- SOLUTION -->
+<!-- <!-- SOLUTION -->
 
 <!-- ```{r exercise-1-dataset, echo = TRUE} -->
 
@@ -482,6 +486,23 @@ Consider the following dataset, which corresponds to measurements of drug concen
 <!-- ``` -->
 
 
+<!-- ```{r exercise-1-grad-descent-soln, echo = TRUE} -->
+<!-- #define SSE -->
+<!-- determine_sse <- function(x){ -->
+<!--   pred<-(x[1]*exp(x[2]*T)+x[3]*exp(x[4]*T)) -->
+<!--   obs<-C -->
+<!--   sse<-sum((obs - pred)^2) -->
+<!--   return(sse) -->
+<!-- } -->
+<!-- x0 = c(3,-0.01,3,-0.01) -->
+<!-- gd = grad.descent(determine_sse,x0,step.size=0.0001) -->
+<!-- x0_out <- c(gd$x, simpleFun(gd$x)) -->
+<!-- x0_out -->
+<!-- plot(BE_data) -->
+<!-- curve(x0_out[1]*exp(x0_out[2]*x)+x0_out[3]*exp(x0_out[4]*x), from = 0, to = 100, add=TRUE, col='firebrick') -->
+<!-- ``` -->
+
+
 <!-- ```{r exercise_1_nls_soln, echo = FALSE} -->
 <!-- BEmodel.nls <- nls(C ~ a_1*exp(r_1*T) + a_2*exp(r_2*T),start = list(a_1 = 3, a_2=3, r_1 = 0.01, r_2=0.1)) -->
 <!-- summary(BEmodel.nls) -->
@@ -490,8 +511,6 @@ Consider the following dataset, which corresponds to measurements of drug concen
 <!-- plot(BE_data) -->
 <!-- curve(params[1]*exp(params[3]*x) + params[2]*exp(params[4]*x), from = 0, to = 100, add=TRUE, col='firebrick') -->
 <!-- ``` -->
-
-
 
 <!-- ```{r exercise_1_part_2_nls_soln, echo = FALSE} -->
 <!-- BEmodel.nls <- nls(C ~ a*exp(r*T),start = list(a = 3,  r = 0.01)) -->
@@ -504,19 +523,19 @@ Consider the following dataset, which corresponds to measurements of drug concen
 
 ### Global Optimization
 
-<p> The default optimization algorithm used by ```nls``` is the Gauss-Newton method, which is a generalization of Newton's method for solving nonlinear equations (which may be familiar from introductory calculus). This is a refinement of gradient descent in which the local curvature of the function is used to predict the position of the bottom of the local valley assuming that the surface is shaped like a parabola. On parabolic surfaces, this achieves descent to the bottom in one iteration. For non-parabloic objectives (i.e. most objectives), the result is a sequence of iterations; often many fewer than would be required by gradient descent. </p>
+<p> The default optimization algorithm used by ```nls``` is the Gauss-Newton method, which is a generalization of Newton's method that you may have used to solve nonlinear equations in an introductory calculus course. Gauss-Newton is a refinement of gradient descent in which the local curvature of the function is used to predict the position of the bottom of the local valley.  </p>
 
-<p> Both gradient descent and the Gauss-Newton method are designed to reach the bottom of the valley in which the initial guess lies. If that's  not the global minimum, then the algorithm will not be successful.  So, how does one select a 'good' initial guess? Unfortunately, there's no general answer to this question. In some cases, one can use previous knowledge of the system to begin with a solid initial guess. If no such previous knowledge is available, sometimes a 'guess' is all we have. In those cases, we may have little confidence that the algorithm will arrive at a global minimum. The simplest way to gain some confidence of achieving a global minimum is the multi-start strategy: choose many initial guesses, and run the algorithm from each (as in Example 7 above). This can be computationally expensive, but if the initial guesses are spread widely over the parameters space, one can have hope that the global minimum will be achieved. </p>
+<p> Both gradient descent and the Gauss-Newton method are designed to reach the bottom of the valley in which the initial guess lies. If that's  not the global minimum, then the algorithm will not be successful.  So, how does one select a 'good' initial guess? Unfortunately, there's no general answer to this question. In some cases, one can use previous knowledge of the system to identify a solid initial guess. If no such previous knowledge is available, sometimes a 'wildguess' is all we have. In those cases, we may have little confidence that the algorithm will arrive at a global minimum. The simplest way to gain some confidence of achieving a global minimum is the __multi-start__ strategy: choose many initial guesses, and run the algorithm from each (as in Example 7 above). This can be computationally expensive, but if the initial guesses are spread widely over the parameters space, one can expect that the global minimum will be achieved. </p>
 
-<p> A number of methods have been developed to complement the multi-start approach. These are known as __global optimization routines__. They are also known as _heuristic methods_, because their performance cannot be guaranteed in general: there are no guarantees that they'll find the global minimum, nor are there solid estimates of how many iterations will be required for them to carry out a satisfactory search of the parameter space. We will consider two commonly used heuristic methods: simulated annealing and genetic algorithms. </p>
+<p> A number of methods have been developed to complement the multi-start approach. These are known as __global optimization routines__. They are also known as _heuristic_ methods, because their performance cannot be guaranteed in general: there are no guarantees that they'll find the global minimum, nor are there solid estimates of how many iterations will be required for them to carry out a satisfactory search of the parameter space. We will consider two commonly used heuristic methods: simulated annealing and genetic algorithms. </p>
 
 #### Simulated Annealing
 
-<p> __Simulated annealing__ is motivated by the process of annealing: a heat treatment by which the physical properties of metals can be altered. Simulated annealing is an iterative algorithm; the algorithm starts at an initial guess, and then steps through the search space. In contrast with gradient descent, the stapes taken in simulated annealing are partially random. Consequently, the path followed from a particular initial condition won't be repeated if the algorithm is run again from the same point. (Algorithms that incorporate randomness are often referred to as _Monte Carlo_ methods, in reference to the European gambling centre.)  At each step, the algorithm begins by identify a candidate next position. (This point could be selected by a variant of gradient descent, or some other method).  The value of the objective at this candidate point is then compared with the objective value at the current point. If the objective is lower at the candidate point (i.e. this step takes the algorithm downhill), then the step is taken and a new iteration begins. If the value of the objective is larger at the candidate point (i.e. the step makes things _worse_), the step can still be taken, but only with a small probability. Both the size of the candidate steps and the probability of accepting 'wrong' (uphill) steps are tied to a __cooling schedule__: a decreasing 'temperature' profile: at high temperatures, large steps are considered and 'wrong' steps are taken frequently; as the temperature drops, only smaller steps are considered, and fewer 'wrong' steps are allowed. By analogy, imagine a ping-pong ball resting on a curved landscape. One strategy to move the ball to the lowest valley bottom is to shake the table. Following a simulated annealing-inspired approach, we could begin by applying violent shakes (high temperature) which would result in the ball bouncing across much of the landscape. By slowly reducing the severity of the shaking, we could ensure the ball would settle into a local minimum at a valley bottom. The hope is that if the cooling schedule is well-chosen, the ball would have sampled many valleys, and would end up at the bottom of the lowest valley. Simulated annealing can be combined with a multi-start strategy to further ensure broad sampling of the search space. </p>
+<p> __Simulated annealing__ is motivated by the process of annealing: a heat treatment by which the physical properties of metals can be altered. Simulated annealing is an iterative algorithm; the algorithm starts at an initial guess, and then steps through the search space. In contrast to gradient descent, the staps taken in simulated annealing are partially random. Consequently, the path followed from a particular initial condition won't be repeated if the algorithm is run again from the same point. (Algorithms that incorporate randomness are often referred to as _Monte Carlo_ methods, in reference to the European gambling centre.)  At each step, the algorithm begins by identifying a candidate next position. (This point could be selected by a variant of gradient descent, or some other method).  The value of the objective at this candidate point is then compared with the objective value at the current point. If the objective is lower at the candidate point (i.e. this step takes the algorithm downhill), then the step is taken and a new iteration begins. If the value of the objective is larger at the candidate point (i.e. the step makes things _worse_), the step can still be taken, but only with a small probability. Both the size of the steps and the probability of accepting 'wrong' (uphill) steps are tied to a __cooling schedule__: a decreasing 'temperature' profile. At high temperatures, large steps are considered and 'wrong' steps are taken frequently; as the temperature drops, only smaller steps are considered, and fewer 'wrong' steps are allowed. By analogy, imagine a ping-pong ball resting on a curved landscape. One strategy to move the ball to the lowest valley bottom is to shake the table. Following a simulated annealing-inspired approach, we could begin by applying violent shakes (high temperature) which would result in the ball bouncing across much of the landscape. By slowly reducing the severity of the shaking, we could ensure the ball would settle into a local minimum at a valley bottom. The hope is that if the cooling schedule is well-chosen, the ball would have sampled many valleys, and would end up at the bottom of the lowest valley. Simulated annealing can be combined with a multi-start strategy to further ensure broad sampling of the search space. </p>
 
 #### Example 8
 
-<p> To illustrate, we'll apply simulated annealing to the optimization task in Example 7 above, using the same initial guess points. We'll use the ```GenSA``` library to implement the algorithm (described in detail [here](https://cran.r-project.org/web/packages/GenSA/GenSA.pdf)). Calls to ```GenSA``` require that we specify the objective function, an initial guess, and upper and lower bounds for the search values for each parameter. (Optional input parameters allow the user to modify internal features of the algorithm such as the cooling schedule and stepping protocol.)
+<p> To illustrate, we'll apply simulated annealing to the optimization task in Example 7 above, using the same initial guess points. We'll use the ```GenSA``` library to implement the algorithm (described in detail [here](https://cran.r-project.org/web/packages/GenSA/GenSA.pdf)). Calls to ```GenSA``` require that we specify (i) the objective function; (ii) an initial guess; (iii) and upper and lower bounds for the search values for each parameter. (Optional input parameters allow the user to modify internal features of the algorithm such as the cooling schedule and stepping protocol.)
 
 ```{r simulated-annealing-complicated-function,echo=TRUE}
 library(GenSA)
@@ -537,24 +556,20 @@ lower <- rep(-2, dimension)
 upper <- rep(2, dimension)
 
 out0 <- GenSA(par = x0, lower = lower, upper = upper,fn = complicatedFun)
-out0[c("value","par")]
-
-out1 <- GenSA(par = x1, lower = lower, upper = upper,fn = complicatedFun,control = list(temperature=2000))
-out1[c("value","par")]
-
+out1 <- GenSA(par = x1, lower = lower, upper = upper,fn = complicatedFun)
 out2 <- GenSA(par = x2, lower = lower, upper = upper,fn = complicatedFun)
-out2[c("value","par")]
-
 out3 <- GenSA(par = x3, lower = lower, upper = upper,fn = complicatedFun)
-out3[c("value","par")]
-
 out4 <- GenSA(par = x4, lower = lower, upper = upper,fn = complicatedFun)
+out0[c("value","par")]
+out1[c("value","par")]
+out2[c("value","par")]
+out3[c("value","par")]
 out4[c("value","par")]
 ```
 
 <p> We see that in each case, simulated annealing has avoided getting 'stuck' in the local minima. It has achieved the same optimized value from every initial guess. </p>
 
-<p> The plot below provides some insight into how the simulated annealing run proceed. Iterations (steps) are shown along the horizontal axis. The vertical axis shows values of the objective function. The blue points represents the function value at the current position, while the red shows the minimum achieved so far. The minimum is found rather quickly, but the algorithm continues to jump around in an attempt to widely explore the search space.</p>
+<p> The plot below provides some insight into how the simulated annealing runs proceed. Iterations (steps) are shown along the horizontal axis. The vertical axis shows values of the objective function. The blue points represents the function value at the current position, while the red shows the minimum achieved so far. The minimum is found rather quickly, but the algorithm continues to explore the search space.</p>
 
 ```{r output-simulated-annealing-complicated-function, echo-TRUE}
 plot(out1$trace.mat[,4][1:8000],type="l",lwd=4,col="red",xlab="Iteration number",ylab="Objective value")
@@ -562,7 +577,7 @@ points(out1$trace.mat[,3][1:8000],pch=20,col="blue")
 ```
 
 #### Example 9
-<p> To give the simulated annealing algorithm a more challenging task, consider the following function, which has many local minima.
+<p> To give the simulated annealing algorithm a more challenging task, consider the following function, which has many local minima (somehwat like an egg carton).
 $$f(x,y) = (y+47)\sin\left (\sqrt{|y+(x/2)+47|)}-x\sin(\sqrt{|x-(y+47)|} + \frac{1}{1000}\left(x^2+y^2\right)\right)$$
 </p>
 
@@ -629,9 +644,8 @@ We start the algorithm from  two different initial guesses. Both runs result in 
 
 ```{r egg-carton-simulated-annealing-runs, echo=TRUE}
 egg.out <- GenSA(par = x0, lower = lower, upper = upper,fn = f.egg)
-egg.out[c("value","par")]
-
 egg.out3 <- GenSA(par = x3, lower = lower, upper = upper,fn = f.egg)
+egg.out[c("value","par")]
 egg.out3[c("value","par")]
 ```
 
@@ -651,9 +665,11 @@ We next consider a heuristic algorithm in which multiple paths through the searc
 
 <p> __Genetic algorithms__ are inspired by Darwinian evolution. The algorithm begins with the specification of a population of initial guesses. At each iteration of the algorithm, this population 'evolves' toward improved estimates of the global minimum. This 'evolution' step involves three substeps: selection, mutation, and cross-over. In the selection step, the population is pruned by removing a fraction that are not sufficiently fit (where fitness corresponds to the value of the objective function being minimized). Then, mutations are introduced into the remaining population by adding small random perturbations to their position in the search space. Finally, a new generation is generated by crossing members of the current population. This can be done in several ways; the simplest is to generate crosses as averages of the numerical values of the two 'parents'. Through several generations, this process leads to a population with high fitness (minimal objective) after a thorough exploration of the search space. Genetic algorithms are a subset of the more general class of _evolutionary algorithms_ all of which involve simultaneous exploration of the search space through multiple paths.  </p>
 
-</p>To implement a genetic algorithm, we'll make use of the ```ga``` function, described [here](https://cran.r-project.org/web/packages/GA/GA.pdf). As with simulated annealing, the call to ```ga``` requires that we specify the objective function, lower and upper bounds to define the search space, and the number of iterations to execute. The ```ga``` routine maximizes the objective function, so we enter our objective with a negative sign to achieve minimization. </p>
+#### Example 10
 
-```{r call GA, echo=TRUE}
+</p>To implement a genetic algorithm, we'll make use of the ```ga``` function, from ```Library(GA)```, described [here](https://cran.r-project.org/web/packages/GA/GA.pdf). The call to ```ga``` requires that we specify the objective function, lower and upper bounds to define the search space, and the number of iterations to execute. (The initial population is generated automatically). The ```ga``` routine maximizes the objective function, so we enter our objective with a negative sign to achieve minimization. </p>
+
+```{r call-GA, echo=TRUE}
 library(GA)
 ga <- ga(type = "real-valued", fitness = function(x) -complicated(x[1],x[2]),
          lower = c(-2, -2), upper = c(2, 2), maxiter = 30)
@@ -699,7 +715,7 @@ Apply the genetic algorithm with ```ga``` to confirm the minimum of the egg-cart
 
 <p> The principles of nonlinear regression carry over directly to calibration of more complex models. In many domains of biology, dynamic models are used to describe the time-varying behaviour of systems (from biomolecular networks to physiology to ecology). These models take many forms; a commonly used formulation is based on ordinary differential equations (i.e. _rate equations_). These models are deterministic (do not incorporate random effects) and assume that the dynamics occur in a spatially homogeneous (well-mixed) environment. Despite these limitations, these models can describe a wide variety of dynamic behaviours, and are useful starting points for investigations across a variety of biological domains. </p>
 
-<p> Ordinary differential equation models used in biology often take the form
+<p> Differential equation models used in biology often take the form
 \begin{equation*}
     \frac{d}{dt} {\bf x}(t) = {\bf f}({\bf x}(t), {\bf p})
 \end{equation*}
@@ -708,7 +724,7 @@ where components of the time-varying vector ${\bf x}(t)$ are the _states_ of the
     \frac{d}{dt} x_1(t) &=& \alpha x_1(t) - \beta x_1(t) x_2(t)\\
     \frac{d}{dt} x_2(t) &=& \gamma x_1(t) x_2(t) - \delta x_2(t)\\
 \end{eqnarray*} </p>
-Here $x_1$ is the size of the prey population; $x_2$ is the size of the predator population. The prey are presumed to have access to resources that supports exponential growth in the absence of predation: growth at rate $\alpha x_1(t)$. Interactions between prey and predator populations, assumed to occur at rate $x_1(t) x_2(t)$, lead to decrease of the prey population and increase of the predator population (characterized by parameters $\beta$ and $\gamma$ respectively). Finally, the prey suffer an exponential decline in population size in the absence of prey: decay at rate $\delta x_2(t)$. A simulation of the model, shown below, demonstrates the boom-bust cycle of oscillations. Simulation of the model requires specification of numerical values for each of the four model parameters and the two initial population sizes.
+Here $x_1$ is the size of the prey population; $x_2$ is the size of the predator population. The prey are presumed to have access to resources that support exponential growth in the absence of predation: growth at rate $\alpha x_1(t)$. Interactions between prey and predator populations, assumed to occur at rate $x_1(t) x_2(t)$, lead to decrease of the prey population and increase of the predator population (characterized by parameters $\beta$ and $\gamma$ respectively). Finally, the prey suffer an exponential decline in population size in the absence of prey: decay at rate $\delta x_2(t)$. A simulation of the model, shown below, demonstrates the boom-bust cycle of oscillations. Simulation of the model requires specification of numerical values for each of the four model parameters, $\alpha$, $\bate$, $\gamma$, $\delta$ and the two initial population sizes $x_1(0)$ and $x_2(0)$.
 </p>
 
 
@@ -739,7 +755,7 @@ points(out$x~out$time, type = "l", add = TRUE)
 legend(3.8,20,legend = c("Prey", "Predator"), col = c("red", "black"), pch = 20)
 ```
 
-<p> The figure below shows a dataset the corresponds to observations of an oscillatory predator-prey  system. To calibrate the Lotka-Volterra model to this data we seek values of the  model parameters  for which simulation of the model provides the best fit. As in the regression tasks described previously, the standard measure for quality of fit is the sum of squared errors. We thus proceed with a minimization task: for each choice of numerical values for the model parameters, we compare model simulation with the data and determine the sum of squared errors. We aim to minimize this measure of fit over the space of model parameters. We will use the observed population values at time zero as initial condition for the simulations. </p>
+<p> The figure below shows a dataset the corresponds to observations of an oscillatory predator-prey  system. To calibrate the Lotka-Volterra model to this data we seek values of the  model parameters  for which simulation of the model provides the best fit. As in the regression tasks described previously, the standard measure for quality of fit is the sum of squared errors. We thus proceed with a minimization task: for each choice of numerical values for the model parameters, we compare model simulation with the data and determine the sum of squared errors. We aim to minimize this measure of fit over the space of model parameters. </p>
 
 ```{r generate-and-plot-lotka-volterra-corrupted-data, echo = FALSE, warning = FALSE}
 observations<-data.frame(t_obs<-out$time[seq(1,length(out$time),20)],
@@ -763,13 +779,13 @@ legend(4,20, legend = c("Prey", "Predator"), col = c("red", "black"), pch = 20)
 not_used<-corplot
 ```
 
-#### Example 10
+#### Example 11
 
-To illustrate, we'll first consider the case that two of the model parameter values have been established independently: $\alpha= 30$ and $\delta=6$. We'll then calibrate the model by estimating values for parameters $\beta$ and $\gamma$. We begin by building a sum-of-squared errors function that takes values of $\beta$ and $\gamma$ as arguments:
+To illustrate, we'll first consider the case that two of the model parameter values have been established independently: $\alpha= 30$ and $\delta=6$. We'll then calibrate the model by estimating values for parameters $\beta$ and $\gamma$. We begin by building a sum-of-squared errors function that takes values of $\beta$ and $\gamma$ as arguments. We will use the observed population values at time zero as initial condition for the simulations. 
 
 ```{r define-lotka-volterra-sse-function, echo = TRUE}
 #define SSE function
-determine_sse2 <- function(p) {
+determine_sse <- function(p) {
 
   #inputs are the two unknown model parameters collected into a vector p=[beta, gamma]
   newPars <- c(p[1],p[2])
@@ -779,7 +795,7 @@ determine_sse2 <- function(p) {
   #define the time-grid (same as above)
   #Time <- seq(0, 6, by = .001)
   
-  #kinetics is the same as before, no need to redefine
+  #kinetics as before
 newLotVmod <- function (Time, State, newPars) {
     with(as.list(c(State, newPars)), {
         dx = x*(30 - p[1]*y)
@@ -814,7 +830,7 @@ library(GenSA)
 x1 = c(1,1)
 lower <- c(0.1,0.1)
 upper <- c(10,10)
-out0 <- GenSA(par = x1, lower = lower, upper = upper,fn = determine_sse2, control = list(maxit = 10)) 
+out0 <- GenSA(par = x1, lower = lower, upper = upper,fn = determine_sse, control = list(maxit = 10)) 
 out0[c("value","par")]
 ```
 
@@ -869,7 +885,7 @@ not_used5<-corplot
 
 #### Exercise 3
 
-<p> Extend Example 10 to calibrate all four model parameters $\alpha$, $\beta$, $\gamma$, and $\delta$ to the following dataset, with initial states $x=0.01$ and $y=1.0$. Use either simulated annealing 
+<p> Extend Example 11 to calibrate all four model parameters $\alpha$, $\beta$, $\gamma$, and $\delta$ to the following dataset, with initial states $x=0.01$ and $y=1.0$. Use either simulated annealing or a genetic algorithm.
 
 
 ```{r exercise-3-generate-lotka-volterra-corrupted-data, echo = FALSE, warning = FALSE}
@@ -933,7 +949,7 @@ kable(corrupted_observations)
 
 
 ```
-<p> You can cut-and-paste this data into your own R consloe using either ```data<- read.table("clipboard", header=T)``` on Windows or ```data<- read.table(pipe("pbpaste"), header=T)``` on a Mac.
+<p> You can cut-and-paste this data into your own R console using either ```data<- read.table("clipboard", header=T)``` on Windows or ```data<- read.table(pipe("pbpaste"), header=T)``` on a Mac.
 
 <!-- ```{r ex3-determine-sse, echo = FALSE} -->
 <!-- determine_sse3 <- function(p) { -->
@@ -993,26 +1009,26 @@ kable(corrupted_observations)
 
 #### Exercise 4
 
-<p> The behaviour of the Lotka-Volterra model described above depends on the values of the model parameters. Such models are often used to explore the effect of perturbations on a system. For instance, after successfully calibrating a model to given population's dynamics, one could propose interventions that could alter the value of one of the model parameters, e.g.~by restricting access to resources required for growth of the prey population. We could then simulate the model under this altered value of $p_1$ and thus generate predictions of the effect of this manipulation. </p>
+<p> The behaviour of the Lotka-Volterra model described above depends on the values of the model parameters. Such models are often used to explore the effect of perturbations on a system. For instance, after successfully calibrating a model to given population's dynamics, one could propose interventions that would alter the value of one of the model parameters, e.g. by restricting access to resources. We could then simulate the model under this alteration and thus generate predictions of the effect of this manipulation. </p>
 
 <p> Alternatively, we could use a model formulation that incorporates a time-varying perturbation.  As an example, consider a version of the Lotka-Volterra equations that includes a term to describe removal (harvesting/culling) of the predator population: 
  \begin{eqnarray*} 
-     \frac{d}{dt} x_1(t) &=& p_1 x_1(t) - p_2 x_1(t) x_2(t)\\ 
-     \frac{d}{dt} x_2(t) &=& p_3 x_1(t) x_2(t) - p_4 x_2(t) - u(t) x_2(t) 
+     \frac{d}{dt} x_1(t) &=& \alpha x_1(t) - \beta x_1(t) x_2(t)\\ 
+     \frac{d}{dt} x_2(t) &=& \gamma x_1(t) x_2(t) - \delta x_2(t) - u(t) x_2(t) 
  \end{eqnarray*} </p> 
 
-<p> Here $u(t)$, called an _input signal_ is a function that represents the effort exerted in removal of predators. With this input signal in place, we can now use the model to explore the consequences of a range of removal schedules. In particular, optimization can be used to identify the removal strategy that best achieves some performance goal. </p> 
+<p> Here $u(t)$, called an _input signal_, is a function that represents the effort exerted in removal of predators. With this input signal in place, we can now use the model to explore the consequences of a range of removal schedules. In particular, optimization can be used to identify the removal strategy that best achieves some performance goal. </p> 
 
-<p> As a concrete example, consider the goal of maximizing harvest over some fixed time period (e.g.~a year). Suppose that the harvesting rate must be fixed throughout the time interval of interest. In this case, the harvesting rate is constant. Let's call it $u(t) = u_0$. We can then account for the total harvest by introducing a new state variable that tracks the progress of the harvest:
+<p> As a concrete example, consider the goal of maximizing harvest over some fixed time period. Suppose that the harvesting rate must be fixed throughout the time interval of interest so $u(t) = u_0$ is constant. We can account for the total harvest by introducing a new state variable that tracks the progress of the harvest:
 \begin{eqnarray*}
-    \frac{d}{dt} x_1(t) &=& p_1 x_1(t) - p_2 x_1(t) x_2(t)\\
-    \frac{d}{dt} x_2(t) &=& p_3 x_1(t) x_2(t) - p_4 x_2(t) - u_0 x_2(t)\\
+    \frac{d}{dt} x_1(t) &=& \alpha x_1(t) - \beta x_1(t) x_2(t)\\
+    \frac{d}{dt} x_2(t) &=& \gamma x_1(t) x_2(t) - \delta x_2(t) - u_0 x_2(t)\\
     \frac{d}{dt} x_3(t) &=& u_0 x_2(t)
 \end{eqnarray*} </p>
 
-<p> Then the value of $x_3(t)$ is the accumulated harvest from time zero to time $t$. If our goal is to maximize the total harvest over a year, we aim to maximize $x_3(1)$ over the choice of the fixed harvesting effort $u_0$. </p>
+<p> Then the value of $x_3(t)$ is the accumulated harvest from time 0 to time $t$. If our goal is to maximize the total harvest over an interval $[0, b]$, we aim to maximize the value of $x_3(b)$ over the choice of the fixed harvesting effort $u_0$. </p>
 
-Take parameter values of $p_1 = 30$, $p_2 = 5$, $p_3 = 2$, $p_4 = 6$, and initial state $x_1(0) = 0.0088$, $x_2(0)=1.6$. Determine the value of $u_0$ that maximizes the total harvest over a period of $t \in [0, 6].
+Take parameter values of $p_1 = 30$, $p_2 = 5$, $p_3 = 2$, $p_4 = 6$, and initial state $x_1(0) = 0.0088$, $x_2(0)=1.6$. Determine the value of $u_0$ that maximizes the total harvest over a period of $t \in [0, 6]$.
 
 
 
@@ -1027,7 +1043,7 @@ Take parameter values of $p_1 = 30$, $p_2 = 5$, $p_3 = 2$, $p_4 = 6$, and initia
 
 ## Uncertainty Analysis and Bayesian Calibration
 
-<p> So far, we've used regression analysis to provide estimates of parameter values based on data. Regression is usually followed by _uncertainty analysis_, which provides some measure of confidence in those parameter value estimates. For instance, in the case of linear regression, 95\% confidence intervals on the estimates (best fit line slope and intercept) and corresponding confidence intervals on the model predictions are supported by extensive statistical theory, and can be readily generated in R, as follows. </p> 
+<p> So far, we've used regression analysis to provide specific estimates of parameter values. Regression is usually followed by _uncertainty analysis_, which provides some measure of confidence in those parameter value estimates. For instance, in the case of linear regression, 95\% confidence intervals on the parameter estimates and corresponding confidence intervals on the model predictions are supported by extensive statistical theory, and can be readily generated in R, as follows. </p> 
 
 ```{r generate-prediction-confidence-intervals-linear-regression-iris,echo=TRUE}
 library(ggplot2)
@@ -1041,7 +1057,7 @@ pred_interval <- predict(iris.lm, newdata = data.frame(Petal.Width=new.dat), int
 
 The plot below shows 95\% confidence intervals on the model predictions. 
 
-```{r plot-prediction-confidence-intervals-linear-regression-iris,echo=FALSE}
+```{r plot-prediction-confidence-intervals-linear-regression-iris,echo=TRUE}
 plot(iris$Petal.Width,iris$Sepal.Length,xlab="Sepal Length", ylab="Petal Width", main="Regression",pch=16)
 abline(iris.lm,col="firebrick",lwd=2)
 lines(new.dat, pred_interval[,2], col="steelblue", lty=2,lwd=2)
@@ -1073,7 +1089,9 @@ confint(MMmodel.nls)
 <!--   "upper" = lm_summ$coef[1,1] + qt(0.975, df = lm_summ$df[2]) * lm_summ$coef[1, 2]) -->
 <!-- ``` -->
 
-<p> __Bayesian methods__ address the regression task by combining calibration and uncertainty in a single process. The basic idea behind Bayesian analysis (founded on Bayes Theorem, which may be familiar from elementary probability), is to start with some knowledge about the parameter estimates (analogous to the initial guess supplied to nonlinear regression or global optimization) and then use the available data to refine that knowledge. In the Bayesian contect, instead of the initial guess and refined estimate being single numerical values, they are _distributions_. In Bayesian terminology, we being with a _prior_ distribution, which may be informed by previously established expert knowledge. A commonly used prior is a normal distribution centered at a good initial estimate; in other cases the piro may be a uniform distribution over a wide range of possible values, indicating very little previously established knowledge about the parameetr values. Application of a Bayesian calibration scheme uses the available data to generate an improved distribution of the parameter values, called the  _posterior_ distribution. A successful Bayesian calibration could take a `wild guess' uniform prior and return a tightly-centered posterior. Uncertainty can then be gleaned directly from the posterior distribution. </p>
+<p> __Bayesian methods__ address the regression task by combining calibration and uncertainty in a single process. The basic idea behind Bayesian analysis (founded on Bayes Theorem, which may be familiar from elementary probability), is to start with some knowledge about the parameter estimates (analogous to the initial guess supplied to nonlinear regression or global optimization) and then use the available data to refine that knowledge. In the Bayesian context, instead of the initial guess and refined estimate being single numerical values, they are _distributions_. In Bayesian terminology, we being with a _prior_ distribution, which may be based on previously established expert knowledge. A commonly used prior is a normal distribution centered at a good initial estimate. In other cases the prior may be a uniform distribution over a wide range of possible values, indicating very little previously established knowledge about the parameter values. Application of a Bayesian calibration scheme uses the available data to generate an improved distribution of the parameter values, called the  _posterior_ distribution. A successful Bayesian calibration could take a `wild guess' uniform prior and return a tightly-centered posterior. Uncertainty can then be gleaned directly from the posterior distribution. </p>
+
+#### Example 12
 
 <p> Here we'll consider a simple numerical implementation of a Bayesian approach: Approximate Bayesian Computation (ABC). This approach is based on a simple idea: the _rejection method_, in which we sample repeatedly from the prior distribution and reject all samples that do not satisfy a pre-specified tolerance for quality of fit. (This is reminiscent of the selection step in genetic algorithms: culling unfit members of a population.) The samples that are not rejected form the _posterior_ distribution.</p>
 
@@ -1082,19 +1100,16 @@ To illustrate, we'll revist the Michaelis-Menten example considered above. We se
 
 ```{r rejection-method-for-Michaelis-Menten-data, ECHO=TRUE}
 # recall the dataset
-S = c(3.6, 1.8, 0.9, 0.45, 0.225, 0.1125, 3.6, 1.8, 0.9, 0.45, 0.225, 0.1125, 
-      3.6, 1.8, 0.9, 0.45, 0.225, 0.1125, 0)
-V = c(0.004407692, 0.004192308, 0.003553846, 0.002576923, 0.001661538, 
-      0.001064286, 0.004835714, 0.004671429, 0.0039, 0.002857143,
-      0.00175, 0.001057143, 0.004907143, 0.004521429, 0.00375, 0.002764286,
-      0.001857143, 0.001121429, 0)
+
+S <- c(4.32, 2.16, 1.08, 0.54, 0.27, 0.135, 3.6, 1.8, 0.9, 0.45, 0.225, 0.1125, 2.88, 1.44, 0.72, 0.36, 0.18, 0.9, 0) #substrate concentrations
+V <- c(0.48, 0.42, 0.36, 0.26, 0.17, 0.11, 0.44, 0.47, 0.39, 0.29, 0.18, 0.12, 0.50, 0.45, 0.37, 0.28, 0.19, 0.31, 0) #reaction velocities
 
 # define functions to draw values for Km and Vmax from the prior distributions
 draw_Km <- function () {
   return (runif(1, min=0, max=1))
 }
 draw_Vmax <- function () {
-  return (runif(1, min=0, max=0.01))
+  return (runif(1, min=0, max=1))
 }
 
 # Michaelis-Menten function 
@@ -1107,12 +1122,6 @@ compare_with_squared_distance <- function (true, simulated) {
   distance = sqrt(sum(mapply(function(x,y) (x-y)^2, true, simulated)))
   return(distance)
 }
-
-# function to check whether distance is below threshold (returns TRUE) or not (returns FALSE)
-#accept_or_reject_with_squared_distance <- function (true, simulated, acceptance_threshold) {
-#  distance = compare_with_squared_distance(true, simulated)
-#  if((distance < acceptance_threshold) ) return(T) else return(F)
-#}
 
 # sampling algorithm: returns the sampled Km and Vmax values and whether this pair is accepted
 sample_by_rejection <- function (true_data, n_iterations, acceptance_threshold, accept_or_reject_function) {
@@ -1137,11 +1146,6 @@ sample_by_rejection <- function (true_data, n_iterations, acceptance_threshold, 
   }
   return(data.frame(cbind("accepted" = accepted, "sampled_Kms" = sampled_Km, "sampled_Vmaxs" = sampled_Vmax)))
 }
-
-
-
-#sample_by_rejection(V, 20, 0.01, accept_or_reject_with_squared_distance)
-
 ```
 
 
@@ -1168,7 +1172,7 @@ sample_by_rejection <- function (true_data, n_iterations, acceptance_threshold, 
 
 
 
-In the call below, we sample from the prior distributions of $Km$ and $Vmax$ 200000 times. We set the acceptance threshold as 0.001. That is, parameter pairs that give rise to SSE values below 0.001 are accepted; others are rejected. The histograms below show the uniform priors along with the posteriors. The algorithm has successfully tightened the distributions about the best-fit parameter estimates established above. 
+In the call below, we sample from the prior distributions of $Km$ and $Vmax$ 200000 times. We set the acceptance threshold as 0.15. That is, parameter pairs that give rise to SSE values below 0.15 are accepted; others are rejected. The histograms below show the uniform priors along with the posteriors. The algorithm has successfully tightened the distributions about the best-fit parameter estimates established above. 
 
 ```{r, echo=FALSE}
 # set seed
@@ -1176,33 +1180,33 @@ set.seed(132)
 ```
 
 ```{r}
-# simulate 200000 times with a threshold of 0.001 
-sampled_parameter_values_squared_distances = sample_by_rejection(V, 200000, 0.001, accept_or_reject_with_squared_distance)
+# simulate 200000 times with a threshold of 0.15 
+sampled_parameter_values_squared_distances = sample_by_rejection(V, 200000, 0.15, accept_or_reject_with_squared_distance)
 
 # report the number of accepted values among the 200000 samples
 sum(sampled_parameter_values_squared_distances$accepted)
 ```
 
-We see that only 2164 of 200 000 samples were accepted, yielding an acceptance rate of about 1%. The acceptance rate can be tuned by choice of the rejection threshold. A low acceptance rate gives rise to a computationally expensive algorithm, while a high acceptance rate can lead to poor estimation.
+We see that only 2148 of 200 000 samples were accepted, yielding an acceptance rate of about 1%. The acceptance rate can be tuned by choice of the rejection threshold. A low acceptance rate gives rise to a computationally expensive algorithm, while a high acceptance rate can lead to poor estimation.
 
 ```{r plot-rejection-histograms, echo=FALSE}
 c1 <- rgb(173,216,230,max = 255, alpha = 80, names = "lt.blue")
 c2 <- rgb(255,192,203, max = 255, alpha = 80, names = "lt.pink")
 
-post1 <- hist(sampled_parameter_values_squared_distances[which(sampled_parameter_values_squared_distances$accepted==1),3], col=c2, xlab = "Km", xlim=c(0,0.01))
-rect(0, 0, 0.01, 35, col=c1, border=par("fg"), lwd=par("lwd"), xpd=FALSE)
+post1 <- hist(sampled_parameter_values_squared_distances[which(sampled_parameter_values_squared_distances$accepted==1),3], col=c2, xlab = "Km", xlim=c(0,1), main='')
+rect(0, 0, 1, 35, col=c1, border=par("fg"), lwd=par("lwd"), xpd=FALSE)
 legend("topright",legend=c("Prior Distribution for Km", "Posterior Distribution for Km"),
        inset=.02, fill=c(c1,c2), cex=0.8)
 
 #prior2 = hist(sampled_parameter_values_squared_distances[1:2500,2],col = c1,
 #              xlab = "Vm", main="Prior Distribution for Vm")
-post2 = hist(sampled_parameter_values_squared_distances[which(sampled_parameter_values_squared_distances$accepted==1),2],col = c2, xlab = "Vmax", xlim=c(0,1))
+post2 = hist(sampled_parameter_values_squared_distances[which(sampled_parameter_values_squared_distances$accepted==1),2],col = c2, xlab = "Vmax", xlim=c(0,1),main='')
 rect(0, 0, 1, 50, col=c1, border=par("fg"), lwd=par("lwd"), xpd=FALSE)
 legend("topright",legend=c("Prior Distribution for Vmax", "Posterior Distribution for Vmax"),
        inset=.02, fill=c(c1,c2), cex=0.8)
 ```
 
-<p> Typically, approximate Bayesian computation is implemented as a sequential method, in which a sequence of rejection steps is applied, with the distribution being refined at each step (generating, in essence, a sequence of _posterior_ distributions, the last of which is considered to be the best description of the desired parameter estimates). Below, we illustrate the use of the ```EasyABC``` package to implement sequential ABC for the Michaelis-Menten fitting task. (more details on this package can be found in (Beaumont, 2019) and [here](https://cran.r-project.org/web/packages/EasyABC/EasyABC.pdf)) </p>
+<p> Typically, approximate Bayesian computation is implemented as a sequential method, in which a sequence of rejection steps is applied, with the distribution being refined at each step (generating, in essence, a sequence of _posterior_ distributions, the last of which is considered to be the best description of the desired parameter estimates). The ```EasyABC``` package can be used to implement sequential ABC. (More details on this package can be found in (Beaumont, 2019) and [here](https://cran.r-project.org/web/packages/EasyABC/EasyABC.pdf).) </p>
 
 <!-- ```{r set-seed-for-EasyABC} -->
 <!-- # set seed -->
@@ -1289,7 +1293,7 @@ wireframe(z ~ x*y,x, drape=T, expand = 0.5, col = "blue", xlab=x, ylab=y, zlab=N
 
 #### Exercise 6
 
-<p> Apply the rejection algorithm to estimate the values of $p_2$ and $p_3$ by fitting the Lotka-Volterra model to the data provided above. Use uniform prior distributions of [0,10] for both parameters, and choose a rejection threshold that provides an acceptance rate of about 5%. Do you find that one parameter is more confidently estimated than the other? </p>
+<p> Apply the rejection algorithm to estimate the values of $\beta$ and $\gamma$ by fitting the Lotka-Volterra model to the data provided above. Use uniform prior distributions of [0,10] for both parameters, and choose a rejection threshold that provides an acceptance rate of about 1%. Do you find that one parameter is more confidently estimated (tighter distribution) than the other? </p>
 
 
 
