@@ -470,12 +470,13 @@ output
 
 #### Exercise 1
 
-Consider the following dataset, which corresponds to measurements of drug concentration in the blood over time. The trend in the data suggests it can be well-captured by a biexponential $C(t) = a_1 e^{r_1 t} + a_2 e^{r_2 t}$. Set up a sum of squared errors function and use either the gradient descent function above or the ```nls``` command to determine the best-fit estimates of the parameters $A$, $r_1$ and $r_2$. Next, try fitting the data to a single exponential $C(t) = a e^{r t}$. Can this simple exponential model also fit the data well? (If you choose to apply gradient descent, you'll need to write a function that generates the sum of squared errors.)
+Consider the following dataset, which corresponds to measurements of drug concentration in the blood over time. The trend in the data suggests it can be well-captured by a biexponential $C(t) = a_1 e^{-r_1 t} + a_2 e^{-r_2 t}$. Set up a sum of squared errors function and use either the gradient descent function above or the ```nls``` command to determine the best-fit estimates of the parameters $A$, $r_1$ and $r_2$. Next, try fitting the data to a single exponential $C(t) = a e^{-r t}$. Can this simple exponential model also fit the data well? (If you choose to apply gradient descent, you'll need to write a function that generates the sum of squared errors, and you'll need to use a small stepsize, e.g. $10^{-5}$, and a large number of iterations.)
 
 
-<!-- <!-- SOLUTION -->
+<!--  SOLUTION -->
 
 <!-- ```{r exercise-1-dataset, echo = TRUE} -->
+<!-- #true values: 3,3, 0.1, 0.01 -->
 
 <!-- T <- c(       0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100) -->
 
@@ -483,23 +484,41 @@ Consider the following dataset, which corresponds to measurements of drug concen
 
 <!-- BE_data=cbind(T,C) -->
 <!-- plot(BE_data) -->
-<!-- ``` -->
+<!-- <!-- `` -->
 
 
 <!-- ```{r exercise-1-grad-descent-soln, echo = TRUE} -->
 <!-- #define SSE -->
 <!-- determine_sse <- function(x){ -->
-<!--   pred<-(x[1]*exp(x[2]*T)+x[3]*exp(x[4]*T)) -->
+<!--   pred<-(x[1]*exp(-x[2]*T)+x[3]*exp(-x[4]*T)) -->
 <!--   obs<-C -->
 <!--   sse<-sum((obs - pred)^2) -->
 <!--   return(sse) -->
 <!-- } -->
-<!-- x0 = c(3,-0.01,3,-0.01) -->
-<!-- gd = grad.descent(determine_sse,x0,step.size=0.0001) -->
+<!-- x0 = c(3,0.1,3,0.01) -->
+<!-- gd = grad.descent(determine_sse,x0,step.size=0.00001,max.iter=20000,  -->
+<!--                         stopping.deriv=0.01) -->
 <!-- x0_out <- c(gd$x, simpleFun(gd$x)) -->
 <!-- x0_out -->
 <!-- plot(BE_data) -->
-<!-- curve(x0_out[1]*exp(x0_out[2]*x)+x0_out[3]*exp(x0_out[4]*x), from = 0, to = 100, add=TRUE, col='firebrick') -->
+<!-- curve(x0_out[1]*exp(-x0_out[2]*x)+x0_out[3]*exp(-x0_out[4]*x), from = 0, to = 100, add=TRUE, col='firebrick') -->
+<!-- ``` -->
+
+<!-- ```{r exercise-1-grad-descent-part-2-soln, echo = TRUE} -->
+<!-- #define SSE -->
+<!-- determine_sse <- function(x){ -->
+<!--   pred<-(x[1]*exp(-x[2]*T)) -->
+<!--   obs<-C -->
+<!--   sse<-sum((obs - pred)^2) -->
+<!--   return(sse) -->
+<!-- } -->
+<!-- x0 = c(3,0.01) -->
+<!-- gd = grad.descent(determine_sse,x0,step.size=0.00001,max.iter=20000,  -->
+<!--                         stopping.deriv=0.01) -->
+<!-- x0_out <- c(gd$x, simpleFun(gd$x)) -->
+<!-- x0_out -->
+<!-- plot(BE_data) -->
+<!-- curve(x0_out[1]*exp(-x0_out[2]*x), from = 0, to = 100, add=TRUE, col='firebrick') -->
 <!-- ``` -->
 
 
@@ -520,6 +539,7 @@ Consider the following dataset, which corresponds to measurements of drug concen
 <!-- plot(BE_data) -->
 <!-- curve(params[1]*exp(params[2]*x), from = 0, to = 100, add=TRUE, col='firebrick') -->
 <!-- ``` -->
+
 
 ### Global Optimization
 
@@ -629,6 +649,7 @@ wireframe(y ~ x1 * x2 # y, x1, and x2 axes to plot
 ```
 
 ```{r define-egg-carton-function-again,echo=FALSE}
+
 f.egg<- function(x){
   -(x[2]+47)*sin(sqrt(abs(x[2]+(x[1]/2)+47)))-x[1]*sin(sqrt(abs(x[1]-(x[2]+47))))+ 0.001*x[1]^2 + 0.001*x[2]^2
 }
@@ -690,10 +711,13 @@ summary(ga)
 #### Exercise 2
 Apply the genetic algorithm with ```ga``` to confirm the minimum of the egg-carton function in Example 9.
 
+
+<!-- SOLUTION -->
+
 <!-- Here is the code for the egg-carton function: -->
 <!-- ```{r ex2-define egg-carton, echo = TRUE} -->
 <!-- f.egg<- function(x,y){ -->
-<!--   -(y+47)*sin(sqrt(abs(y+(x/2)+47)))-x*sin(sqrt(abs(x-(y+47)))) -->
+<!--   -(y+47)*sin(sqrt(abs(y+(x/2)+47)))-x*sin(sqrt(abs(x-(y+47))))+ 0.001*x^2 + 0.001*y^2 -->
 <!-- } -->
 <!-- ``` -->
 
@@ -703,13 +727,12 @@ Apply the genetic algorithm with ```ga``` to confirm the minimum of the egg-cart
 <!--          lower = c(-200, -200), upper = c(200, 200), maxiter = 30) -->
 <!-- ``` -->
 
-<!-- Now try plotting the results of the genetic algorithm search as well as getting a summary of the results to see if the fitness function value obtained through this method is the same as the value obtained through simulated annealing.  -->
+<!-- Now try plotting the results of the genetic algorithm search as well as getting a summary of the results to confirm that the fitness function value obtained through this method is the same as the value obtained through simulated annealing.  -->
 
 <!-- ```{r ex2-results, echo = TRUE} -->
 <!-- plot(ga1) -->
 <!-- summary(ga1) -->
 <!-- ``` -->
-
 
 ## Calibration of Dynamic Models
 
@@ -885,7 +908,8 @@ not_used5<-corplot
 
 #### Exercise 3
 
-<p> Extend Example 11 to calibrate all four model parameters $\alpha$, $\beta$, $\gamma$, and $\delta$ to the following dataset, with initial states $x=0.01$ and $y=1.0$. Use either simulated annealing or a genetic algorithm.
+<p> Extend Example 11 to calibrate all four model parameters $\alpha$, $\beta$, $\gamma$, and $\delta$ to the following dataset, with initial states $x=0.01$ and $y=1.0$. Use either simulated annealing or a genetic algorithm. You can generate a simulation with the predictions at the time-points corresponding to the observations by setting ```Time <- seq(0, 8, by = .2)``` in the simulation script above. If you have trouble finding a suitable initial guess, try $\alpha=10$, $\beta=1$, ,$\gamma=1$, $\delta=1$. </p>
+
 
 
 ```{r exercise-3-generate-lotka-volterra-corrupted-data, echo = FALSE, warning = FALSE}
@@ -926,15 +950,15 @@ unscaled_noise<-runif(length(t_obs))
 
 #generate corrupted observations
 corrupted_observations<-data.frame(t_obs,
-                  x_obs<- x_obs_pure+ ((unscaled_noise*2-1)*(0.1*x_obs)),
-                  y_obs<- y_obs_pure+ ((unscaled_noise*2-1)*(0.3*y_obs)) )
+                  x_obs_corr<- x_obs_pure+ ((unscaled_noise*2-1)*(0.005*x_obs)),
+                  y_obs_corr<- y_obs_pure+ ((unscaled_noise*2-1)*(0.3*y_obs)) )
 
 #plot corrupted observation vector (scatterplot is needed...)
-corplot<-plot(corrupted_observations[,3]~corrupted_observations[,1], col = "red", ylim = c(0,10), main = "Exercise 3: Observations", xlab = "Time", ylab = "Population Density", pch = 20)
-dataset<-points(corrupted_observations[,2]~corrupted_observations[,1], add = TRUE, pch = 20)
-legend(4,20, legend = c("Prey", "Predator"), col = c("red", "black"), pch = 20)
-not_used<-corplot
-corrupted_observations <- setNames(corrupted_observations, c("t_obs_exercise3","x_obs_exercise3","y_obs_exercise3"))
+#corplot<-plot(corrupted_observations[,3]~corrupted_observations[,1], col = "red", ylim = c(0,10), main = "Exercise 3: Observations", xlab = "Time", ylab = "Population Density", pch = 20)
+#dataset<-points(corrupted_observations[,2]~corrupted_observations[,1], add = TRUE, pch = 20)
+#legend(4,20, legend = c("Prey", "Predator"), col = c("red", "black"), pch = 20)
+#not_used<-corplot
+#corrupted_observations <- setNames(corrupted_observations, c("t_obs_exercise3","x_obs_exercise3","y_obs_exercise3"))
 #print(corrupted_observations)
 
 #matrix <- data.matrix(corrupted_observations, rownames.force = NA)
@@ -944,27 +968,45 @@ corrupted_observations <- setNames(corrupted_observations, c("t_obs_exercise3","
 #kable(corrupted_observations)
 
 
-library(kableExtra)
-kable(corrupted_observations)
 
+#library(kableExtra)
+#kable(corrupted_observations)
+
+t_obs_ex<-c(0.0, 0.2, 0.4, 0.6, 0.8, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0, 2.2, 2.4, 2.6, 2.8, 3.0, 3.2, 3.4, 3.6, 3.8, 4.0, 4.2, 4.4, 4.6, 4.8, 5.0, 5.2, 5.4, 5.6, 5.8, 6.0, 6.2, 6.4, 6.6, 6.8, 7.0, 7.2, 7.4, 7.6, 7.8, 8.0)
+
+x_obs_ex<-c(0.0010,  0.043,  0.18,  0.86,  3.6,  3.24,  0.13, 0.0075,  0.00095, 0.0079,  0.00012,  0.00012,  0.00015,  0.00026, 0.00057,  0.0016,  0.0052,  0.021,  0.084,  0.39,  1.8, 5.3,  0.72,  0.028,  0.0024, 0.010,  0.00019,  0.00013, 0.00013,  0.00019,  0.00037,  0.00095,  0.0062,  0.010,  0.040, 0.18,  0.84,  3.6,  3.3,  0.13, 0.0091)
+
+y_obs_ex<-c(0.67,  1.2,  5.1, 0.78, 0.13,  5.7,  8.2,  7.5,  5.6, 4.4,  3.0,  5.3,  2.2,  1.9,  1.4,  1.4,  1.2,  1.1, 2.3, 1.6, 0.25,  3.8,  8.4,  8.3,  6.4,  5.0,  4.5, 1.9,  2.8,  2.9,  1.6,  2.0,  1.7,  4.2,  1.8,  2.7, 1.3,  2.0,  6.8,  8.7,  7.4)
+
+cor2plot<-plot(x_obs_ex~t_obs, col = "red", ylim = c(0,10), main = "Exercise 3: Observations", xlab = "Time", ylab = "Population Density", pch = 20)
+cor2plotmore<-points(y_obs_ex~t_obs, col = "black", ylim = c(0,10), main = "Exercise 3: Observations", xlab = "Time", ylab = "Population Density", pch = 20, add=TRUE)
+legend(4,20, legend = c("Prey", "Predator"), col = c("red", "black"), pch = 20)
+```
+
+```{r ex-3-data, echo=TRUE}
+
+t_obs_ex<-c(0.0, 0.2, 0.4, 0.6, 0.8, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0, 2.2, 2.4, 2.6, 2.8, 3.0, 3.2, 3.4, 3.6, 3.8, 4.0, 4.2, 4.4, 4.6, 4.8, 5.0, 5.2, 5.4, 5.6, 5.8, 6.0, 6.2, 6.4, 6.6, 6.8, 7.0, 7.2, 7.4, 7.6, 7.8, 8.0)
+
+x_obs_ex<-c(0.0010,  0.043,  0.18,  0.86,  3.6,  3.24,  0.13, 0.0075,  0.00095, 0.0079,  0.00012,  0.00012,  0.00015,  0.00026, 0.00057,  0.0016,  0.0052,  0.021,  0.084,  0.39,  1.8, 5.3,  0.72,  0.028,  0.0024, 0.010,  0.00019,  0.00013, 0.00013,  0.00019,  0.00037,  0.00095,  0.0062,  0.010,  0.040, 0.18,  0.84,  3.6,  3.3,  0.13, 0.0091)
+
+y_obs_ex<-c(0.67,  1.2,  5.1, 0.78, 0.13,  5.7,  8.2,  7.5,  5.6, 4.4,  3.0,  5.3,  2.2,  1.9,  1.4,  1.4,  1.2,  1.1, 2.3, 1.6, 0.25,  3.8,  8.4,  8.3,  6.4,  5.0,  4.5, 1.9,  2.8,  2.9,  1.6,  2.0,  1.7,  4.2,  1.8,  2.7, 1.3,  2.0,  6.8,  8.7,  7.4)
 
 ```
-<p> You can cut-and-paste this data into your own R console using either ```data<- read.table("clipboard", header=T)``` on Windows or ```data<- read.table(pipe("pbpaste"), header=T)``` on a Mac.
+
+<!-- SOLUTION -->
 
 <!-- ```{r ex3-determine-sse, echo = FALSE} -->
-<!-- determine_sse3 <- function(p) { -->
-
-
+<!-- determine_sse_ex3 <- function(p) { -->
 
 <!--   #first four input parameters are the kinetic parameters of the model -->
 <!--   newPars <- c(p[1],p[2],p[3],p[4]) -->
 <!--   #last tw parameters are the initial populations for x and y, respectively -->
-<!--   newState <- c(x = 8.792889e-3, y = 1.595545) -->
+<!--   newState <- c(x = 0.01, y = 1) -->
 
 <!--   #time-grid is the same as before, no need to redefine -->
-<!--   #Time <- seq(0, 6, by = .001) -->
+<!--   Time <- seq(0, 8, by = .2) -->
 
-<!--   #kinetics is the same as before, no need to redefine -->
+<!--   #kinetics  -->
 <!-- newLotVmod <- function (Time, State, newPars) { -->
 <!--     with(as.list(c(State, newPars)), { -->
 <!--         dx = x*(p[1] - p[2]*y) -->
@@ -977,59 +1019,111 @@ kable(corrupted_observations)
 <!--   new_out1 <- as.data.frame(ode(func = newLotVmod, y = newState, parms = newPars, times = Time)) -->
 
 <!--   #generate vector of predictions to align with vector of observations -->
-<!--   predictions1<-data.frame(t_pred1<-t_obs, -->
-<!--                   x_pred1<-new_out1$x[seq(1,length(new_out1$x),20)], -->
-<!--                   y_pred1<-new_out1$y[seq(1,length(new_out1$y),20)]) -->
+<!--   #predictions1<-data.frame(t_pred1<-times, -->
+<!--    #               x_pred1<-new_out1$x, -->
+<!--     #              y_pred1<-new_out1$y) -->
 
+<!--   x_obs_ex<- c(0.0010,  0.043,  0.18,  0.86,  3.6,  3.24,  0.13, 0.0075,  0.00095, 0.0079,  0.00012,  0.00012,  0.00015,  0.00026, 0.00057,  0.0016,  0.0052,  0.021,  0.084,  0.39,  1.8, 5.3,  0.72,  0.028,  0.0024, 0.010,  0.00019,  0.00013, 0.00013,  0.00019,  0.00037,  0.00095,  0.0062,  0.010,  0.040, 0.18,  0.84,  3.6,  3.3,  0.13, 0.0091) -->
 
-<!--   sse<-sum((x_obs_corrupt - x_pred1)^2) + sum((y_obs_corrupt - y_pred1)^2) -->
+<!--   y_obs_ex <- c(0.67,  1.2,  5.1, 0.78, 0.13,  5.7,  8.2,  7.5,  5.6, 4.4,  3.0,  5.3,  2.2,  1.9,  1.4,  1.4,  1.2,  1.1, 2.3, 1.6, 0.25,  3.8,  8.4,  8.3,  6.4,  5.0,  4.5, 1.9,  2.8,  2.9,  1.6,  2.0,  1.7,  4.2,  1.8,  2.7, 1.3,  2.0,  6.8,  8.7,  7.4) -->
+
+<!--   sse<-sum((x_obs_ex - new_out1$x)^2) + sum((y_obs_ex - new_out1$y)^2) -->
 <!--   return(sse) -->
+
 <!-- } -->
+<!-- determine_sse_ex3(c(1,1,1,5)) -->
 <!-- ``` -->
 
-<!-- Using the values of $p_2$ and $p_3$ determined using the GenSA call previously, we know that the value of those parameters that minimize the sum of squares error value is 4.974368 and 2.005188 respectively. Knowing that, we can input those values into the determine_sse function as well as predicted values for $p_1$ and $p_4$.  -->
-
-<!-- Our prediction for $p_1$ and $p_4$ will be 20 and 10 respectively.  -->
-
-<!-- ```{r } -->
-<!-- determine_sse3(c(20,4.974368,2.005188,10)) -->
-<!-- ``` -->
-
-<!-- As shown above, the sum of squares error value is 501.9846.  -->
 
 <!-- ```{r} -->
 <!-- library(GenSA) -->
-<!-- x2 = c(20,4.974368,2.005188,10) -->
+<!-- #x2 = c(10,3,1,2) -->
+<!-- x2 = c(10,1,1,1) -->
 <!-- lower <- c(0.1,0.1,0.1,0.1) -->
-<!-- upper <- c(35,35,35,35) -->
-<!-- out0 <- GenSA(par = x2, lower = lower, upper = upper,fn = determine_sse3, control = list(maxit = 50)) -->
+<!-- upper <- c(20,4,2,3) -->
+<!-- out0 <- GenSA(par = x2, lower = lower, upper = upper,fn = determine_sse_ex3, control = list(maxit = 50)) -->
 <!-- out0[c("value","par")] -->
 <!-- ``` -->
 
 
-#### Exercise 4
+<!-- #### Exercise 4 -->
 
-<p> The behaviour of the Lotka-Volterra model described above depends on the values of the model parameters. Such models are often used to explore the effect of perturbations on a system. For instance, after successfully calibrating a model to given population's dynamics, one could propose interventions that would alter the value of one of the model parameters, e.g. by restricting access to resources. We could then simulate the model under this alteration and thus generate predictions of the effect of this manipulation. </p>
+<!-- <p> The behaviour of the Lotka-Volterra model described above depends on the values of the model parameters. Such models are often used to explore the effect of perturbations on a system. For instance, after successfully calibrating a model to given population's dynamics, one could propose interventions that would alter the value of one of the model parameters, e.g. by restricting access to resources. We could then simulate the model under this alteration and thus generate predictions of the effect of this manipulation. </p> -->
 
-<p> Alternatively, we could use a model formulation that incorporates a time-varying perturbation.  As an example, consider a version of the Lotka-Volterra equations that includes a term to describe removal (harvesting/culling) of the predator population: 
- \begin{eqnarray*} 
-     \frac{d}{dt} x_1(t) &=& \alpha x_1(t) - \beta x_1(t) x_2(t)\\ 
-     \frac{d}{dt} x_2(t) &=& \gamma x_1(t) x_2(t) - \delta x_2(t) - u(t) x_2(t) 
- \end{eqnarray*} </p> 
+<!-- <p> Alternatively, we could use a model formulation that incorporates a time-varying perturbation.  As an example, consider a version of the Lotka-Volterra equations that includes a term to describe removal (harvesting/culling) of the predator population:  -->
+<!--  \begin{eqnarray*}  -->
+<!--      \frac{d}{dt} x_1(t) &=& \alpha x_1(t) - \beta x_1(t) x_2(t)\\  -->
+<!--      \frac{d}{dt} x_2(t) &=& \gamma x_1(t) x_2(t) - \delta x_2(t) - u(t) x_2(t)  -->
+<!--  \end{eqnarray*} </p>  -->
 
-<p> Here $u(t)$, called an _input signal_, is a function that represents the effort exerted in removal of predators. With this input signal in place, we can now use the model to explore the consequences of a range of removal schedules. In particular, optimization can be used to identify the removal strategy that best achieves some performance goal. </p> 
+<!-- <p> Here $u(t)$, called an _input signal_, is a function that represents the effort exerted in removal of predators. With this input signal in place, we can now use the model to explore the consequences of a range of removal schedules. In particular, optimization can be used to identify the removal strategy that best achieves some performance goal. </p>  -->
 
-<p> As a concrete example, consider the goal of maximizing harvest over some fixed time period. Suppose that the harvesting rate must be fixed throughout the time interval of interest so $u(t) = u_0$ is constant. We can account for the total harvest by introducing a new state variable that tracks the progress of the harvest:
-\begin{eqnarray*}
-    \frac{d}{dt} x_1(t) &=& \alpha x_1(t) - \beta x_1(t) x_2(t)\\
-    \frac{d}{dt} x_2(t) &=& \gamma x_1(t) x_2(t) - \delta x_2(t) - u_0 x_2(t)\\
-    \frac{d}{dt} x_3(t) &=& u_0 x_2(t)
-\end{eqnarray*} </p>
+<!-- <p> As a concrete example, consider the goal of maximizing harvest over some fixed time period. Suppose that the harvesting rate must be fixed throughout the time interval of interest so $u(t) = u_0$ is constant. We can account for the total harvest by introducing a new state variable that tracks the progress of the harvest: -->
+<!-- \begin{eqnarray*} -->
+<!--     \frac{d}{dt} x_1(t) &=& \alpha x_1(t) - \beta x_1(t) x_2(t)\\ -->
+<!--     \frac{d}{dt} x_2(t) &=& \gamma x_1(t) x_2(t) - \delta x_2(t) - u_0 x_2(t)\\ -->
+<!--     \frac{d}{dt} x_3(t) &=& u_0 x_2(t) -->
+<!-- \end{eqnarray*} </p> -->
 
-<p> Then the value of $x_3(t)$ is the accumulated harvest from time 0 to time $t$. If our goal is to maximize the total harvest over an interval $[0, b]$, we aim to maximize the value of $x_3(b)$ over the choice of the fixed harvesting effort $u_0$. </p>
+<!-- <p> Then, with $x_3(0)=0$, the value of $x_3(t)$ is the accumulated harvest from time 0 to time $t$. If our goal is to maximize the total harvest over an interval $[0, b]$, we aim to maximize the value of $x_3(b)$ over the choice of the fixed harvesting effort $u_0$. </p> -->
 
-Take parameter values of $p_1 = 30$, $p_2 = 5$, $p_3 = 2$, $p_4 = 6$, and initial state $x_1(0) = 0.0088$, $x_2(0)=1.6$. Determine the value of $u_0$ that maximizes the total harvest over a period of $t \in [0, 6]$.
+<!-- Take parameter values of $p_1 = 30$, $p_2 = 5$, $p_3 = 2$, $p_4 = 6$, and initial state $x_1(0) = 0.0088$, $x_2(0)=1.6$. Determine the value of $u_0$ that maximizes the total harvest over a period of $t \in [0, 6]$. -->
 
+
+<!-- SOLUTION -->
+
+
+<!-- ```{r ex4-determine-sse, echo = FALSE} -->
+<!-- determine_sse_ex4 <- function(u) { -->
+
+<!--   #first four input parameters are the kinetic parameters of the model -->
+<!--   newPars <- c(u) -->
+<!--   #last two parameters are the initial populations for x and y, respectively -->
+<!--   newState <- c(x = 0.0088, y = 1.6, z=0) -->
+
+<!--   #time-grid is the same as before, no need to redefine -->
+<!--   Time <- seq(0, 6, by = .0005) -->
+
+<!--   #kinetics -->
+<!-- newLotVmod <- function (Time, State, newPars) { -->
+<!--     with(as.list(c(State, newPars)), { -->
+<!--         dx = x*(30 - 5*y - 1*x) -->
+<!--         dy = -y*((2+u) - 6*x) -->
+<!--         dz = u*y -->
+<!--         return(list(c(dx, dy, dz))) -->
+<!--     }) -->
+<!-- } -->
+
+
+<!-- out <- as.data.frame(ode(func = newLotVmod, y = newState, parms = newPars, times = Time, method = "radau", atol = 1e-6, rtol = 1e-6)) -->
+
+
+<!-- plot(out$y~out$time, type = "l", xlab = "Time", ylab = "Population Density", main = "Predatory-Prey Model Simulation", col = "red", ylim = c(0,20)) -->
+<!-- points(out$x~out$time, type = "l", add = TRUE) -->
+<!-- legend(3.8,20,legend = c("Prey", "Predator"), col = c("red", "black"), pch = 20) -->
+
+<!--   #generate vector of predictions to align with vector of observations -->
+<!--   #predictions1<-data.frame(t_pred1<-times, -->
+<!--    #               x_pred1<-new_out1$x, -->
+<!--     #              y_pred1<-new_out1$y) -->
+
+<!--   harvest <- tail(out$z, n=1) -->
+<!--   return(harvest) -->
+
+<!-- } -->
+<!-- determine_sse_ex4(c(60)) -->
+<!-- ``` -->
+
+
+<!-- ```{r} -->
+<!-- library(GenSA) -->
+<!-- #x2 = c(10,3,1,2) -->
+<!-- x2 = c(10,1,1,1) -->
+<!-- lower <- c(0.1,0.1,0.1,0.1) -->
+<!-- upper <- c(20,4,2,3) -->
+<!-- out0 <- GenSA(par = x2, lower = lower, upper = upper,fn = determine_sse_ex3, control = list(maxit = 50)) -->
+<!-- out0[c("value","par")] -->
+<!-- ``` -->
 
 
 
@@ -1260,9 +1354,9 @@ legend("topright",legend=c("Prior Distribution for Vmax", "Posterior Distributio
 <!-- ``` -->
 
 
-#### Exercise 5
+#### Exercise 4
 
-<p> Consider the task of finding the minimum of the function $f(x,y)=x^4 + y^2$, plotted below. Clearly, the minimum is zero, and numerical optimization routines will have no trouble estimating that solution. However, because the curvature at the minimum is much different along the $x$- and $y$-directions, most numerical algorithms will do a better job estimating one parameter compared to the other. This can be well-illustrated by applying the rejection method to this problem and noting the relative spread in the posterior distributions. Implement the rejection algorithm provided above with uniform prior distributions on [-1, 1] for both the $x$ and $y$ values. Choose a rejection threshold that provides an accpetance rate of about 5%. Which estimate is provided with more confidence (i.e. which posterior is more tightly distributed? How can you relate that back to the curvature of the function at the minimum?.  </p>
+<p> Consider the task of finding the minimum of the function $f(x,y)=x^4 + y^2$, plotted below. Clearly, the minimum is zero, and numerical optimization routines will have no trouble estimating that solution. However, because the curvature at the minimum is much different along the $x$- and $y$-directions, most numerical algorithms will do a better job estimating one parameter compared to the other. This can be well-illustrated by applying the rejection method to this problem and noting the relative spread in the posterior distributions. Implement the rejection algorithm provided above with uniform prior distributions on [-1, 1] for both the $x$ and $y$ values. Choose a rejection threshold that provides an acceptance rate of about 1%. Which estimate is provided with more confidence (i.e. which posterior is more tightly distributed? How can you relate that back to the curvature of the function at the minimum?.  </p>
 
 ```{r plot-wireframe-ex5-function,echo=FALSE,message=FALSE}
 simpleFun = function(x) {
@@ -1288,12 +1382,146 @@ wireframe(z ~ x*y,x, drape=T, expand = 0.5, col = "blue", xlab=x, ylab=y, zlab=N
 ```
 
 
+<!-- SOLUTION Much tighter in x than y, as expected.-->
+
+
+<!-- ```{r rejection-method-for-ex-4, ECHO=TRUE} -->
+<!-- # recall the dataset -->
+
+
+<!-- # define functions to draw values for Km and Vmax from the prior distributions -->
+<!-- draw_x <- function () { -->
+<!--   return (runif(1, min=-1, max=1)) -->
+<!-- } -->
+<!-- draw_y <- function () { -->
+<!--   return (runif(1, min=-1, max=1)) -->
+<!-- } -->
+
+<!-- # sampling algorithm: returns the sampled Km and Vmax values and whether this pair is accepted -->
+<!-- sample_by_rejection <- function (n_iterations, acceptance_threshold) { -->
+<!--   accepted <- vector(length = n_iterations) -->
+<!--   sampled_x <- vector(length = n_iterations, mode = "numeric") -->
+<!--   sampled_y <- vector (length = n_iterations, mode = "numeric") -->
+<!--   for (i in 1:n_iterations){ -->
+<!--     x <- draw_x() -->
+<!--     y <- draw_y() -->
+<!--     if (x^4+y^2 < acceptance_threshold) { -->
+<!--       accepted[i] <- 1 -->
+<!--     } else { -->
+<!--       accepted[i] <- 0 -->
+<!--       } -->
+<!--     #accepted_or_rejected[i] = accept_or_reject_function(true_data, simulated_data, acceptance_threshold) -->
+<!--     sampled_x[i] = x -->
+<!--     sampled_y[i] = y -->
+<!--   } -->
+<!--   return(data.frame(cbind("accepted" = accepted, "sampled_xs" = sampled_x, "sampled_ys" = sampled_y))) -->
+<!-- } -->
+<!-- ``` -->
 
 
 
-#### Exercise 6
 
-<p> Apply the rejection algorithm to estimate the values of $\beta$ and $\gamma$ by fitting the Lotka-Volterra model to the data provided above. Use uniform prior distributions of [0,10] for both parameters, and choose a rejection threshold that provides an acceptance rate of about 1%. Do you find that one parameter is more confidently estimated (tighter distribution) than the other? </p>
+<!-- ```{r, echo=FALSE} -->
+<!-- # set seed -->
+<!-- set.seed(132) -->
+
+<!-- # simulate 200000 times with a threshold of 0.15  -->
+<!-- sampled_parameter_values_squared_distances = sample_by_rejection(20000, 0.005) -->
+
+<!-- # report the number of accepted values among the 200000 samples -->
+<!-- sum(sampled_parameter_values_squared_distances$accepted) -->
+
+<!-- ``` -->
+
+
+<!-- ```{r plot-rejection-histograms, echo=FALSE} -->
+<!-- c1 <- rgb(173,216,230,max = 255, alpha = 80, names = "lt.blue") -->
+<!-- c2 <- rgb(255,192,203, max = 255, alpha = 80, names = "lt.pink") -->
+
+<!-- post1 <- hist(sampled_parameter_values_squared_distances[which(sampled_parameter_values_squared_distances$accepted==1),3], col=c2, xlab = "x", xlim=c(-1,1), main='') -->
+<!-- rect(-1, 0, 1, 35, col=c1, border=par("fg"), lwd=par("lwd"), xpd=FALSE) -->
+<!-- legend("topright",legend=c("Prior Distribution for x", "Posterior Distribution for x"), -->
+<!--        inset=.02, fill=c(c1,c2), cex=0.8) -->
+
+<!-- #prior2 = hist(sampled_parameter_values_squared_distances[1:2500,2],col = c1, -->
+<!-- #              xlab = "Vm", main="Prior Distribution for Vm") -->
+<!-- post2 = hist(sampled_parameter_values_squared_distances[which(sampled_parameter_values_squared_distances$accepted==1),2],col = c2, xlab = "y", xlim=c(-1,1),main='') -->
+<!-- rect(-1, 0, 1, 50, col=c1, border=par("fg"), lwd=par("lwd"), xpd=FALSE) -->
+<!-- legend("topright",legend=c("Prior Distribution for y", "Posterior Distribution for y"), -->
+<!--        inset=.02, fill=c(c1,c2), cex=0.8) -->
+<!-- ``` -->
+
+
+
+
+#### Exercise 5
+
+<p> Repeat example 11 by applying the rejection algorithm to estimate the values of $\beta$ and $\gamma$ by fitting the Lotka-Volterra model to the data provided below. Use initial conditions $x = 0.008792889$, $y = 1.595545$ as in teh example. Use uniform prior distributions of [0,10] for both parameters, and choose a rejection threshold that provides an acceptance rate of about 1%. Do you find that one parameter is more confidently estimated (tighter distribution) than the other? Use the data shown below</p>
+
+```{r ex5-data, echo=TRUE}
+
+t_obs_ex5<-c(0.0, 0.2, 0.4, 0.6, 0.8, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0, 2.2, 2.4, 2.6, 2.8, 3.0, 3.2, 3.4, 3.6, 3.8, 4.0, 4.2, 4.4, 4.6, 4.8, 5.0, 5.2, 5.4, 5.6, 5.8, 6.0, 6.2, 6.4, 6.6, 6.8, 7.0, 7.2, 7.4, 7.6, 7.8, 8.0)
+
+x_obs_ex5 <- c(0.0091, 0.043, 0.20, 0.82, 3.4, 2.9, 0.12, 0.0077, 0.00093, 0.00026, 0.00014, 0.00013, 0.00015, 0.00025, 0.00054, 0.0015, 0.0051, 0.020, 0.087, 0.36, 1.7, 5.6, 0.66, 0.029, 0.0024, 0.00048, 0.00019, 0.00012, 0.00013, 0.00019, 0.00035, 0.0010, 0.0030, 0.010, 0.041, 0.19, 0.88, 3.8, 3.2, 0.13, 0.0078)
+
+y_obs_ex5 <- c(0.82, 1.1, 0.98, 0.65, 1.1, 5.1, 7.1, 7.9, 4.3, 3.5, 3.8, 3.9, 2.5, 2.1, 1.6, 1.4, 1.2, 1.0, 0.92, 0.57, 0.73, 3.6, 6.7, 9.1, 5.5, 4.7, 4.5, 3.0, 2.9, 2.7, 1.7, 2.0, 1.7, 1.3, 0.98, 0.98, 0.84, 1.6, 6.5, 8.2, 7.7)
+```
+> 
+
+
+SOLUTION
+
+
+```{r ex5-determine-sse, echo = FALSE}
+determine_sse_ex5 <- function(p) {
+
+  #first four input parameters are the kinetic parameters of the model
+  newPars <- c(p[1],p[2])
+  #last tw parameters are the initial populations for x and y, respectively
+  newState <- c(x = 8.792889e-3, y = 1.595545)
+
+  #time-grid is the same as before, no need to redefine
+  Time <- seq(0, 8, by = .2)
+
+  #kinetics
+newLotVmod <- function (Time, State, newPars) {
+    with(as.list(c(State, newPars)), {
+        dx = x*(30 - p[2]*y)
+        dy = -y*(p[3] - 6*x)
+        return(list(c(dx, dy)))
+    })
+}
+
+
+  new_out1 <- as.data.frame(ode(func = newLotVmod, y = newState, parms = newPars, times = Time))
+
+  #generate vector of predictions to align with vector of observations
+  #predictions1<-data.frame(t_pred1<-times,
+   #               x_pred1<-new_out1$x,
+    #              y_pred1<-new_out1$y)
+
+
+
+  sse<-sum((x_obs_ex5 - new_out1$x)^2) + sum((y_obs_ex5 - new_out1$y)^2)
+  return(sse)
+
+}
+determine_sse_ex5(c(1,1))
+```
+
+
+```{r}
+library(GenSA)
+#x2 = c(10,3,1,2)
+x2 = c(10,1,1,1)
+lower <- c(0.1,0.1,0.1,0.1)
+upper <- c(20,4,2,3)
+out0 <- GenSA(par = x2, lower = lower, upper = upper,fn = determine_sse_ex3, control = list(maxit = 50))
+out0[c("value","par")]
+```
+
+
+
 
 
 
