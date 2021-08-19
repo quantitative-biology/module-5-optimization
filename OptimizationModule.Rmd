@@ -1456,7 +1456,7 @@ wireframe(z ~ x*y,x, drape=T, expand = 0.5, col = "blue", xlab=x, ylab=y, zlab=N
 
 #### Exercise 5
 
-<p> Repeat example 11 by applying the rejection algorithm to estimate the values of $\beta$ and $\gamma$ by fitting the Lotka-Volterra model to the data provided below. Use initial conditions $x = 0.008792889$, $y = 1.595545$ as in teh example. Use uniform prior distributions of [0,10] for both parameters, and choose a rejection threshold that provides an acceptance rate of about 1%. Do you find that one parameter is more confidently estimated (tighter distribution) than the other? Use the data shown below</p>
+<p> Repeat example 11 by applying the rejection algorithm to estimate the values of $\beta$ and $\gamma$ by fitting the Lotka-Volterra model to the data provided below. Use initial conditions $x = 0.008792889$, $y = 1.595545$ as in the example. Use uniform prior distributions of [2,30] for $\beta$ and [1,4] for $\gamma$, and choose a rejection threshold that provides an acceptance rate of about 1%. Do you find that one parameter is more confidently estimated (tighter distribution) than the other? Use the data shown below. To avoid errors in the simulation, you can add the options ```method = "radau", atol = 1e-6, rtol = 1e-6``` to the call to ```ode```.</p>
 
 ```{r ex5-data, echo=TRUE}
 
@@ -1469,56 +1469,120 @@ y_obs_ex5 <- c(0.82, 1.1, 0.98, 0.65, 1.1, 5.1, 7.1, 7.9, 4.3, 3.5, 3.8, 3.9, 2.
 > 
 
 
-SOLUTION
+<!-- SOLUTION -->
 
 
-```{r ex5-determine-sse, echo = FALSE}
-determine_sse_ex5 <- function(p) {
+<!-- ```{r ex5-determine-sse, echo = FALSE} -->
 
-  #first four input parameters are the kinetic parameters of the model
-  newPars <- c(p[1],p[2])
-  #last tw parameters are the initial populations for x and y, respectively
-  newState <- c(x = 8.792889e-3, y = 1.595545)
+<!-- library(deSolve) -->
 
-  #time-grid is the same as before, no need to redefine
-  Time <- seq(0, 8, by = .2)
+<!-- determine_sse_ex5 <- function(p) { -->
 
-  #kinetics
-newLotVmod <- function (Time, State, newPars) {
-    with(as.list(c(State, newPars)), {
-        dx = x*(30 - p[2]*y)
-        dy = -y*(p[3] - 6*x)
-        return(list(c(dx, dy)))
-    })
-}
+<!--   #first four input parameters are the kinetic parameters of the model -->
+<!--   newPars <- c(p[1],p[2]) -->
+<!--   #last tw parameters are the initial populations for x and y, respectively -->
+<!--   newState <- c(x = 8.792889e-3, y = 1.595545) -->
 
+<!--   #time-grid is the same as before, no need to redefine -->
+<!--   Time_ex5 <- seq(0, 8, by = 0.2) -->
 
-  new_out1 <- as.data.frame(ode(func = newLotVmod, y = newState, parms = newPars, times = Time))
+<!--   Time_ex5 -->
 
-  #generate vector of predictions to align with vector of observations
-  #predictions1<-data.frame(t_pred1<-times,
-   #               x_pred1<-new_out1$x,
-    #              y_pred1<-new_out1$y)
+<!--   #kinetics -->
+<!-- newLotVmod <- function (Time, State, newPars) { -->
+<!--     with(as.list(c(State, newPars)), { -->
+<!--         dx = x*(30 - p[1]*y) -->
+<!--         dy = -y*(p[2] - 6*x) -->
+<!--         return(list(c(dx, dy))) -->
+<!--     }) -->
+<!-- } -->
 
 
+<!--   new_out1 <- as.data.frame(ode(func = newLotVmod, y = newState, parms = newPars, times = Time_ex5, method = "radau", atol = 1e-6, rtol = 1e-6)) -->
 
-  sse<-sum((x_obs_ex5 - new_out1$x)^2) + sum((y_obs_ex5 - new_out1$y)^2)
-  return(sse)
+<!--   #generate vector of predictions to align with vector of observations -->
+<!--   #predictions1<-data.frame(t_pred1<-times, -->
+<!--    #               x_pred1<-new_out1$x, -->
+<!--     #              y_pred1<-new_out1$y) -->
 
-}
-determine_sse_ex5(c(1,1))
-```
+<!--  new_out1$x -->
+<!-- new_out1$y -->
+
+<!--   sse<-sum((x_obs_ex5 - new_out1$x)^2) + sum((y_obs_ex5 - new_out1$y)^2) -->
+<!--   return(sse) -->
+
+<!-- } -->
+
+<!-- #determine_sse_ex5(c(5,2)) -->
+<!-- ``` -->
 
 
-```{r}
-library(GenSA)
-#x2 = c(10,3,1,2)
-x2 = c(10,1,1,1)
-lower <- c(0.1,0.1,0.1,0.1)
-upper <- c(20,4,2,3)
-out0 <- GenSA(par = x2, lower = lower, upper = upper,fn = determine_sse_ex3, control = list(maxit = 50))
-out0[c("value","par")]
-```
+
+<!-- ```{r rejection-method-for-ex-5, ECHO=TRUE} -->
+<!-- # recall the dataset -->
+
+
+<!-- # define functions to draw values for Km and Vmax from the prior distributions -->
+<!-- draw_beta <- function () { -->
+<!--   return (runif(1, min=2, max=30)) -->
+<!-- } -->
+<!-- draw_gamma <- function () { -->
+<!--   return (runif(1, min=1, max=4)) -->
+<!-- } -->
+
+<!-- # sampling algorithm: returns the sampled Km and Vmax values and whether this pair is accepted -->
+<!-- sample_by_rejection <- function (n_iterations, acceptance_threshold) { -->
+<!--   accepted <- vector(length = n_iterations) -->
+<!--   sampled_beta <- vector(length = n_iterations, mode = "numeric") -->
+<!--   sampled_gamma <- vector (length = n_iterations, mode = "numeric") -->
+<!--   for (i in 1:n_iterations){ -->
+<!--     beta <- draw_beta() -->
+<!--     gamma <- draw_gamma() -->
+<!--     if (determine_sse_ex5(c(beta,gamma)) < acceptance_threshold) { -->
+<!--       accepted[i] <- 1 -->
+<!--     } else { -->
+<!--       accepted[i] <- 0 -->
+<!--       } -->
+<!--     #accepted_or_rejected[i] = accept_or_reject_function(true_data, simulated_data, acceptance_threshold) -->
+<!--     sampled_beta[i] = beta -->
+<!--     sampled_gamma[i] = gamma -->
+<!--   } -->
+<!--   return(data.frame(cbind("accepted" = accepted, "sampled_betas" = sampled_beta, "sampled_gammas" = sampled_gamma))) -->
+<!-- } -->
+<!-- ``` -->
+
+
+
+
+<!-- ```{r, echo=FALSE} -->
+<!-- # set seed -->
+<!-- set.seed(132) -->
+
+<!-- # simulate 200000 times with a threshold of 0.15 -->
+<!-- sampled_parameter_values_squared_distances = sample_by_rejection(2000, 400) -->
+
+<!-- # report the number of accepted values among the 200000 samples -->
+<!-- sum(sampled_parameter_values_squared_distances$accepted) -->
+
+<!-- ``` -->
+
+
+<!-- ```{r plot-rejection-histograms, echo=FALSE} -->
+<!-- c1 <- rgb(173,216,230,max = 255, alpha = 80, names = "lt.blue") -->
+<!-- c2 <- rgb(255,192,203, max = 255, alpha = 80, names = "lt.pink") -->
+
+<!-- post1 <- hist(sampled_parameter_values_squared_distances[which(sampled_parameter_values_squared_distances$accepted==1),3], col=c2, xlab = "beta", xlim=c(1,7), main='') -->
+<!-- rect(-1, 0, 1, 35, col=c1, border=par("fg"), lwd=par("lwd"), xpd=FALSE) -->
+<!-- legend("topright",legend=c("Prior Distribution for gamma", "Posterior Distribution for gamma"), -->
+<!--        inset=.02, fill=c(c1,c2), cex=0.8) -->
+
+<!-- #prior2 = hist(sampled_parameter_values_squared_distances[1:2500,2],col = c1, -->
+<!-- #              xlab = "Vm", main="Prior Distribution for Vm") -->
+<!-- post2 = hist(sampled_parameter_values_squared_distances[which(sampled_parameter_values_squared_distances$accepted==1),2],col = c2, xlab = "gamma", xlim=c(2,30),main='') -->
+<!-- rect(-1, 0, 1, 50, col=c1, border=par("fg"), lwd=par("lwd"), xpd=FALSE) -->
+<!-- legend("topright",legend=c("Prior Distribution for beta", "Posterior Distribution for beta"), -->
+<!--        inset=.02, fill=c(c1,c2), cex=0.8) -->
+<!-- ``` -->
 
 
 
