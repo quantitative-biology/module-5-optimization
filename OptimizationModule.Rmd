@@ -1,3 +1,8 @@
+#---
+#title: "Optimization"
+#output: html_document
+#---
+
 # Optimization
 
 ## Introduction
@@ -251,7 +256,7 @@ grad.descent = function(f, x0, step.size=0.05, max.iter=200,
 ```
 
 #### Example 6
- <p>We'll begin by demonstrating the performance of this algorithm on a simple function with a single local minimum. </p>
+ <p>We'll begin by demonstrating the performance of this algorithm on a simple function with a single local minimum. (Here and below, code for generating plots is suppressed to avoid clutter. All code can be accessed in the .rmd file posted at the main github repository.) </p>
 
 ```{r define-convex-function, echo=TRUE}
 Paraboloid = function(x) {
@@ -372,19 +377,19 @@ output
  <p>Next, let's consider a  function that has multiple local minima. The second plot below is interactive, allowing you to rotate the surface.</p>   
 
 ```{r complicated-function, echo=TRUE}
-complicatedFun = function(x) {
+Example_7_function = function(x) {
   return((1/2*x[1]^2+1/4*x[2]^2+3)+cos(2*x[1]+1-exp(x[2])))
 }
 ```
 
 ```{r plot-wireframe-complicated-function,echo=FALSE,message=FALSE}
-complicated = function(x,y) {
+Example_7_function_plotting = function(x,y) {
   return((1/2*x^2+1/4*y^2+3)+cos(2*x+1-exp(y)))
 }
 
 x <- seq(-4, 4, length= 30)
 y <- seq(-4, 4, length= 30)
-z <- outer(x, y, complicated)
+z <- outer(x, y, Example_7_function_plotting)
 z[is.na(z)] <- 1
 z = as.vector(z)
 x <- data.frame(z = as.vector(z))
@@ -402,7 +407,7 @@ library(MASS)
 library(plotly)
 x <- seq(-4, 4, length= 30)
 y <- seq(-4, 4, length= 30)
-z <- outer(x, y, complicated)
+z <- outer(x, y, Example_7_function_plotting)
 z[is.na(z)] <- 1
 fig <- plot_ly(x = x, y = y, z = z,color = "blue") %>% add_surface()
 
@@ -419,49 +424,49 @@ x2 = c(-1.5,1.3)
 x3 = c(-1.2,-1.4)
 x4 = c(-0.5,-0.5)
 #run the gradient descent algorithm from each
-gd0 = grad.descent(complicatedFun,x0,step.size=0.01,max.iter=1000)
-gd1 = grad.descent(complicatedFun,x1,step.size=0.01,max.iter=1000)
-gd2 = grad.descent(complicatedFun,x2,step.size=0.01,max.iter=1000)
-gd3 = grad.descent(complicatedFun,x3,step.size=0.01,max.iter=1000)
-gd4 = grad.descent(complicatedFun,x4,step.size=0.01,max.iter=1000)
+gd0 = grad.descent(Example_7_function,x0,step.size=0.01,max.iter=1000)
+gd1 = grad.descent(Example_7_function,x1,step.size=0.01,max.iter=1000)
+gd2 = grad.descent(Example_7_function,x2,step.size=0.01,max.iter=1000)
+gd3 = grad.descent(Example_7_function,x3,step.size=0.01,max.iter=1000)
+gd4 = grad.descent(Example_7_function,x4,step.size=0.01,max.iter=1000)
 ```
 
 <p>  From some initial guess values, the algorithm successfully reaches the global minimum. From others, it gets stuck at a local minimum. The plot below shows the paths followed by the algorithm, leading to two separate valley bottoms. </p>
 
 ```{r gradient-descent-plot-paths-complicated-function,echo=FALSE}
 
-r = surface(complicatedFun,from.x=-2,to.x=2,from.y=-2,to.y=2,
+r = surface(Example_7_function,from.x=-2,to.x=2,from.y=-2,to.y=2,
 xlab="",ylab="",zlab="")
-lines(trans3d(gd0$xmat[1,],gd0$xmat[2,],apply(gd0$xmat,2,complicatedFun),r),
+lines(trans3d(gd0$xmat[1,],gd0$xmat[2,],apply(gd0$xmat,2,Example_7_function),r),
       lwd=2,col="red")
-points(trans3d(gd0$xmat[1,],gd0$xmat[2,],apply(gd0$xmat,2,complicatedFun),r),
+points(trans3d(gd0$xmat[1,],gd0$xmat[2,],apply(gd0$xmat,2,Example_7_function),r),
       col="red")
-points(trans3d(gd4$xmat[1,],gd4$xmat[2,],apply(gd4$xmat,2,complicatedFun),r),
+points(trans3d(gd4$xmat[1,],gd4$xmat[2,],apply(gd4$xmat,2,Example_7_function),r),
       col="blue")
-lines(trans3d(gd4$xmat[1,],gd4$xmat[2,],apply(gd4$xmat,2,complicatedFun),r),
+lines(trans3d(gd4$xmat[1,],gd4$xmat[2,],apply(gd4$xmat,2,Example_7_function),r),
       lwd=2,col="blue")
-lines(trans3d(gd2$xmat[1,],gd2$xmat[2,],apply(gd2$xmat,2,complicatedFun),r),
+lines(trans3d(gd2$xmat[1,],gd2$xmat[2,],apply(gd2$xmat,2,Example_7_function),r),
       lwd=2,col="purple")
-points(trans3d(gd2$xmat[1,],gd2$xmat[2,],apply(gd2$xmat,2,complicatedFun),r),
+points(trans3d(gd2$xmat[1,],gd2$xmat[2,],apply(gd2$xmat,2,Example_7_function),r),
       col="purple")
-lines(trans3d(gd3$xmat[1,],gd3$xmat[2,],apply(gd3$xmat,2,complicatedFun),r),
+lines(trans3d(gd3$xmat[1,],gd3$xmat[2,],apply(gd3$xmat,2,Example_7_function),r),
       lwd=2,col="darkgreen")
-points(trans3d(gd3$xmat[1,],gd3$xmat[2,],apply(gd3$xmat,2,complicatedFun),r),
+points(trans3d(gd3$xmat[1,],gd3$xmat[2,],apply(gd3$xmat,2,Example_7_function),r),
       col="darkgreen")
-lines(trans3d(gd1$xmat[1,],gd1$xmat[2,],apply(gd1$xmat,2,complicatedFun),r),
+lines(trans3d(gd1$xmat[1,],gd1$xmat[2,],apply(gd1$xmat,2,Example_7_function),r),
       lwd=2,col="orange")
-points(trans3d(gd1$xmat[1,],gd1$xmat[2,],apply(gd1$xmat,2,complicatedFun),r),
+points(trans3d(gd1$xmat[1,],gd1$xmat[2,],apply(gd1$xmat,2,Example_7_function),r),
       col="orange")
 ```
 
 <p>  The table below shows the final estimate and the corresponding objective value reached by gradient descent starting from those five starting points. </p>
 
 ```{r final-output-plot-paths-gradient-descent-complicated-function,echo=FALSE}
-x0_out <- c(gd0$x, complicatedFun(gd0$x))
-x1_out <- c(gd1$x, complicatedFun(gd1$x))
-x2_out <- c(gd2$x, complicatedFun(gd2$x))
-x3_out <- c(gd3$x, complicatedFun(gd3$x))
-x4_out <- c(gd4$x, complicatedFun(gd4$x))
+x0_out <- c(gd0$x, Example_7_function(gd0$x))
+x1_out <- c(gd1$x, Example_7_function(gd1$x))
+x2_out <- c(gd2$x, Example_7_function(gd2$x))
+x3_out <- c(gd3$x, Example_7_function(gd3$x))
+x4_out <- c(gd4$x, Example_7_function(gd4$x))
 output <- rbind(x0_out,x1_out,x2_out,x3_out,x4_out)
 colnames(output) <- c("x1","x2","objective value")
 output
@@ -555,7 +560,7 @@ plot(BE_data)
 ```{r simulated-annealing-complicated-function,echo=TRUE}
 library(GenSA)
 
-out0 <- GenSA(par = x0, lower = c(-2,-2), upper = c(2,2),fn = complicatedFun)
+out0 <- GenSA(par = x0, lower = c(-2,-2), upper = c(2,2),fn = Example_7_function)
 out0[c("value","par")]
 ```
 <p> The result of this function call is recorded in the variable ```out0``` which indicates the minimal value of the objective achieved (2.426731) and the parameter values at which this minimum occurs $(x,y)= (-0.3629442,  1.1734789)$. Next, we'll call ```GenSA``` starting from each of the initial guesses that were provided to the gradient descent algorithm in Example 7. </p>
@@ -570,11 +575,11 @@ tol <- 1e-13
 lower <- rep(-2, dimension)
 upper <- rep(2, dimension)
 
-out0 <- GenSA(par = x0, lower = lower, upper = upper,fn = complicatedFun)
-out1 <- GenSA(par = x1, lower = lower, upper = upper,fn = complicatedFun)
-out2 <- GenSA(par = x2, lower = lower, upper = upper,fn = complicatedFun)
-out3 <- GenSA(par = x3, lower = lower, upper = upper,fn = complicatedFun)
-out4 <- GenSA(par = x4, lower = lower, upper = upper,fn = complicatedFun)
+out0 <- GenSA(par = x0, lower = lower, upper = upper,fn = Example_7_function)
+out1 <- GenSA(par = x1, lower = lower, upper = upper,fn = Example_7_function)
+out2 <- GenSA(par = x2, lower = lower, upper = upper,fn = Example_7_function)
+out3 <- GenSA(par = x3, lower = lower, upper = upper,fn = Example_7_function)
+out4 <- GenSA(par = x4, lower = lower, upper = upper,fn = Example_7_function)
 out0[c("value","par")]
 out1[c("value","par")]
 out2[c("value","par")]
@@ -686,8 +691,12 @@ We next consider a heuristic algorithm in which multiple paths through the searc
 </p>To implement a genetic algorithm, we'll make use of the ```ga``` function, from ```Library(GA)```, described [here](https://cran.r-project.org/web/packages/GA/GA.pdf). The call to ```ga``` requires that we specify the objective function, lower and upper bounds to define the search space, and the number of iterations to execute. (The initial population is generated automatically). The ```ga``` routine maximizes the objective function, so we enter our objective with a negative sign to achieve minimization. </p>
 
 ```{r call-GA, echo=TRUE}
+Example_10_function = function(x,y) {
+  return((1/2*x^2+1/4*y^2+3)+cos(2*x+1-exp(y)))
+}
+
 library(GA)
-ga <- ga(type = "real-valued", fitness = function(x) -complicated(x[1],x[2]),
+ga <- ga(type = "real-valued", fitness = function(x) -Example_10_function(x[1],x[2]),
          lower = c(-2, -2), upper = c(2, 2), maxiter = 30)
 ```
 
@@ -773,7 +782,15 @@ points(out$x~out$time, type = "l", add = TRUE)
 legend(3.8,20,legend = c("Prey", "Predator"), col = c("red", "black"), pch = 20)
 ```
 
-<p> The figure below shows a dataset the corresponds to observations of an oscillatory predator-prey  system. To calibrate the Lotka-Volterra model to this data we seek values of the  model parameters  for which simulation of the model provides the best fit. As in the regression tasks described previously, the standard measure for quality of fit is the sum of squared errors. We thus proceed with a minimization task: for each choice of numerical values for the model parameters, we compare model simulation with the data and determine the sum of squared errors. We aim to minimize this measure of fit over the space of model parameters. </p>
+<p> The figure below shows the following dataset, which corresponds to observations of an oscillatory predator-prey  system. To calibrate the Lotka-Volterra model to this data we seek values of the  model parameters  for which simulation of the model provides the best fit. As in the regression tasks described previously, the standard measure for quality of fit is the sum of squared errors. We thus proceed with a minimization task: for each choice of numerical values for the model parameters, we compare model simulation with the data and determine the sum of squared errors. We aim to minimize this measure of fit over the space of model parameters. </p>
+
+
+```{r define_observations_corrupted, generated in subsequent block as x_obs_corrupt, y_obs_corrupt}
+
+x_obs_data= c(8.04e-03, 9.57e-01, 1.01e-01, 4.12e-05, 1.68e-06, 1.40e-06, 9.40e-06, 2.62e-04, 1.46e-02, 1.51, 2.31e-02, 2.38e-05, 1.48e-06, 1.76e-06, 1.39e-05, 4.25e-04, 2.96e-02, 3.00, 6.87e-03, 1.16e-05, 1.27e-06, 2.31e-06, 2.01e-05, 7.69e-04, 5.31e-02, 4.38e+00, 2.08e-03, 7.06e-06, 1.24e-06, 2.83e-06, 3.16e-05)
+y_obs_data=c(1.18, 1.60, 20.79,  9.60,  5.99,  3.61,  2.71,  2.44,  1.08,  1.10, 14.68, 12.53,  6.55,  4.40,  2.73,  2.05,  1.40,  2.20, 16.36,  7.66, 5.56,  5.26,  2.28,  2.27,  1.14,  3.27, 14.13,  7.69,  6.10,  4.68, 2.40)
+```
+
 
 ```{r generate-and-plot-lotka-volterra-corrupted-data, echo = FALSE, warning = FALSE}
 observations<-data.frame(t_obs<-out$time[seq(1,length(out$time),20)],
@@ -837,12 +854,9 @@ newLotVmod <- function (Time, State, newPars) {
   x_pred<-new_out$x[seq(1,length(new_out$x),20)]
   y_pred<-new_out$y[seq(1,length(new_out$y),20)]
   
-  sse<-sum((x_obs_corrupt - x_pred)^2) + sum((y_obs_corrupt - y_pred)^2)
+  sse<-sum((x_obs_data - x_pred)^2) + sum((y_obs_data - y_pred)^2)
   return(sse)
 }
-determine_sse(c(1,3))
-#determine_sse(c(1,4))
-#determine_sse(c(1,4.1))
 
 ```
 
@@ -862,7 +876,7 @@ out0 <- GenSA(par = x1, lower = lower, upper = upper,fn = determine_sse, control
 out0[c("value","par")]
 ```
 
-The search algorithm has identified values of $\beta=4.914941$ and $\gamma=2.018206$ as minimizer, with the minimal sum of squares error value of 45.58991. 
+The search algorithm has identified values of $\beta=4.915$ and $\gamma=2.018$ as minimizer, with the minimal sum of squares error value of 45.58991. 
 
 The best fit model simulation is shown along with the data below:
 
@@ -1166,16 +1180,31 @@ legend(4, 105, legend=c("Best-fit Line", "Prediction interval"),
 ```
 
 
-The confint() function determines 95\% confidence intervals on the estimates of the parameters (the slope and intercept).
+The ```confint`` function determines 95\% confidence intervals on the estimates of the parameters (the slope and intercept).
 
 ```{r estimate-confidence-intervals-linear-regression-iris, echo=FALSE}
 confint(iris.lm)
 ```
 
 
-<p> For nonlinear regression (including calibration of dynamic models), the theory is less helpful, but estimates of uncertainty intervals can be achieved: </p>
+<p> For nonlinear regression (including calibration of dynamic models), the theory is less helpful, but estimates of uncertainty intervals can be achieved. Recal the nonlinear regression fit from Example 5 above: </p>
 
-```{r, generate-estimate-confidence-intervals-Michaelis-Menten, echo=TRUE}
+
+```{r 2plot-Michaelis-Menten-dataset, echo = TRUE}
+#substrate concentrations
+S <- c(4.32, 2.16, 1.08, 0.54, 0.27, 0.135, 3.6, 1.8, 0.9, 0.45, 0.225, 0.1125, 2.88, 1.44, 0.72, 0.36, 0.18, 0.9, 0) 
+#reaction velocities
+V <- c(0.48, 0.42, 0.36, 0.26, 0.17, 0.11, 0.44, 0.47, 0.39, 0.29, 0.18, 0.12, 0.50, 0.45, 0.37, 0.28, 0.19, 0.31, 0) 
+MM_data=cbind(S,V)
+MMmodel.nls <- nls(V ~ Vmax*S/(Km+S),start = list(Km=0.3, Vmax=0.5)) #perform the nonlinear regression analysis
+params <- summary(MMmodel.nls)$coeff[,1] #extract the parameter estimates
+plot(MM_data)
+curve((params[2]*x)/(params[1]+x), from = 0, to = 4.5, add=TRUE, col='firebrick')
+```
+
+Applying the ```confit``` function generates confidence intervals for the parameter estimates
+
+```{r, 2generate-estimate-confidence-intervals-Michaelis-Menten, echo=TRUE}
 confint(MMmodel.nls)
 ```
 
@@ -1286,7 +1315,7 @@ sampled_parameter_values_squared_distances = sample_by_rejection(V, 200000, 0.15
 sum(sampled_parameter_values_squared_distances$accepted)
 ```
 
-We see that only 2148 of 200 000 samples were accepted, yielding an acceptance rate of about 1%. The acceptance rate can be tuned by choice of the rejection threshold. A low acceptance rate gives rise to a computationally expensive algorithm, while a high acceptance rate can lead to poor estimation.
+We see that only 2225 of 200 000 samples were accepted, yielding an acceptance rate of about 1%. The acceptance rate can be tuned by choice of the rejection threshold. A low acceptance rate gives rise to a computationally expensive algorithm, while a high acceptance rate can lead to poor estimation.
 
 ```{r plot-rejection-histograms, echo=FALSE}
 c1 <- rgb(173,216,230,max = 255, alpha = 80, names = "lt.blue")
