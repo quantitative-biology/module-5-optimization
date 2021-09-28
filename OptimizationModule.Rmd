@@ -1320,7 +1320,7 @@ sum(sampled_parameter_values_squared_distances$accepted)
 
 We see that only 2225 of 200 000 samples were accepted, yielding an acceptance rate of about 1%. The acceptance rate can be tuned by choice of the rejection threshold. A low acceptance rate gives rise to a computationally expensive algorithm, while a high acceptance rate can lead to poor estimation.
 
-```{r plot-rejection-histograms, echo=FALSE}
+```{r plot-rejection-histograms, fig.alt="Posterior histograms for Michaelis-Menten fit", echo=FALSE}
 c1 <- rgb(173,216,230,max = 255, alpha = 80, names = "lt.blue")
 c2 <- rgb(255,192,203, max = 255, alpha = 80, names = "lt.pink")
 
