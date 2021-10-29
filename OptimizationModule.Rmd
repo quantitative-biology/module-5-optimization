@@ -13,13 +13,8 @@
 Figure 1 illustrates some basics terminology associated with optimization. The graph of a function $f$ of a single variable $x$ is shown, defined over a domain $[a,b]$. In the context of optimization, we can think of each $x$-value in the interval $[a,b]$ as one possible scenario (e.g. enzyme activity, foraging rate, etc.). The function $f$ maps those scenarios to some __objective__ (e.g. metabolic flux, fitness) to be optimized (either maximized or minimized). The _global_ extrema (i.e. maximum and minimum) represent the goals of optimization.
 
 ```{r, echo=FALSE, out.height="50%", fig.cap="Figure 1: Extreme Values", fig.alt="A graph showing local maxima and minima"}
-knitr::include_graphics("Figure1.png")
+knitr::include_graphics("../module-5-optimization/Figure1.png")
 ```
-
-<!-- <p><center> -->
-<!-- `r htmltools::img(src=knitr::image_uri("Figure1.png"))`   -->
-<!--   Figure 1: Extreme Values -->
-<!-- </center></p> -->
 
 <p> More generally, we define _local_ extrema (maxima and minima) as cases that appear to be optimal if we restrict attention only to 'nearby' possibilities (i.e. $x$-values). Most of the theory of optimization methods is dedicated to identifying local optima. These approaches cannot directly identify a global optimum -- instead they identify _candidate_ global optima, which then can be compared to one another to identify the 'best' result. (A convenient special case occurs for problems where every local optimum is a global optimum; these are called convex optimization problems. Unfortunately, they typically occur only as special cases when addressing biological phenomena.) </p>
 
@@ -28,13 +23,8 @@ knitr::include_graphics("Figure1.png")
 <p> To illustrate these fundamentals, consider the following two academic examples that rely on basic calculus, specifically on __Fermat's Theorem__, which states that local extrema occur at points where the tangent line to a function's graph is horizontal, i.e. at points where the derivative (the slope of the tangent) is zero (Figure 2). </p>
 
 ```{r, echo=FALSE, out.height="50%", fig.cap="Figure 2: Fermat's Theorem: local extrema occur at points where the tangent line is horizontal or at endpoints of the domain. Some local extrema are also global extrema.", fig.alt="A graph showing local maxima and minima at which horizontal tangents occur"}
-knitr::include_graphics("Figure2.png")
+knitr::include_graphics("../module-5-optimization/Figure2.png")
 ```
-
-<!-- <p><center> -->
-<!-- `r htmltools::img(src=knitr::image_uri("Figure2.png"))`   -->
-<!-- Figure 2: Fermat's Theorem: local extrema occur at points where the tangent line is horizontal. Some local extrema are also global extrema. -->
-<!-- </center></p> -->
 
 #### Example 1
 
@@ -45,13 +35,8 @@ As shown in Figure 3, the single local minimum is the global miminum in this cas
 
 
 ```{r, echo=FALSE, out.height="50%", fig.cap="Figure 3: Graph of $f(x) = x^2+3x-2$ (Example 1) ", fig.alt="Graph of $f(x) = x^2+3x-2$"}
-knitr::include_graphics("Figure3.png")
+knitr::include_graphics("../module-5-optimization/Figure3.png")
 ```
-
-<!-- <p><center> -->
-<!-- `r htmltools::img(src=knitr::image_uri("Figure3.png"))`   -->
-<!-- Figure 3: Graph of $f(x) = x^2+3x-2$  (Example 1)    -->
-<!-- </center></p> -->
 
 #### Example 2
 
@@ -62,14 +47,8 @@ $$f'(x) = 0 \ \ \Leftrightarrow \ \ x = 3, 1, -3$$
 As shown in Figure 4, two of these points are local minima and one is a local maximum. Of the two local minima, $x=-3$ is where the global minimum occurs.</p>
 
 ```{r, echo=FALSE, out.height="50%", fig.cap="Figure 4: Graph of $f(x) = 3x^4-4x^3-54x^2+108x$  (Example 2) ", fig.alt="Graph of $f(x) = 3x^4-4x^3-54x^2+108x$"}
-knitr::include_graphics("Figure4.png")
+knitr::include_graphics("../module-5-optimization/Figure4.png")
 ```
-
-<!-- <p><center> -->
-<!-- `r htmltools::img(src=knitr::image_uri("Figure4.png"))`   -->
-<!-- Figure 4: Graph of $f(x) = 3x^4-4x^3-54x^2+108x$  (Example 2) -->
-<!-- </center></p> -->
-
 
 ## Regression
 
@@ -80,14 +59,8 @@ knitr::include_graphics("Figure4.png")
 
 
 ```{r, echo=FALSE, out.height="50%", fig.cap="Figure 5: Finding a line of best fit", fig.alt="Points on a plane and potential best fits lines"}
-knitr::include_graphics("Figure5.png")
+knitr::include_graphics("../module-5-optimization/Figure5.png")
 ```
-
-<!-- <p><center> -->
-<!-- `r htmltools::img(src=knitr::image_uri("Figure5.png"))`   -->
-<!-- Figure 5: finding a line of best fit  -->
-<!-- </center></p> -->
-
 
 <p> To specify this task  mathematically, we need to decide on a measure of quality of fit. We start by recognizing that the line will (typically) fail to pass through most of the points in the dataset. Thus, at each point $x_i$ we can define an __error__, which is the difference between the observed $y$-value and the model __prediction__, i.e. the $y$-value on the line. If we specify the line as $y=mx+b$, then the error at $x_i$ can be defined as $e_i = y_i-(mx_i+b)$. We then need to combine these errors into a single quality-of-fit measure. This is typically done by squaring the errors and adding them together. (Squaring ensures that both under- and over-estimations contribute equally.) We define the __sum of squared errors__ (SSE) as :
 $$\mbox{SSE:} \ \ \ e_1^2+e_2^2+ \cdots e_N^2 \ \ = \ \ (y_1-(mx_1+b))^2 + (y_2-(mx_2+b))^2 + \cdots +(y_N-(mx_N+b))^2. $$</p>
@@ -101,16 +74,8 @@ $$\mbox{SSE:} \ \ \ e_1^2+e_2^2+ \cdots e_N^2 \ \ = \ \ (y_1-(mx_1+b))^2 + (y_2-
 
 
 ```{r, echo=FALSE, out.height="50%", fig.cap="Figure 6: Finding a line of best fit through the origin (Example 3)", fig.alt="Defining error between points and line."}
-knitr::include_graphics("Figure6.png")
+knitr::include_graphics("../module-5-optimization/Figure6.png")
 ```
-
-
-
-<!-- <p><center> -->
-<!-- `r htmltools::img(src=knitr::image_uri("Figure6.png"))`   -->
-<!-- Figure 6: Example 3: finding a line of best fit through the origin   -->
-<!-- </center></p> -->
-
 
 In this simple case, the sum of squared errors is:
 \begin{equation*}
