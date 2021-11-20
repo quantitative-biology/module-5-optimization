@@ -221,7 +221,7 @@ curve((params[2]*x)/(params[1]+x), from = 0, to = 4.5, add=TRUE, col='firebrick'
 
 <p> The best techniques for addressing the general nonlinear regression task are iterative global optimization routines. As we'll discuss below, these algorithms  start with a 'guess' for the parameter values and then take steps through parameter space to improve the quality of that estimate. In the exercise above, the ```nls``` command executed this kind of algorithm, which is why it requires that the user supply an initial 'guess'. </p>
 
-### Gradient Descent
+### Gradient Descent{#gradient}
 
 <p> A simple iterative optimization algorithm is __gradient descent__, which can be understood intuitively via a thought experiment. Imagine finding your way to a valley bottom in a thick fog. The fog obscures your vision so that you can only discern changes in elevation in your immediate vicinity. To make your way to the valley bottom, it would be reasonable to take each step of your journey in the direction of steepest decline. This strategy is guaranteed to lead to a local minimum, but cannot guarantee arrival at the lowest point: the global minimum. That is, the search may lead to a local minimum at which there is no direction of local descent, and so the algorithm gets `stuck'.</p>
 
