@@ -1,5 +1,8 @@
 # Optimization
-
+```{r start, include=FALSE}
+rm(list=ls())
+knitr::opts_chunk$set(echo = FALSE,kableExtra.auto_format = FALSE, cache=TRUE)
+```
 ## Introduction
 
 <p> To improve is to make better; to optimize is to make best. Optimization is the act of identifying the extreme (cheapest, tallest, fastest...) over a collection of possibilities. Optimization over __design space__ (also called __decision space__) is a critical feature of many engineering tasks, and has a role in most areas of applied science, including biology. Examples include optimal manipulation of biological systems (e.g. optimal harvesting or optimal drug dosing) or optimal design of biological systems (e.g. robust synthetic genetic circuits). A complementary task is optimal experimental design, which aims to identify the 'best' experiment from a collection of possibilities. Model calibration, to be discussed further below, provides another example; here we seek the 'best fit' version of a model from a collection of possible options.</p>
@@ -235,11 +238,16 @@ library(numDeriv)       # contains functions for calculating gradient
 #define function that implements gradient descent. Inputs are the objective function f, the initial parameter estimate x0,  the size of each step, the maximum number of iterations to be applied, and a threshold gradient below which the landscape is considered flat (at which iterations are terminated)
 grad.descent = function(f, x0, step.size=0.05, max.iter=200,
                         stopping.deriv=0.01, ...) {
-  n = length(x0)  # record the number of parameters to be estimated (i.e. the dimension of the parameter space)
-  xmat = matrix(0,nrow=n,ncol=max.iter) # initialize a matrix to record the sequence of estimates
-  xmat[,1] = x0   # the first row of matrix xmat is the initial 'guess'
+# record the number of parameters to be estimated 
+#  (i.e. the dimension of the parameter space)
+    n = length(x0)  
+ # initialize a matrix to record the sequence of estimates
+  xmat = matrix(0,nrow=n,ncol=max.iter)
+  # the first row of matrix xmat is the initial 'guess'
+  xmat[,1] = x0   
   for (k in 2:max.iter) { #loop over the allowed number of steps
-     # Calculate the gradient (a vector indicating steepness and direct of greatest ascent)
+     # Calculate the gradient 
+      #(a vector indicating steepness and direct of greatest ascent)
     grad.current = grad(f,xmat[,k-1],...)
     # Check termination condition: has a flat valley bottom been reached?
     if (all(abs(grad.current) < stopping.deriv)) {
@@ -1724,8 +1732,11 @@ library(numDeriv)       # contains functions for calculating gradient
 #define function that implement gradient descent. Inputs are the objective function f, the initial parameter estimate x0,  the size of each step, the maximum number of iterations to be applied, and a threshold gradient below which the landscape is considered flat (and so iterations are terminated)
 grad.descent = function(f, x0, step.size=0.05, max.iter=200, 
                         stopping.deriv=0.01, ...) {
-  n = length(x0)  # record the number of parameters to be estimated (i.e. the dimension of the parameter space)
-  xmat = matrix(0,nrow=n,ncol=max.iter) # initialize a matrix to record the sequence of estimates
+  # record the number of parameters to be estimated (i.e. the dimension of the parameter space)
+  n = length(x0)  
+  # initialize a matrix to record the sequence of estimates
+  xmat = matrix(0,nrow=n,ncol=max.iter) 
+  
   xmat[,1] = x0   # the first row of matrix xmat is the initial 'guess'
   for (k in 2:max.iter) { #loop over the allowed number of steps
      # Calculate the gradient (a vector indicating steepness and direct of greatest ascent)
