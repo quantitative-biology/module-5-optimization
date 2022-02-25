@@ -592,7 +592,7 @@ To give the simulated annealing algorithm a more challenging task, consider the 
 $$f(x,y) = (y+47)\sin\left (\sqrt{|y+(x/2)+47|)}-x\sin(\sqrt{|x-(y+47)|} + \frac{1}{1000}\left(x^2+y^2\right)\right)$$
 
 
-```{r define-egg-carton-function, ECHO=TRUE, fig.cap="Process of simulated annealing runs", fig.alt="Points are shown on a graph where there are two concentrated vertical blue points and red solid lines near the blue points."}
+```{r define-egg-carton-function, echo=TRUE, fig.cap="Process of simulated annealing runs", fig.alt="Points are shown on a graph where there are two concentrated vertical blue points and red solid lines near the blue points."}
 f.egg<- function(x){
   -(x[,2]+47)*sin(sqrt(abs(x[,2]+(x[,1]/2)+47)))-x[,1]*sin(sqrt(abs(x[,1]-(x[,2]+47))))+ 0.001*x[,1]^2 + 0.001*x[,2]^2
 }
@@ -1216,7 +1216,7 @@ Here we'll consider a straightforward implementation of a Bayesian approach: App
 To illustrate, we'll revisit the Michaelis-Menten data from Example 5 above. We select uniform priors for both parameters: $K_M$ and $V_{\mbox{max}}$ both uniform on $[0,1]$.
 
 
-```{r rejection-method-for-Michaelis-Menten-data, ECHO=TRUE}
+```{r rejection-method-for-Michaelis-Menten-data, echo=TRUE}
 # recall the dataset
 
 S <- c(4.32, 2.16, 1.08, 0.54, 0.27, 0.135, 3.6, 1.8, 0.9, 0.45, 0.225, 0.1125, 2.88, 1.44, 0.72, 0.36, 0.18, 0.9, 0) #substrate concentrations
@@ -1749,7 +1749,7 @@ set.seed(1234) # The user can use any seed.
 ```
 
 
-```{r exercise-1-grad-descent_exp-soln, fig.cap="Exercise 1 data decreasing drug concentration with expoential fit gradient descent", fig.alt="Fitted exponential with gradient descent, as the line of best fit, as the solution is superimposed.", echo = TRUE}
+```{r exercise-1-grad-descent-exp-soln, fig.cap="Exercise 1 data decreasing drug concentration with exponetial fit gradient descent", fig.alt="Fitted exponential with gradient descent, as the line of best fit, as the solution is superimposed.", echo = TRUE}
 x0 = c(5.5,-0.01)
 
 gd = grad.descent(determine_sse_exp,x0,step.size=0.00002,max.iter=400000,
@@ -1903,7 +1903,7 @@ Consider the task of finding the minimum of the function $f(x,y)=x^4 + y^2$, plo
 
 We modify the rejection method code to apply to this function:
 
-```{r rejection-method-for-ex-4, ECHO=TRUE}
+```{r rejection-method-for-ex-4, echo=TRUE}
 
 # define functions to draw values from the prior distributions
 draw_x <- function () {
@@ -2026,7 +2026,7 @@ newLotVmod <- function (Time, State, newPars) {
 
 We then define the rejection method algorithm:
 
-```{r rejection-method-for-ex-5, ECHO=TRUE}
+```{r rejection-method-for-ex-5, echo=TRUE}
 # recall the dataset
 
 
