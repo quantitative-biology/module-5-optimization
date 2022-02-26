@@ -132,7 +132,7 @@ plot(iris$Sepal.Length~iris$Petal.Width, xlab = "Petal Width", ylab = "Sepal Len
 
 The `lm` command applies the formula described above to arrive at the line of best fit (i.e. the minimizer of the sum of squared errors).  The command below generates the parameters ($m$ and $b$) that specify the line $y=mx+b$.
 
-```{r linear_regression_iris_dataset, echo = TRUE}
+```{r linear-regression-iris-dataset, echo = TRUE}
 lm(iris$Sepal.Length~iris$Petal.Width)
 ```
 
@@ -142,7 +142,7 @@ We can plot the data together with the line of best fit with the `abline` comman
 <!-- or __abline(lm(iris$Sepal.Length~iris$Petal.Width))__.  -->
 
 
-```{r plot-linear_regression_iris_dataset, fig.cap="Sepal Length vs Petal Width from the iris dataset, with best-fit line", fig.alt = "A scatterplot of Sepal Length vs Petal Width for each observation with an upward trending line superimposed", echo = TRUE}
+```{r plot-linear-regression-iris-dataset, fig.cap="Sepal Length vs Petal Width from the iris dataset, with best-fit line", fig.alt = "A scatterplot of Sepal Length vs Petal Width for each observation with an upward trending line superimposed", echo = TRUE}
 plot(iris$Sepal.Length~iris$Petal.Width, xlab = "Petal Width", ylab = "Sepal Length")
 abline(lm(iris$Sepal.Length~iris$Petal.Width))
 ```
@@ -183,7 +183,7 @@ plot(MM_data)
 
 The ```nls``` command can be used for nonlinear regression in R. Like the ```lm``` command, the ```nls``` function takes as inputs the dataset and the model. In addition, ```nls``` requires that the user provide 'guesses' for the values of the parameters to be estimated. In this case, we can roughly estimate $V_{\mbox{max}} \approx  0.5$ as the maximal $V$-value that can be achieved, and $K_M \approx 0.3$ as the $S$-value at which $V$ reaches half of its maximal value. 
 
-```{r nonlinear_regression_Michaelis-Menten_dataset, echo = TRUE}
+```{r nonlinear-regression-Michaelis-Menten-dataset, echo = TRUE}
 MMmodel.nls <- nls(V ~ Vmax*S/(Km+S),start = list(Km=0.3, Vmax=0.5)) #perform the nonlinear regression analysis
 params <- summary(MMmodel.nls)$coeff[,1] #extract the parameter estimates
 params
@@ -193,7 +193,7 @@ params
 
 We thus arrive at parameter estimates that characterize the best-fit model: $K_M = 0.4187090$ and $V_{\mbox{max}} = 0.5331688$). Further details on using the ```nls``` command can be found in (Ritz and Streibig, 2008). We can now plot the best fit model along with the dataset:
 
-```{r plot_nonlinear_regression_Michaelis-Menten_dataset, fig.cap="Reaction velocity against substrate concentration dataset, with best-fit line", fig.alt = "A scatterplot of velocity vs substrate concentration for each observation with a logarithmic trending line superimposed.",echo = TRUE}
+```{r plot-nonlinear-regression-Michaelis-Menten-dataset, fig.cap="Reaction velocity against substrate concentration dataset, with best-fit line", fig.alt = "A scatterplot of velocity vs substrate concentration for each observation with a logarithmic trending line superimposed.",echo = TRUE}
 plot(MM_data)
 curve((params[2]*x)/(params[1]+x), from = 0, to = 4.5, add=TRUE, col='firebrick')
 ```
@@ -782,8 +782,8 @@ legend(3.8,20,legend = c("Prey", "Predator"), col = c("red", "black"), pch = 20)
 The dataset shown below corresponds to observations of an oscillatory predator-prey  system. To calibrate the Lotka-Volterra model to this data we seek values of the  model parameters  for which simulation of the model provides the best fit. As in the regression tasks described previously, the standard measure for quality of fit is the sum of squared errors. We thus proceed with a minimization task: for each choice of numerical values for the model parameters, we compare model simulation with the data and determine the sum of squared errors. We aim to minimize this measure of fit over the space of model parameters. 
 
 
-```{r define_observations_corrupted, generated in subsequent block as x_obs_corrupt, y_obs_corrupt}
-
+```{r define-observations-corrupted}
+# generated in subsequent block as x_obs_corrupt, y_obs_corrupt
 x1_obs_data= c(8.792889e-3, 9.57e-01, 1.01e-01, 4.12e-05, 1.68e-06, 1.40e-06, 9.40e-06, 2.62e-04, 1.46e-02, 1.51, 2.31e-02, 2.38e-05, 1.48e-06, 1.76e-06, 1.39e-05, 4.25e-04, 2.96e-02, 3.00, 6.87e-03, 1.16e-05, 1.27e-06, 2.31e-06, 2.01e-05, 7.69e-04, 5.31e-02, 4.38e+00, 2.08e-03, 7.06e-06, 1.24e-06, 2.83e-06, 3.16e-05)
 x2_obs_data=c(1.595545, 1.60, 20.79,  9.60,  5.99,  3.61,  2.71,  2.44,  1.08,  1.10, 14.68, 12.53,  6.55,  4.40,  2.73,  2.05,  1.40,  2.20, 16.36,  7.66, 5.56,  5.26,  2.28,  2.27,  1.14,  3.27, 14.13,  7.69,  6.10,  4.68, 2.40)
 ```
@@ -1308,7 +1308,7 @@ We see that only 2225 of 200 000 samples were accepted, yielding an acceptance r
 ```{r plot-rejection-histograms, fig.cap="Posterior histograms for Michaelis-Menten fit.", fig.alt="Two histogram; Km vs. Frequency has bars occupying more of the plot and Vmax vs. Frequency showing steep bars concentrated near the center.", echo=FALSE}
 c1 <- rgb(173,216,230,max = 255, alpha = 80, names = "lt.blue")
 c2 <- rgb(255,192,203, max = 255, alpha = 80, names = "lt.pink")
-
+c2=2
 post1 <- hist(sampled_parameter_values_squared_distances[which(sampled_parameter_values_squared_distances$accepted==1),2], col=c2, xlab = "Km", xlim=c(0,1), main='')
 rect(0, 0, 1, 35, col=c1, border=par("fg"), lwd=par("lwd"), xpd=FALSE)
 legend("topright",legend=c("Prior Distribution for KM", "Posterior Distribution for KM"),
@@ -1704,9 +1704,10 @@ Alternatively, we try applying gradient descent. First we declare the gradient d
 
 
 ```{r gradient-descent2,echo=TRUE}
-library(numDeriv)       # contains functions for calculating gradient
+library(numDeriv)# contains functions for calculating gradient
 
 #define function that implement gradient descent. Inputs are the objective function f, the initial parameter estimate x0,  the size of each step, the maximum number of iterations to be applied, and a threshold gradient below which the landscape is considered flat (and so iterations are terminated)
+
 grad.descent = function(f, x0, step.size=0.05, max.iter=200, 
                         stopping.deriv=0.01, ...) {
   n = length(x0)  # record the number of parameters to be estimated (i.e. the dimension of the parameter space)
