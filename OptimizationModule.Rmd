@@ -1,7 +1,7 @@
 # Optimization
 ```{r start, include=FALSE}
 rm(list=ls())
-knitr::opts_chunk$set(echo = FALSE,kableExtra.auto_format = FALSE, cache=TRUE)
+knitr::opts_chunk$set(cache=TRUE)
 ```
 ## Introduction
 
